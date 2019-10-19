@@ -12,4 +12,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Update=".git" Visible="false" />
+  </ItemGroup>
 </Project>
