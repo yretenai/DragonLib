@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Squish;
 
 namespace DragonLib.DXGI
 {
@@ -46,6 +47,67 @@ namespace DragonLib.DXGI
             MemoryMarshal.Write(result.Slice(0x80), ref dx10);
             blob.CopyTo(result.Slice(0x94));
             return result;
+        }
+
+        public static Span<byte> BGRARGBA(Span<byte> BGRA)
+        {
+            var value = new Span<byte>(new byte[BGRA.Length]);
+            for (var i = 0; i < BGRA.Length; i += 4)
+            {
+                value[i + 0] = BGRA[i + 2];
+                value[i + 1] = BGRA[i + 1];
+                value[i + 2] = BGRA[i + 0];
+                value[i + 3] = BGRA[i + 3];
+            }
+            return value;
+        }
+
+        public static Span<byte> DecompressDXGIFormat(Span<byte> data, int width, int height, DXGIPixelFormat format)
+        {
+            var req = width * height * 4;
+            switch (format)
+            {
+                case DXGIPixelFormat.R8G8B8A8_SINT:
+                case DXGIPixelFormat.R8G8B8A8_UINT:
+                case DXGIPixelFormat.R8G8B8A8_UNORM:
+                case DXGIPixelFormat.R8G8B8A8_UNORM_SRGB:
+                case DXGIPixelFormat.R8G8B8A8_SNORM:
+                case DXGIPixelFormat.R8G8B8A8_TYPELESS:
+                    return data;
+                case DXGIPixelFormat.B8G8R8A8_UNORM:
+                case DXGIPixelFormat.B8G8R8A8_UNORM_SRGB:
+                case DXGIPixelFormat.B8G8R8A8_TYPELESS:
+                    return BGRARGBA(data);
+                case DXGIPixelFormat.BC1_TYPELESS:
+                case DXGIPixelFormat.BC1_UNORM:
+                case DXGIPixelFormat.BC1_UNORM_SRGB:
+                    {
+                        var dec = new byte[req];
+                        var dataArray = data.ToArray();
+                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt1);
+                        return new Span<byte>(dec);
+                    }
+                case DXGIPixelFormat.BC2_TYPELESS:
+                case DXGIPixelFormat.BC2_UNORM:
+                case DXGIPixelFormat.BC2_UNORM_SRGB:
+                    {
+                        var dec = new byte[req];
+                        var dataArray = data.ToArray();
+                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt3);
+                        return new Span<byte>(dec);
+                    }
+                case DXGIPixelFormat.BC3_TYPELESS:
+                case DXGIPixelFormat.BC3_UNORM:
+                case DXGIPixelFormat.BC3_UNORM_SRGB:
+                    {
+                        var dec = new byte[req];
+                        var dataArray = data.ToArray();
+                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt5);
+                        return new Span<byte>(dec);
+                    }
+                default:
+                    throw new InvalidOperationException($"Format {format} is not supported yet!");
+            }
         }
     }
 }
