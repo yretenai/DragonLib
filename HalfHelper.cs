@@ -28,14 +28,14 @@ namespace DragonLib
             uint e = 0; // Zero exponent
 
             // While not normalized
-            while ((m & 0x00800000) == 0)
+            while ((m & 0x0080_0000) == 0)
             {
-                e -= 0x00800000; // Decrement exponent (1<<23)
+                e -= 0x0080_0000; // Decrement exponent (1<<23)
                 m <<= 1; // Shift mantissa                
             }
 
-            m &= unchecked((uint)~0x00800000); // Clear leading 1 bit
-            e += 0x38800000; // Adjust bias ((127-14)<<23)
+            m &= unchecked((uint)~0x0080_0000); // Clear leading 1 bit
+            e += 0x3880_0000; // Adjust bias ((127-14)<<23)
             return m | e; // Return combined number
         }
 
@@ -50,7 +50,7 @@ namespace DragonLib
 
             for (int i = 1024; i < 2048; i++)
             {
-                mantissaTable[i] = (uint)(0x38000000 + ((i - 1024) << 13));
+                mantissaTable[i] = (uint)(0x3800_0000 + ((i - 1024) << 13));
             }
 
             return mantissaTable;
@@ -65,14 +65,14 @@ namespace DragonLib
                 exponentTable[i] = (uint)(i << 23);
             }
 
-            exponentTable[31] = 0x47800000;
-            exponentTable[32] = 0x80000000;
+            exponentTable[31] = 0x4780_0000;
+            exponentTable[32] = 0x8000_0000;
             for (int i = 33; i < 63; i++)
             {
-                exponentTable[i] = (uint)(0x80000000 + ((i - 32) << 23));
+                exponentTable[i] = (uint)(0x8000_0000 + ((i - 32) << 23));
             }
 
-            exponentTable[63] = 0xc7800000;
+            exponentTable[63] = 0xc780_0000;
 
             return exponentTable;
         }
@@ -178,7 +178,7 @@ namespace DragonLib
         {
             uint value = *(uint*)&single;
 
-            ushort result = (ushort)(BaseTable[(value >> 23) & 0x1ff] + ((value & 0x007fffff) >> ShiftTable[value >> 23]));
+            ushort result = (ushort)(BaseTable[(value >> 23) & 0x1ff] + ((value & 0x007f_ffff) >> ShiftTable[value >> 23]));
             return Half.ToHalf(result);
         }
 
