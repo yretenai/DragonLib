@@ -15,6 +15,15 @@ namespace DragonLib
 
         public static int Align(this int value, int n)
         {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value + (n - value % n);
+        }
+
+        public static uint Align(this uint value, uint n)
+        {
+            if (value < n) return n;
             if (value % n == 0) return value;
 
             return value + (n - value % n);
