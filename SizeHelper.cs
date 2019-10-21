@@ -11,12 +11,9 @@ namespace DragonLib
         public static int SizeOf<T>()
         {
             var type = typeof(T);
-            if (!SizeCache.TryGetValue(type, out var size))
-            {
-                size = Unsafe.SizeOf<T>();
-                SizeCache[type] = size;
-            }
-
+            if (SizeCache.TryGetValue(type, out var size)) return size;
+            size = Unsafe.SizeOf<T>();
+            SizeCache[type] = size;
             return size;
         }
     }

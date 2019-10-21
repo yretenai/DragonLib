@@ -33,7 +33,7 @@ namespace DragonLib
             M43 = values.ElementAtOrDefault(11);
         }
 
-        public float[] ToArray() => new float[12] { M11, M12, M13, M21, M22, M23, M31, M32, M33, M41, M42, M43 };
+        public float[] ToArray() => new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33, M41, M42, M43 };
 
         public System.Numerics.Matrix4x4 ToNumerics() => new System.Numerics.Matrix4x4(M11, M12, M13, 0, M21, M22, M23, 0, M31, M32, M33, 0, M41, M42, M43, 0);
     }

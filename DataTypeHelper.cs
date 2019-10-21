@@ -34,18 +34,14 @@ namespace DragonLib
 
         public static bool IsKnown<T>(T magic) where T : struct
         {
-            if (!Cache.TryGetValue(typeof(T), out var cache)) return false;
-
-            return cache.ContainsKey(magic);
+            return Cache.TryGetValue(typeof(T), out var cache) && cache.ContainsKey(magic);
         }
 
         public static bool Matches<T>(Span<byte> span, T magic) where T : struct => GetMagicValue<T>(span).Equals(magic);
 
         public static T GetMagicValue<T>(Span<byte> span) where T : struct
         {
-            if (span.Length < 4) return default;
-
-            return MemoryMarshal.Read<T>(span);
+            return span.Length < 4 ? default : MemoryMarshal.Read<T>(span);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿/// ================ Half.cs ====================
-/// The code is free to use for any reason without any restrictions.
-/// Ladislav Lang (2009), Joannes Vermorel (2017)
+﻿// ================ Half.cs ====================
+// The code is free to use for any reason without any restrictions.
+// Ladislav Lang (2009), Joannes Vermorel (2017)
 
 using System;
 using System.Diagnostics;
@@ -482,18 +482,12 @@ namespace DragonLib
         /// <exception cref="System.ArgumentException">value is not a System.Half</exception>
         public int CompareTo(object obj)
         {
-            int result;
-            if (obj == null)
+            var result = obj switch
             {
-                result = 1;
-            }
-            else
-            {
-                if (obj is Half)
-                    result = CompareTo((Half) obj);
-                else
-                    throw new ArgumentException("Object must be of type Half.");
-            }
+                null => 1,
+                Half half => CompareTo(half),
+                _ => throw new ArgumentException("Object must be of type Half.")
+            };
 
             return result;
         }
@@ -514,9 +508,9 @@ namespace DragonLib
         public override bool Equals(object obj)
         {
             var result = false;
-            if (obj is Half half)
-                if (half == this || IsNaN(half) && IsNaN(this))
-                    result = true;
+            if (!(obj is Half half)) return false;
+            if (half == this || IsNaN(half) && IsNaN(this))
+                result = true;
 
             return result;
         }
@@ -531,7 +525,7 @@ namespace DragonLib
         ///     Returns the System.TypeCode for value type System.Half.
         /// </summary>
         /// <returns>The enumerated constant (TypeCode)255.</returns>
-        public TypeCode GetTypeCode() => (TypeCode) 255;
+        public static TypeCode GetTypeCode() => (TypeCode) 255;
 
         #region BitConverter & Math methods for Half
 

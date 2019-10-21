@@ -18,6 +18,6 @@ namespace DragonLib
 
         public (float x, float y, float z) ToTuple() => (X, Y, Z);
 
-        public Vector<float> ToNumerics() => new Vector<float>(new float[3] { X, Y, Z });
+        public Vector<float> ToNumerics() => new Vector<float>(new[] { X, Y, Z });
     }
 }

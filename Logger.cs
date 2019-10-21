@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using static DragonLib.ConsoleSwatch;
@@ -207,7 +208,7 @@ namespace DragonLib
 
                 if (showProgressValue && remaining > 6)
                 {
-                    var valueText = (Math.Min(value, 1) * 100).ToString().Split('.')[0] + "%";
+                    var valueText = (Math.Min(value, 1) * 100).ToString(CultureInfo.InvariantCulture).Split('.')[0] + "%";
                     Console.CursorLeft = pre.Length + 2 + (int) Math.Floor(remaining / 2.0d - valueText.Length / 2.0d);
                     Log24Bit(processValueColor, false, Console.Out, null, valueText);
                     Console.CursorLeft = width - post.Length;
