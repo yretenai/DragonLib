@@ -39,7 +39,7 @@ namespace DragonLib.DXGI
             MemoryMarshal.Write(result, ref header);
             var dx10 = new DXT10Header
             {
-                Format = (int)pixel,
+                Format = (int) pixel,
                 Dimension = DXT10ResourceDimension.TEXTURE2D,
                 Misc = 0,
                 Size = 1
@@ -49,22 +49,24 @@ namespace DragonLib.DXGI
             return result;
         }
 
-        public static Span<byte> BGRARGBA(Span<byte> BGRA)
+        public static Span<byte> BGRARGBA(Span<byte> bgra)
         {
-            var value = new Span<byte>(new byte[BGRA.Length]);
-            for (var i = 0; i < BGRA.Length; i += 4)
+            var value = new Span<byte>(new byte[bgra.Length]);
+            for (var i = 0; i < bgra.Length; i += 4)
             {
-                value[i + 0] = BGRA[i + 2];
-                value[i + 1] = BGRA[i + 1];
-                value[i + 2] = BGRA[i + 0];
-                value[i + 3] = BGRA[i + 3];
+                value[i + 0] = bgra[i + 2];
+                value[i + 1] = bgra[i + 1];
+                value[i + 2] = bgra[i + 0];
+                value[i + 3] = bgra[i + 3];
             }
+
             return value;
         }
 
         public static Span<byte> DecompressDXGIFormat(Span<byte> data, int width, int height, DXGIPixelFormat format)
         {
             var req = width * height * 4;
+            // ReSharper disable once SwitchStatementMissingSomeCases
             switch (format)
             {
                 case DXGIPixelFormat.R8G8B8A8_SINT:
@@ -81,30 +83,30 @@ namespace DragonLib.DXGI
                 case DXGIPixelFormat.BC1_TYPELESS:
                 case DXGIPixelFormat.BC1_UNORM:
                 case DXGIPixelFormat.BC1_UNORM_SRGB:
-                    {
-                        var dec = new byte[req];
-                        var dataArray = data.ToArray();
-                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt1);
-                        return new Span<byte>(dec);
-                    }
+                {
+                    var dec = new byte[req];
+                    var dataArray = data.ToArray();
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt1);
+                    return new Span<byte>(dec);
+                }
                 case DXGIPixelFormat.BC2_TYPELESS:
                 case DXGIPixelFormat.BC2_UNORM:
                 case DXGIPixelFormat.BC2_UNORM_SRGB:
-                    {
-                        var dec = new byte[req];
-                        var dataArray = data.ToArray();
-                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt3);
-                        return new Span<byte>(dec);
-                    }
+                {
+                    var dec = new byte[req];
+                    var dataArray = data.ToArray();
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt3);
+                    return new Span<byte>(dec);
+                }
                 case DXGIPixelFormat.BC3_TYPELESS:
                 case DXGIPixelFormat.BC3_UNORM:
                 case DXGIPixelFormat.BC3_UNORM_SRGB:
-                    {
-                        var dec = new byte[req];
-                        var dataArray = data.ToArray();
-                        Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt5);
-                        return new Span<byte>(dec);
-                    }
+                {
+                    var dec = new byte[req];
+                    var dataArray = data.ToArray();
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt5);
+                    return new Span<byte>(dec);
+                }
                 default:
                     throw new InvalidOperationException($"Format {format} is not supported yet!");
             }

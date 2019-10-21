@@ -1,5 +1,5 @@
-﻿using BitMiracle.LibTiff.Classic;
-using System;
+﻿using System;
+using BitMiracle.LibTiff.Classic;
 
 namespace DragonLib
 {
@@ -18,10 +18,7 @@ namespace DragonLib
             tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
             tif.SetField(TiffTag.ROWSPERSTRIP, 1);
             var bpr = width * 4;
-            for(var i = 0; i < height; ++i)
-            {
-                tif.WriteScanline(mip0.Slice(i * bpr, bpr).ToArray(), i);
-            }
+            for (var i = 0; i < height; ++i) tif.WriteScanline(mip0.Slice(i * bpr, bpr).ToArray(), i);
             tif.FlushData();
             tif.Close();
             return true;

@@ -21,8 +21,8 @@ namespace DragonLib
         public static void Log4Bit(ConsoleColor color, bool newLine, TextWriter writer, string category, string message, params object[] arg)
         {
             if (!Enabled) return;
-            if (UseColor) Console.ForegroundColor = color;
 
+            if (UseColor) Console.ForegroundColor = color;
 
             var output = message;
 
@@ -42,6 +42,7 @@ namespace DragonLib
         public static void Log24Bit(ConsoleColor color, bool newline, TextWriter writer, string category, string message, params object[] arg)
         {
             if (!Enabled) return;
+
             if (!EnableVT())
             {
                 Log4Bit(color, newline, writer, category, message, arg);
@@ -54,6 +55,7 @@ namespace DragonLib
         public static void Log24Bit(DOSColor color, bool newline, TextWriter writer, string category, string message, params object[] arg)
         {
             if (!Enabled) return;
+
             if (!EnableVT())
             {
                 Log4Bit(color.AsConsoleColor(), newline, writer, category, message, arg);
@@ -66,6 +68,7 @@ namespace DragonLib
         public static void Log24Bit(XTermColor color, bool newline, TextWriter writer, string category, string message, params object[] arg)
         {
             if (!Enabled) return;
+
             if (!EnableVT())
             {
                 Log4Bit(ConsoleColor.Gray, newline, writer, category, message, arg);
@@ -78,6 +81,7 @@ namespace DragonLib
         public static void Log24Bit(string foreground, string background, bool newLine, TextWriter writer, string category, string message, params object[] arg)
         {
             if (!Enabled) return;
+
             if (!EnableVT())
             {
                 Log4Bit(ConsoleColor.Gray, newLine, writer, category, message, arg);
@@ -90,6 +94,7 @@ namespace DragonLib
                 writer.Write($"[{category}] ");
                 writer.Write(ColorReset);
             }
+
             if (UseColor && !string.IsNullOrWhiteSpace(foreground)) writer.Write(foreground);
 
             if (UseColor && !string.IsNullOrWhiteSpace(background)) writer.Write(background);
@@ -104,42 +109,27 @@ namespace DragonLib
 
             writer.Write(output);
 
-            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background)))
-                writer.Write(ColorReset);
+            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background))) writer.Write(ColorReset);
 
             if (newLine) writer.WriteLine();
         }
 
-        public static void Log(ConsoleColor color, bool newline, bool stderr, string category, string message, params object[] arg)
-        {
-            Log24Bit(color, newline, stderr ? Console.Error : Console.Out, category, message, arg);
-        }
+        public static void Log(ConsoleColor color, bool newline, bool stderr, string category, string message, params object[] arg) => Log24Bit(color, newline, stderr ? Console.Error : Console.Out, category, message, arg);
 
-        public static void Success(string category, string message, params object[] arg)
-        {
-            Log(ConsoleColor.Green, true, false, category, message, arg);
-        }
+        public static void Success(string category, string message, params object[] arg) => Log(ConsoleColor.Green, true, false, category, message, arg);
 
-        public static void Info(string category, string message, params object[] arg)
-        {
-            Log(ConsoleColor.White, true, false, category, message, arg);
-        }
+        public static void Info(string category, string message, params object[] arg) => Log(ConsoleColor.White, true, false, category, message, arg);
 
         public static void Debug(string category, string message, params object[] arg)
         {
             if (!ShowDebug) return;
+
             Log(ConsoleColor.DarkGray, true, false, category, message, arg);
         }
 
-        public static void Warn(string category, string message, params object[] arg)
-        {
-            Log(ConsoleColor.DarkYellow, true, false, category, message, arg);
-        }
+        public static void Warn(string category, string message, params object[] arg) => Log(ConsoleColor.DarkYellow, true, false, category, message, arg);
 
-        public static void Error(string category, string message, params object[] arg)
-        {
-            Log(ConsoleColor.Red, true, true, category, message, arg);
-        }
+        public static void Error(string category, string message, params object[] arg) => Log(ConsoleColor.Red, true, true, category, message, arg);
 
         public static void ResetColor(TextWriter writer)
         {
@@ -154,6 +144,7 @@ namespace DragonLib
             var builder = new StringBuilder();
             ConsoleKeyInfo ch;
             while ((ch = Console.ReadKey(true)).Key != ConsoleKey.Enter)
+            {
                 if (ch.Key == ConsoleKey.Backspace) // backspace
                 {
                     if (builder.Length > 0)
@@ -178,16 +169,18 @@ namespace DragonLib
 
                     if (!@private) writer.Write(ch.KeyChar);
                 }
+            }
 
             writer.WriteLine();
             return builder.ToString();
         }
 
-        private static string LastMessage = null;
+        private static string LastMessage;
 
         public static void LogProgress(string message, string pre, string post, double value, XTermColor messageColor, XTermColor preColor, XTermColor postColor, XTermColor brickColor, XTermColor processColor, bool showProgressValue, XTermColor processValueColor)
         {
             if (Console.IsOutputRedirected) return;
+
             var width = Console.WindowWidth;
             var empty = new char[width];
             Array.Fill(empty, ' ');
@@ -198,6 +191,7 @@ namespace DragonLib
                 LastMessage = message;
                 Log24Bit(messageColor, true, Console.Out, null, message);
             }
+
             Console.Out.Write(empty);
             Console.CursorLeft = 0;
             var remaining = width - pre.Length - post.Length - 4;
@@ -207,18 +201,19 @@ namespace DragonLib
                 Log24Bit(brickColor, false, Console.Out, null, " [");
                 empty = new char[remaining];
                 Array.Fill(empty, ' ');
-                Array.Fill(empty, '=', 0, (int)Math.Round(remaining * Math.Min(value, 1)));
+                Array.Fill(empty, '=', 0, (int) Math.Round(remaining * Math.Min(value, 1)));
                 Log24Bit(processColor, false, Console.Out, null, string.Join("", empty));
                 Log24Bit(brickColor, false, Console.Out, null, "] ");
 
                 if (showProgressValue && remaining > 6)
                 {
                     var valueText = (Math.Min(value, 1) * 100).ToString().Split('.')[0] + "%";
-                    Console.CursorLeft = pre.Length + 2 + (int)Math.Floor(remaining / 2.0d - valueText.Length / 2.0d);
+                    Console.CursorLeft = pre.Length + 2 + (int) Math.Floor(remaining / 2.0d - valueText.Length / 2.0d);
                     Log24Bit(processValueColor, false, Console.Out, null, valueText);
                     Console.CursorLeft = width - post.Length;
                 }
             }
+
             Log24Bit(postColor, false, Console.Out, null, post);
             Console.CursorLeft = Console.WindowWidth - 1;
             Console.CursorTop -= 1;
