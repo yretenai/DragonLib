@@ -8,7 +8,7 @@ namespace DragonLib
         public static string ReadString(this Span<byte> data, Encoding encoding = null)
         {
             var index = data.IndexOf<byte>(0);
-            if (index < -1) index = data.Length;
+            if (index <= -1) index = data.Length;
 
             return (encoding ?? Encoding.UTF8).GetString(data.Slice(0, index));
         }
