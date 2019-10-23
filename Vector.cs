@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Numerics;
 
 namespace DragonLib
@@ -19,5 +21,7 @@ namespace DragonLib
         public (float x, float y, float z) ToTuple() => (X, Y, Z);
 
         public Vector<float> ToNumerics() => new Vector<float>(new[] { X, Y, Z });
+
+        public object ToString(NumberFormatInfo numberFormat) => $"{X.ToString(numberFormat)} {Y.ToString(numberFormat)} {Z.ToString(numberFormat)}";
     }
 }
