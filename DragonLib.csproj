@@ -24,8 +24,5 @@
 
   <ItemGroup>
     <None Update=".git" Visible="false" />
-    <None Update="assimp-license.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>
