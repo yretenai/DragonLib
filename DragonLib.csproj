@@ -25,4 +25,8 @@
   <ItemGroup>
     <None Update=".git" Visible="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="GLTFSerialization\GLTFSerialization.csproj" />
+  </ItemGroup>
 </Project>

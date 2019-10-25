@@ -1,0 +1,3 @@
+[submodule "GLTFSerialization"]
+	path = GLTFSerialization
+	url = git@github.com:healingbrew/GLTFSerialization.git
