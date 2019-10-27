@@ -1,6 +1,7 @@
 ﻿using System.Linq;
+using OpenTK;
 
-namespace DragonLib
+namespace DragonLib.Numerics
 {
     public struct Matrix3x3
     {
@@ -27,8 +28,6 @@ namespace DragonLib
             M33 = values.ElementAtOrDefault(8);
         }
 
-        public float[] ToArray() => new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33 };
-
-        public System.Numerics.Matrix4x4 ToNumerics() => new System.Numerics.Matrix4x4(M11, M12, M13, 0, M21, M22, M23, 0, M31, M32, M33, 0, 1, 1, 1, 0);
+        public Matrix3 ToOpenTK() => new Matrix3(M11, M12, M13, M21, M22, M23, M31, M32, M33);
     }
 }

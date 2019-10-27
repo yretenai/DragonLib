@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Squish;
 
-namespace DragonLib.DXGI
+namespace DragonLib.Imaging.DXGI
 {
     public static class DXGI
     {

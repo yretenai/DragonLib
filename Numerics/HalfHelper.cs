@@ -2,7 +2,7 @@
 // The code is free to use for any reason without any restrictions.
 // Ladislav Lang (2009), Joannes Vermorel (2017)
 
-namespace DragonLib
+namespace DragonLib.Numerics
 {
     /// <summary>
     ///     Helper class for Half conversions and some low level operations.

@@ -1,6 +1,6 @@
-namespace DragonLib.DXGI
+﻿namespace DragonLib.Imaging.DXGI
 {
-    public enum DDSResourceDimension : uint
+    public enum DXT10ResourceDimension
     {
         UNKNOWN = 0,
         BUFFER = 1,

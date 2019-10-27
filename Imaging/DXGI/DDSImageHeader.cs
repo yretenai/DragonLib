@@ -1,4 +1,4 @@
-namespace DragonLib.DXGI
+namespace DragonLib.Imaging.DXGI
 {
     public unsafe struct DDSImageHeader
     {

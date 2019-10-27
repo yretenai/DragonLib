@@ -1,7 +1,7 @@
 ﻿using System;
 using BitMiracle.LibTiff.Classic;
 
-namespace DragonLib
+namespace DragonLib.Imaging
 {
     public static class TiffImage
     {

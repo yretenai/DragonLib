@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace DragonLib
+namespace DragonLib.Numerics
 {
     /// <summary>
     ///     Represents a half-precision floating point number.

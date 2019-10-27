@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace DragonLib
+namespace DragonLib.IO
 {
     public static class ConsoleSwatch
     {

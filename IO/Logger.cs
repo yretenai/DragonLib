@@ -2,9 +2,9 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
-using static DragonLib.ConsoleSwatch;
+using static DragonLib.IO.ConsoleSwatch;
 
-namespace DragonLib
+namespace DragonLib.IO
 {
     public static class Logger
     {

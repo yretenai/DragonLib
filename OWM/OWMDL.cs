@@ -1,12 +1,20 @@
 using System.Collections.Generic;
 using System.IO;
-using GLTF.Math;
+using DragonLib.Numerics;
 using static DragonLib.OWM.OWMHelper;
 
 namespace DragonLib.OWM
 {
     public class OWMDL
     {
+        private const short VERSION_MAJOR = 0x1;
+        private const short VERSION_MINOR = 0x6;
+
+        public OWMDL(string name = "")
+        {
+            Name = name;
+        }
+
         public string Name { get; set; }
         public string MaterialLib { get; set; }
         public List<OWMDLBone> Bones { get; set; } = new List<OWMDLBone>();
@@ -14,32 +22,24 @@ namespace DragonLib.OWM
         public List<OWMDLSocket> Sockets { get; set; } = new List<OWMDLSocket>();
         public List<OWMDLRefBone> RestPose { get; set; } = new List<OWMDLRefBone>();
         public uint GUID { get; set; } = 0;
-        
-        private const short VERSION_MAJOR = 0x1;
-        private const short VERSION_MINOR = 0x6;
-        
-        public OWMDL(string name = "")
-        {
-            Name = name;
-        }
 
         public Stream Write()
         {
             var stream = new MemoryStream();
-            
+
             // Version 1.6
-            
+
             stream.Write(GetBytes(VERSION_MAJOR, VERSION_MINOR));
             stream.Write(GetString(Name));
             stream.Write(GetString(MaterialLib));
-            stream.Write(GetBytes((short)Bones.Count));
+            stream.Write(GetBytes((short) Bones.Count));
             stream.Write(GetBytes(Meshes.Count, Sockets.Count));
 
             for (var index = 0; index < Bones.Count; index++)
             {
                 var bone = Bones[index];
                 stream.Write(GetString(bone.Name));
-                stream.Write(GetBytes(bone.Parent == -1 ? (short)index : bone.Parent));
+                stream.Write(GetBytes(bone.Parent == -1 ? (short) index : bone.Parent));
                 stream.Write(GetBytes(bone.Position, bone.Scale));
                 stream.Write(GetBytes(bone.Rotation));
             }
@@ -65,10 +65,9 @@ namespace DragonLib.OWM
 
                 foreach (var face in mesh.Faces)
                 {
-                    stream.Write(GetBytes((byte)face.Length));
+                    stream.Write(GetBytes((byte) face.Length));
                     stream.Write(GetBytes(face));
                 }
-                
             }
 
             foreach (var socket in Sockets)
@@ -78,11 +77,8 @@ namespace DragonLib.OWM
                 stream.Write(GetBytes(socket.Rotation));
             }
 
-            foreach (var socket in Sockets)
-            {
-                stream.Write(GetString(socket.Bone));    
-            }
-            
+            foreach (var socket in Sockets) stream.Write(GetString(socket.Bone));
+
             // Cloth Count
             stream.Write(GetBytes(0));
 
@@ -93,7 +89,7 @@ namespace DragonLib.OWM
                 stream.Write(GetBytes(bone.Position, bone.Scale));
                 stream.Write(GetBytes(bone.Rotation));
             }
-            
+
             stream.Write(GetBytes(GUID));
             stream.Position = 0;
             return stream;
@@ -124,8 +120,8 @@ namespace DragonLib.OWM
         public Vector2[] TexCoords { get; set; }
         public ushort[] Joints { get; set; }
         public float[] Weights { get; set; }
-        public Color Color1 { get; set; }
-        public Color Color2 { get; set; }
+        public Vector4 Color1 { get; set; }
+        public Vector4 Color2 { get; set; }
     }
 
     public struct OWMDLBone

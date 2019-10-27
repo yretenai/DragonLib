@@ -1,4 +1,4 @@
-namespace DragonLib
+namespace DragonLib.Numerics
 {
     public struct Vector4Short
     {
