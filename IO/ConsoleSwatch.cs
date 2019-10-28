@@ -302,19 +302,14 @@ namespace DragonLib.IO
         public static XTermColor AsXTermColor(this DOSColor color)
         {
 #pragma warning disable IDE0066 // Convert switch statement to expression
-            switch (color)
+            return color switch
             {
-                case DOSColor.DarkGray:
-                    return XTermColor.Grey;
-                case DOSColor.DarkYellow:
-                    return XTermColor.Yellow;
-                case DOSColor.Yellow:
-                    return XTermColor.LightYellow;
-                case DOSColor.Gray:
-                    return XTermColor.LightSlateGrey;
-                default:
-                    return Enum.TryParse(color.ToString(), out XTermColor col) ? col : XTermColor.DarkSlateGray;
-            }
+                DOSColor.DarkGray => XTermColor.Grey,
+                DOSColor.DarkYellow => XTermColor.Yellow,
+                DOSColor.Yellow => XTermColor.LightYellow,
+                DOSColor.Gray => XTermColor.LightSlateGrey,
+                _ => (Enum.TryParse(color.ToString(), out XTermColor col) ? col : XTermColor.DarkSlateGray)
+            };
 #pragma warning restore IDE0066 // Convert switch statement to expression
         }
 

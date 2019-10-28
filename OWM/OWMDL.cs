@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using DragonLib.Numerics;
 using static DragonLib.OWM.OWMHelper;
+// ReSharper disable CollectionNeverUpdated.Global
 
 namespace DragonLib.OWM
 {
+    // ReSharper disable once UnusedType.Global
     public class OWMDL
     {
         private const short VERSION_MAJOR = 0x1;
