@@ -26,8 +26,4 @@
   <ItemGroup>
     <None Update=".git" Visible="false" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DXGI" />
-  </ItemGroup>
 </Project>
