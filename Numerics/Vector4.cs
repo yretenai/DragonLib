@@ -21,7 +21,7 @@ namespace DragonLib.Numerics
         {
             return new OpenTK.Vector4(X, Y, Z, W);
         }
-        
+
         public System.Numerics.Vector4 ToNumerics()
         {
             return new System.Numerics.Vector4(X, Y, Z, W);
