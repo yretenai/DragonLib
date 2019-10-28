@@ -19,5 +19,10 @@ namespace DragonLib.Numerics
         {
             return new OpenTK.Vector3(X, Y, Z);
         }
+        
+        public System.Numerics.Vector3 ToNumerics()
+        {
+            return new System.Numerics.Vector3(X, Y, Z);
+        }
     }
 }

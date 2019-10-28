@@ -17,5 +17,10 @@ namespace DragonLib.Numerics
         {
             return new OpenTK.Vector2(X, Y);
         }
+
+        public System.Numerics.Vector2 ToNumerics()
+        {
+            return new System.Numerics.Vector2(X, Y);
+        }
     }
 }
