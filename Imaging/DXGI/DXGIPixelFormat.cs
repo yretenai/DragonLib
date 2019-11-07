@@ -1,6 +1,6 @@
 namespace DragonLib.Imaging.DXGI
 {
-    public enum DXGIPixelFormat : byte
+    public enum DXGIPixelFormat : uint
     {
         UNKNOWN = 0x00,
         R32G32B32A32_TYPELESS = 0x01,
@@ -101,6 +101,11 @@ namespace DragonLib.Imaging.DXGI
         BC7_TYPELESS = 0x61,
         BC7_UNORM = 0x62,
         BC7_UNORM_SRGB = 0x63,
-        B4G4R4A4_UNORM = 0x73
+        B4G4R4A4_UNORM = 0x73,
+        P208 = 0x82,
+        V208 = 0x83,
+        V408 = 0x84,
+        DXGI_END,
+        FORCE_UINT = 0xFFFF_FFFF
     }
 }

@@ -6,7 +6,7 @@ namespace DragonLib.Imaging.DXGI
 {
     public static class DXGI
     {
-        public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, Span<byte> blob)
+        public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, int frameCount, Span<byte> blob)
         {
             var result = new Span<byte>(new byte[blob.Length + 0x94]);
             var header = new DDSImageHeader
@@ -42,7 +42,7 @@ namespace DragonLib.Imaging.DXGI
                 Format = (int) pixel,
                 Dimension = DXT10ResourceDimension.TEXTURE2D,
                 Misc = 0,
-                Size = 1
+                Size = Math.Max(1, frameCount)
             };
             MemoryMarshal.Write(result.Slice(0x80), ref dx10);
             blob.CopyTo(result.Slice(0x94));
@@ -63,6 +63,17 @@ namespace DragonLib.Imaging.DXGI
             return value;
         }
 
+        public static Span<byte> R8G8(Span<byte> bgra)
+        {
+            var value = new Span<byte>(new byte[bgra.Length * 2]);
+            for (var i = 0; i < bgra.Length; i += 2)
+            {
+                value[i * 2 + 0] = bgra[i + 0];
+                value[i * 2 + 1] = bgra[i + 1];
+            }
+            return value;
+        }
+
         public static Span<byte> DecompressDXGIFormat(Span<byte> data, int width, int height, DXGIPixelFormat format)
         {
             var req = width * height * 4;
@@ -80,6 +91,12 @@ namespace DragonLib.Imaging.DXGI
                 case DXGIPixelFormat.B8G8R8A8_UNORM_SRGB:
                 case DXGIPixelFormat.B8G8R8A8_TYPELESS:
                     return BGRARGBA(data);
+                case DXGIPixelFormat.R8G8_SINT:
+                case DXGIPixelFormat.R8G8_UINT:
+                case DXGIPixelFormat.R8G8_SNORM:
+                case DXGIPixelFormat.R8G8_UNORM:
+                case DXGIPixelFormat.R8G8_TYPELESS:
+                    return R8G8(data);
                 case DXGIPixelFormat.BC1_TYPELESS:
                 case DXGIPixelFormat.BC1_UNORM:
                 case DXGIPixelFormat.BC1_UNORM_SRGB:

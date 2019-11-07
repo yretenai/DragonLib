@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -225,6 +226,29 @@ namespace DragonLib.IO
         {
             Console.CursorTop += 1;
             Console.WriteLine();
+        }
+
+        [Conditional("DEBUG")]
+        [DebuggerHidden]
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
+        public static void Assert(bool condition, string message = null, string detail = null, params object[] args)
+        {
+            if (condition) return;
+            var trace = new StackTrace(1, true);
+            var frame = trace.GetFrame(0);
+
+            Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", "Assertion tripped on {0}", frame.ToString().Trim());
+            
+            if (message != null)
+            {
+                Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message, args);
+            }
+
+            if (detail != null)
+            {
+                Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + detail, args);
+            }
         }
     }
 }
