@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using DragonLib.Numerics;
 using static DragonLib.OWM.OWMHelper;
+
 // ReSharper disable CollectionNeverUpdated.Global
 
 namespace DragonLib.OWM

@@ -71,6 +71,7 @@ namespace DragonLib.Imaging.DXGI
                 value[i * 2 + 0] = bgra[i + 0];
                 value[i * 2 + 1] = bgra[i + 1];
             }
+
             return value;
         }
 

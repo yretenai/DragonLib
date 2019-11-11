@@ -239,16 +239,10 @@ namespace DragonLib.IO
             var frame = trace.GetFrame(0);
 
             Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", "Assertion tripped on {0}", frame.ToString().Trim());
-            
-            if (message != null)
-            {
-                Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message, args);
-            }
 
-            if (detail != null)
-            {
-                Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + detail, args);
-            }
+            if (message != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message, args);
+
+            if (detail != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + detail, args);
         }
     }
 }
