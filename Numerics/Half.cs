@@ -519,6 +519,7 @@ namespace DragonLib.Numerics
         ///     Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
+        // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => Value.GetHashCode();
 
         /// <summary>

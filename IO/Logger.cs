@@ -8,6 +8,7 @@ using static DragonLib.IO.ConsoleSwatch;
 namespace DragonLib.IO
 {
     // ReSharper disable once UnusedType.Global
+    // ReSharper disable ConvertToConstant.Global
     public static class Logger
     {
         public static bool ShowTime = false;
