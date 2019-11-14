@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using DragonLib.Numerics;
 using OpenTK;
@@ -34,6 +35,14 @@ namespace DragonLib
             if (value % n == 0) return value;
 
             return value + (n - value % n);
+        }
+
+        public static Span<byte> ToSpan(this Stream stream)
+        {
+            if (stream.Length - stream.Position == 0) return Span<byte>.Empty;
+            var buffer = new Span<byte>(new byte[stream.Length - stream.Position]);
+            stream.Read(buffer);
+            return buffer;
         }
 
         #region OpenTK Math

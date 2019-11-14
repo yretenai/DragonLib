@@ -233,17 +233,18 @@ namespace DragonLib.IO
         [DebuggerHidden]
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public static void Assert(bool condition, string message = null, string detail = null, params object[] args)
+        public static void Assert(bool condition, string message = null, params string[] detail)
         {
             if (condition) return;
             var trace = new StackTrace(1, true);
             var frame = trace.GetFrame(0);
 
-            Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", "Assertion tripped on {0}", frame.ToString().Trim());
+            Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", "Assertion failed at {0}", frame.ToString().Trim());
 
-            if (message != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message, args);
+            if (message != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message);
 
-            if (detail != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + detail, args);
+            if (!(detail?.Length > 0)) return;
+            foreach (var line in detail) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + line);
         }
     }
 }
