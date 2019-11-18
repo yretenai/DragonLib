@@ -229,7 +229,6 @@ namespace DragonLib.IO
             Console.WriteLine();
         }
 
-        [Conditional("DEBUG")]
         [DebuggerHidden]
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
