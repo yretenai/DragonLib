@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using DragonLib.Numerics;
 using OpenTK;
@@ -43,6 +44,75 @@ namespace DragonLib
             var buffer = new Span<byte>(new byte[stream.Length - stream.Position]);
             stream.Read(buffer);
             return buffer;
+        }
+
+        public static string[] ToHexOctets(this string input)
+        {
+            var cleaned = input?.Replace(" ", "").Trim();
+            if (cleaned == null || cleaned.Length % 2 != 0) return null;
+
+            return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
+        }
+
+        public static int FindPointerFromSignature(this Span<byte> buffer, string signatureTemplate)
+        {
+            var signatureOctets = signatureTemplate.ToHexOctets();
+            if (signatureOctets == null || signatureOctets.Length < 1) return -1;
+            var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
+            for (var ptr = 0; ptr < buffer.Length - signature.Length; ++ptr)
+            {
+                var slice = buffer.Slice(ptr, signature.Length);
+                var found = true;
+                for (var i = 0; i < signature.Length; ++i)
+                {
+                    var b = signature[i];
+                    if (b.HasValue && b.Value != slice[i]) found = false;
+                }
+
+                if (found) return ptr;
+            }
+
+            return -1;
+        }
+
+        public static int FindPointerFromSignatureReverse(this Span<byte> buffer, string signatureTemplate, int start = -1)
+        {
+            var signatureOctets = signatureTemplate.ToHexOctets();
+            if (signatureOctets == null || signatureOctets.Length < 1) return -1;
+            var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
+            if (start == -1 || start + signature.Length > buffer.Length) start = buffer.Length - signature.Length;
+            for (var ptr = start; ptr > 0; --ptr)
+            {
+                var slice = buffer.Slice(ptr, signature.Length);
+                var found = true;
+                for (var i = 0; i < signature.Length; ++i)
+                {
+                    var b = signature[i];
+                    if (b.HasValue && b.Value != slice[i]) found = false;
+                }
+
+                if (found) return ptr;
+            }
+
+            return -1;
+        }
+
+        // https://stackoverflow.com/questions/15743192/check-if-number-is-prime-number
+        public static bool IsPrime(this int number)
+        {
+            if (number <= 1) return false;
+            if (number == 2) return true;
+            if (number % 2 == 0) return false;
+
+            var boundary = (int) Math.Floor(Math.Sqrt(number));
+
+            for (int i = 3; i <= boundary; i += 2)
+            {
+                if (number % i == 0)
+                    return false;
+            }
+
+            return true;
         }
 
         #region OpenTK Math
