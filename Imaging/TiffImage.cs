@@ -1,8 +1,10 @@
 ﻿using System;
 using BitMiracle.LibTiff.Classic;
+using JetBrains.Annotations;
 
 namespace DragonLib.Imaging
 {
+    [PublicAPI]
     public static class TiffImage
     {
         public static bool WriteTiff(string path, Span<byte> mip0, int width, int height)

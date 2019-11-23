@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public enum DDSResourceDimension : uint
     {
         UNKNOWN = 0,

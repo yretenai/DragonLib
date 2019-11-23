@@ -1,7 +1,9 @@
 ﻿using System.Linq;
+using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
+    [PublicAPI]
     public struct Vector3
     {
         public float X { get; set; }

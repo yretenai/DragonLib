@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public struct DDSPixelFormat
     {
         public int Size { get; set; }

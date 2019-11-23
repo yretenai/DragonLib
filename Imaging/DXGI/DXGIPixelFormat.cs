@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public enum DXGIPixelFormat : uint
     {
         UNKNOWN = 0x00,

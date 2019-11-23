@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public class FileExtensionAttribute : Attribute
     {
         public FileExtensionAttribute(string extension) => Extension = extension;

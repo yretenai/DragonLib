@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace DragonLib.IO
 {
+    [PublicAPI]
     public static class ConsoleSwatch
     {
         public enum DOSColor
@@ -286,11 +288,11 @@ namespace DragonLib.IO
             Grey31
         }
 
-        public const string ColorReset = "\x1b[0m";
+        public const string COLOR_RESET = "\x1b[0m";
         private const int STD_OUTPUT_HANDLE = -11;
         private const int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
 
-        private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+        private static readonly IntPtr InvalidHandleValue = new IntPtr(-1);
 
         public static bool IsVTEnabled { get; private set; }
         public static bool IsVTCapable { get; private set; } = Environment.OSVersion.Version.Major >= 6;
@@ -332,7 +334,7 @@ namespace DragonLib.IO
             unsafe
             {
                 var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-                if (hOut == INVALID_HANDLE_VALUE)
+                if (hOut == InvalidHandleValue)
                 {
                     IsVTCapable = false;
                     return false;

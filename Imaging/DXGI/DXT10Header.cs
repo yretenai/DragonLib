@@ -1,5 +1,8 @@
-﻿namespace DragonLib.Imaging.DXGI
+﻿using JetBrains.Annotations;
+
+namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public struct DXT10Header
     {
         public int Format { get; set; }

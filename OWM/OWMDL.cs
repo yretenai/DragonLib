@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using DragonLib.Numerics;
+using JetBrains.Annotations;
 using static DragonLib.OWM.OWMHelper;
-
-// ReSharper disable CollectionNeverUpdated.Global
 
 namespace DragonLib.OWM
 {
-    // ReSharper disable once UnusedType.Global
+    [PublicAPI]
     public class OWMDL
     {
         private const short VERSION_MAJOR = 0x1;
@@ -24,7 +23,7 @@ namespace DragonLib.OWM
         public List<OWMDLMesh> Meshes { get; set; } = new List<OWMDLMesh>();
         public List<OWMDLSocket> Sockets { get; set; } = new List<OWMDLSocket>();
         public List<OWMDLRefBone> RestPose { get; set; } = new List<OWMDLRefBone>();
-        public uint GUID { get; set; } = 0;
+        public uint GUID { get; set; }
 
         public Stream Write()
         {
@@ -99,6 +98,7 @@ namespace DragonLib.OWM
         }
     }
 
+    [PublicAPI]
     public struct OWMDLSocket
     {
         public string Name { get; set; }
@@ -107,6 +107,7 @@ namespace DragonLib.OWM
         public string Bone { get; set; }
     }
 
+    [PublicAPI]
     public struct OWMDLMesh
     {
         public string Name { get; set; }
@@ -116,6 +117,7 @@ namespace DragonLib.OWM
         public List<int[]> Faces { get; set; }
     }
 
+    [PublicAPI]
     public struct OWMDLMeshVertex
     {
         public Vector3 Position { get; set; }
@@ -127,6 +129,7 @@ namespace DragonLib.OWM
         public Vector4 Color2 { get; set; }
     }
 
+    [PublicAPI]
     public struct OWMDLBone
     {
         public string Name { get; set; }
@@ -136,6 +139,7 @@ namespace DragonLib.OWM
         public Quaternion Rotation { get; set; }
     }
 
+    [PublicAPI]
     public struct OWMDLRefBone
     {
         public string Name { get; set; }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public static class SizeHelper
     {
         private static ConcurrentDictionary<Type, int> SizeCache { get; } = new ConcurrentDictionary<Type, int>();

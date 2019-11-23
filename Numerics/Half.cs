@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
@@ -26,7 +27,7 @@ namespace DragonLib.Numerics
     ///     - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
     ///     - IEEE 754 revision, link: http://grouper.ieee.org/groups/754/
     /// </remarks>
-    [Serializable]
+    [Serializable, PublicAPI]
     public struct Half : IComparable, IFormattable, IConvertible, IComparable<Half>, IEquatable<Half>
     {
         /// <summary>

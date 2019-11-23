@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public static class DataTypeHelper
     {
         public static Dictionary<Type, Dictionary<object, string>> Cache { get; } = new Dictionary<Type, Dictionary<object, string>>();

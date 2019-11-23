@@ -1,5 +1,8 @@
-﻿namespace DragonLib.Imaging.DXGI
+﻿using JetBrains.Annotations;
+
+namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public enum DXT10ResourceDimension
     {
         UNKNOWN = 0,

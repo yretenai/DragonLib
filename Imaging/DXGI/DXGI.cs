@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using Squish;
 
 namespace DragonLib.Imaging.DXGI
 {
+    [PublicAPI]
     public static class DXGI
     {
         public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, int frameCount, Span<byte> blob)

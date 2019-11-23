@@ -3,15 +3,15 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using JetBrains.Annotations;
 using static DragonLib.IO.ConsoleSwatch;
 
 namespace DragonLib.IO
 {
-    // ReSharper disable once UnusedType.Global
-    // ReSharper disable ConvertToConstant.Global
+    [PublicAPI]
     public static class Logger
     {
-        public static bool ShowTime = false;
+        public static bool ShowTime;
 
 #if DEBUG
         public static bool ShowDebug = true;
@@ -96,7 +96,7 @@ namespace DragonLib.IO
             {
                 writer.Write(XTermColor.Grey24.ToForeground());
                 writer.Write($"[{category}] ");
-                writer.Write(ColorReset);
+                writer.Write(COLOR_RESET);
             }
 
             if (UseColor && !string.IsNullOrWhiteSpace(foreground)) writer.Write(foreground);
@@ -113,7 +113,7 @@ namespace DragonLib.IO
 
             writer.Write(output);
 
-            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background))) writer.Write(ColorReset);
+            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background))) writer.Write(COLOR_RESET);
 
             if (newLine) writer.WriteLine();
         }
@@ -140,7 +140,7 @@ namespace DragonLib.IO
             if (!EnableVT())
                 Console.ResetColor();
             else
-                writer.Write(ColorReset);
+                writer.Write(COLOR_RESET);
         }
 
         public static string ReadLine(TextWriter writer, bool @private)
@@ -232,9 +232,9 @@ namespace DragonLib.IO
         [DebuggerHidden]
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public static void Assert(bool condition, string message = null, params string[] detail)
+        public static bool Assert(bool condition, string message = null, params string[] detail)
         {
-            if (condition) return;
+            if (condition) return false;
             var trace = new StackTrace(1, true);
             var frame = trace.GetFrame(0);
 
@@ -242,8 +242,9 @@ namespace DragonLib.IO
 
             if (message != null) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message);
 
-            if (!(detail?.Length > 0)) return;
+            if (!(detail?.Length > 0)) return true;
             foreach (var line in detail) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + line);
+            return true;
         }
     }
 }

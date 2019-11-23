@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DragonLib.Numerics;
+using JetBrains.Annotations;
 using OpenTK;
 using Matrix4x3 = DragonLib.Numerics.Matrix4x3;
 using Quaternion = DragonLib.Numerics.Quaternion;
@@ -12,6 +13,7 @@ using Vector4 = DragonLib.Numerics.Vector4;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public static class Extensions
     {
         public static string ReadString(this Span<byte> data, Encoding encoding = null)

@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace DragonLib.Numerics
 {
+    [PublicAPI]
     public struct Vector4Short
     {
         public short X { get; set; }

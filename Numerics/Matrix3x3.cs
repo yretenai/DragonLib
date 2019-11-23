@@ -1,8 +1,10 @@
 ﻿using System.Linq;
+using JetBrains.Annotations;
 using OpenTK;
 
 namespace DragonLib.Numerics
 {
+    [PublicAPI]
     public struct Matrix3x3
     {
         public float M11 { get; }
