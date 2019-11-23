@@ -1,31 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <Platforms>x64</Platforms>
+        <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>NU1701</NoWarn>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
-    <NoWarn>1701;1702;NU1701</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
-    <NoWarn>1701;1702;NU1701</NoWarn>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
-    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
-    <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
-    <PackageReference Include="OpenTK" Version="3.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update=".git" Visible="false" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
+        <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
+        <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
+        <PackageReference Include="OpenTK" Version="3.1.0" />
+    </ItemGroup>
+    
 </Project>
