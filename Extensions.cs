@@ -18,6 +18,7 @@ namespace DragonLib
     {
         public static string ReadString(this Span<byte> data, Encoding encoding = null)
         {
+            if (data.Length == 0 || data[0] == 0) return null;
             var index = data.IndexOf<byte>(0);
             if (index <= -1) index = data.Length;
 
