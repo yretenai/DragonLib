@@ -16,6 +16,18 @@ namespace DragonLib
     [PublicAPI]
     public static class Extensions
     {
+        public static string SanitizeFilename(this string path)
+        {
+            var illegal = Path.GetInvalidFileNameChars();
+
+            return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '?'));
+        }
+        public static string SanitizeDirname(this string path)
+        {
+            var illegal = Path.GetInvalidPathChars().Concat(Path.GetInvalidFileNameChars()).Distinct();
+
+            return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
+        }
         public static string ReadString(this Span<byte> data, Encoding encoding = null)
         {
             if (data.Length == 0 || data[0] == 0) return null;
