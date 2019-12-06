@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using DragonLib.Numerics;
+using FlatBuffers;
 using JetBrains.Annotations;
 using OpenTK;
 using Matrix4x3 = DragonLib.Numerics.Matrix4x3;
@@ -16,6 +18,18 @@ namespace DragonLib
     [PublicAPI]
     public static class Extensions
     {
+        public static ByteBuffer ToByteBuffer(this Stream stream)
+        {
+            var bytes = new byte[stream.Length];
+            stream.Read(bytes, 0, bytes.Length);
+            return new ByteBuffer(bytes);
+        }
+
+        public static ByteBuffer ToByteBuffer<T>(this Span<T> span) where T : struct
+        {
+            return new ByteBuffer(MemoryMarshal.AsBytes(span).ToArray());
+        }
+        
         public static string SanitizeFilename(this string path)
         {
             var illegal = Path.GetInvalidFileNameChars();

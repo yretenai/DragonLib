@@ -6,6 +6,7 @@
         <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>NU1701</NoWarn>
+        <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

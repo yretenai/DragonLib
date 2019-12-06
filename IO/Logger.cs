@@ -246,5 +246,16 @@ namespace DragonLib.IO
             foreach (var line in detail) Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + line);
             return true;
         }
+
+        [DebuggerHidden]
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
+        public static void Trace()
+        {
+            if (!ShowDebug) return;
+            var trace = new StackTrace(1, true);
+
+            Log24Bit(XTermColor.HotPink3, true, Console.Error, "TRACE", trace.ToString().Trim());
+        }
     }
 }
