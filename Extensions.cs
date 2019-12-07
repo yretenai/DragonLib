@@ -42,9 +42,9 @@ namespace DragonLib
 
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
-        public static string ReadString(this Span<byte> data, Encoding encoding = null)
+        public static string ReadString(this Span<byte> data, Encoding encoding = null, bool returnNull = true)
         {
-            if (data.Length == 0 || data[0] == 0) return null;
+            if (data.Length == 0 || data[0] == 0) return (returnNull ? null : string.Empty);
             var index = data.IndexOf<byte>(0);
             if (index <= -1) index = data.Length;
 
