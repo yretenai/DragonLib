@@ -30,6 +30,9 @@ namespace DragonLib.Numerics
             M33 = values.ElementAtOrDefault(8);
         }
 
-        public Matrix3 ToOpenTK() => new Matrix3(M11, M12, M13, M21, M22, M23, M31, M32, M33);
+        public Matrix3 ToOpenTK() =>
+            new Matrix3(M11, M12, M13,
+                M21, M22, M23,
+                M31, M32, M33);
     }
 }

@@ -29,19 +29,21 @@ namespace DragonLib
         {
             return new ByteBuffer(MemoryMarshal.AsBytes(span).ToArray());
         }
-        
+
         public static string SanitizeFilename(this string path)
         {
             var illegal = Path.GetInvalidFileNameChars();
 
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '?'));
         }
+
         public static string SanitizeDirname(this string path)
         {
             var illegal = Path.GetInvalidPathChars().Concat(Path.GetInvalidFileNameChars()).Distinct();
 
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
+
         public static string ReadString(this Span<byte> data, Encoding encoding = null)
         {
             if (data.Length == 0 || data[0] == 0) return null;
@@ -148,17 +150,27 @@ namespace DragonLib
 
         public static Matrix4x4 ToDragon(this Matrix4 matrix)
         {
-            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
+            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13,
+                matrix.M14, matrix.M21, matrix.M22,
+                matrix.M23, matrix.M24, matrix.M31,
+                matrix.M32, matrix.M33, matrix.M34,
+                matrix.M41, matrix.M42, matrix.M43,
+                matrix.M44);
         }
 
         public static Matrix4x3 ToDragon(this OpenTK.Matrix4x3 matrix)
         {
-            return new Matrix4x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33, matrix.M41, matrix.M42, matrix.M43);
+            return new Matrix4x3(matrix.M11, matrix.M12, matrix.M13,
+                matrix.M21, matrix.M22, matrix.M23,
+                matrix.M31, matrix.M32, matrix.M33,
+                matrix.M41, matrix.M42, matrix.M43);
         }
 
         public static Matrix3x3 ToDragon(this Matrix3 matrix)
         {
-            return new Matrix3x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33);
+            return new Matrix3x3(matrix.M11, matrix.M12, matrix.M13,
+                matrix.M21, matrix.M22, matrix.M23,
+                matrix.M31, matrix.M32, matrix.M33);
         }
 
         public static Vector2 ToDragon(this OpenTK.Vector2 vector)
@@ -179,7 +191,8 @@ namespace DragonLib
 
         public static Quaternion ToDragon(this OpenTK.Quaternion quaternion)
         {
-            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z,
+                quaternion.W);
         }
 
         #endregion
@@ -188,7 +201,12 @@ namespace DragonLib
 
         public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix)
         {
-            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
+            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13,
+                matrix.M14, matrix.M21, matrix.M22,
+                matrix.M23, matrix.M24, matrix.M31,
+                matrix.M32, matrix.M33, matrix.M34,
+                matrix.M41, matrix.M42, matrix.M43,
+                matrix.M44);
         }
 
         public static Vector2 ToDragon(this System.Numerics.Vector2 vector)
@@ -209,7 +227,8 @@ namespace DragonLib
 
         public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion)
         {
-            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z,
+                quaternion.W);
         }
 
         #endregion

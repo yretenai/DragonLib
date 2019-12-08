@@ -27,7 +27,8 @@ namespace DragonLib.Numerics
     ///     - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
     ///     - IEEE 754 revision, link: http://grouper.ieee.org/groups/754/
     /// </remarks>
-    [Serializable, PublicAPI]
+    [Serializable]
+    [PublicAPI]
     public struct Half : IComparable, IFormattable, IConvertible, IComparable<Half>, IEquatable<Half>
     {
         /// <summary>
@@ -565,20 +566,22 @@ namespace DragonLib.Numerics
         /// </summary>
         /// <param name="bits">Binary representation of System.Half value</param>
         /// <returns>A half-precision floating point number formed by its binary representation.</returns>
-        public static Half ToHalf(ushort bits) => new Half
-        {
-            Value = bits
-        };
+        public static Half ToHalf(ushort bits) =>
+            new Half
+            {
+                Value = bits
+            };
 
         /// <summary>
         ///     Returns a half-precision floating point number converted from its binary representation.
         /// </summary>
         /// <param name="bytes">Binary representation of System.Half value</param>
         /// <returns>A half-precision floating point number formed by its binary representation.</returns>
-        public static Half ToHalf(Span<byte> bytes) => new Half
-        {
-            Value = MemoryMarshal.Read<ushort>(bytes)
-        };
+        public static Half ToHalf(Span<byte> bytes) =>
+            new Half
+            {
+                Value = MemoryMarshal.Read<ushort>(bytes)
+            };
 
         /// <summary>
         ///     Returns a value indicating the sign of a half-precision floating-point number.
@@ -774,7 +777,8 @@ namespace DragonLib.Numerics
         public static bool TryParse(string value, NumberStyles style, IFormatProvider provider, out Half result)
         {
             var parseResult = false;
-            if (float.TryParse(value, style, provider, out var f))
+            if (float.TryParse(value, style, provider,
+                out var f))
             {
                 result = (Half) f;
                 parseResult = true;
@@ -830,9 +834,13 @@ namespace DragonLib.Numerics
 
         byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
 
-        char IConvertible.ToChar(IFormatProvider provider) => throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "Char"));
+        char IConvertible.ToChar(IFormatProvider provider) =>
+            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half",
+                "Char"));
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "DateTime"));
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) =>
+            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half",
+                "DateTime"));
 
         decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
 

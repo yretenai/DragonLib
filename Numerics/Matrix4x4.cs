@@ -44,8 +44,20 @@ namespace DragonLib.Numerics
             M44 = values.ElementAtOrDefault(15);
         }
 
-        public Matrix4 ToOpenTK() => new Matrix4(M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44);
+        public Matrix4 ToOpenTK() =>
+            new Matrix4(M11, M12, M13,
+                M14, M21, M22,
+                M23, M24, M31,
+                M32, M33, M34,
+                M41, M42, M43,
+                M44);
 
-        public System.Numerics.Matrix4x4 ToNumerics() => new System.Numerics.Matrix4x4(M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44);
+        public System.Numerics.Matrix4x4 ToNumerics() =>
+            new System.Numerics.Matrix4x4(M11, M12, M13,
+                M14, M21, M22,
+                M23, M24, M31,
+                M32, M33, M34,
+                M41, M42, M43,
+                M44);
     }
 }
