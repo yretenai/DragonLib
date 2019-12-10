@@ -43,7 +43,7 @@ namespace DragonLib
 
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
-        
+
         public static string ReadString(this Span<byte> data, Encoding encoding = null, bool returnNull = true)
         {
             if (data.Length == 0 || data[0] == 0) return (returnNull ? null : string.Empty);
@@ -67,6 +67,11 @@ namespace DragonLib
             if (value % n == 0) return value;
 
             return value + (n - value % n);
+        }
+
+        public static Span<byte> ToSpan(this string str, Encoding encoding = null)
+        {
+            return (encoding ?? Encoding.UTF8).GetBytes(str);
         }
 
         public static Span<byte> ToSpan(this Stream stream)
