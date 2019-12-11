@@ -21,14 +21,12 @@ namespace DragonLib.Numerics
 
         public OpenTK.Vector4 ToOpenTK()
         {
-            return new OpenTK.Vector4(X, Y, Z,
-                W);
+            return new OpenTK.Vector4(X, Y, Z, W);
         }
 
         public System.Numerics.Vector4 ToNumerics()
         {
-            return new System.Numerics.Vector4(X, Y, Z,
-                W);
+            return new System.Numerics.Vector4(X, Y, Z, W);
         }
     }
 }

@@ -22,14 +22,12 @@ namespace DragonLib.Numerics
 
         public OpenTK.Quaternion ToOpenTK()
         {
-            return new OpenTK.Quaternion(X, Y, Z,
-                W);
+            return new OpenTK.Quaternion(X, Y, Z, W);
         }
 
         public System.Numerics.Quaternion ToNumerics()
         {
-            return new System.Numerics.Quaternion(X, Y, Z,
-                W);
+            return new System.Numerics.Quaternion(X, Y, Z, W);
         }
 
         // https://github.com/erich666/GraphicsGems/blob/master/gemsiv/euler_angle/EulerAngles.c

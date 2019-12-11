@@ -8,8 +8,7 @@ namespace DragonLib.Imaging.DXGI
     [PublicAPI]
     public static class DXGI
     {
-        public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, int frameCount,
-            Span<byte> blob)
+        public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, int frameCount, Span<byte> blob)
         {
             var result = new Span<byte>(new byte[blob.Length + 0x94]);
             var header = new DDSImageHeader
@@ -107,8 +106,7 @@ namespace DragonLib.Imaging.DXGI
                 {
                     var dec = new byte[req];
                     var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height,
-                        ref dataArray, SquishFlags.kDxt1);
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt1);
                     return new Span<byte>(dec);
                 }
                 case DXGIPixelFormat.BC2_TYPELESS:
@@ -117,8 +115,7 @@ namespace DragonLib.Imaging.DXGI
                 {
                     var dec = new byte[req];
                     var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height,
-                        ref dataArray, SquishFlags.kDxt3);
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt3);
                     return new Span<byte>(dec);
                 }
                 case DXGIPixelFormat.BC3_TYPELESS:
@@ -127,8 +124,7 @@ namespace DragonLib.Imaging.DXGI
                 {
                     var dec = new byte[req];
                     var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height,
-                        ref dataArray, SquishFlags.kDxt5);
+                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt5);
                     return new Span<byte>(dec);
                 }
                 default:

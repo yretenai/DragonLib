@@ -21,8 +21,7 @@ namespace DragonLib
 
         public static Span<byte> DecompressLZ4(Span<byte> data, int size)
         {
-            return LZ4Codec.Decode(data.ToArray(), 0, data.Length,
-                size);
+            return LZ4Codec.Decode(data.ToArray(), 0, data.Length, size);
         }
     }
 }

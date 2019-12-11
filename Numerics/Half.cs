@@ -777,8 +777,7 @@ namespace DragonLib.Numerics
         public static bool TryParse(string value, NumberStyles style, IFormatProvider provider, out Half result)
         {
             var parseResult = false;
-            if (float.TryParse(value, style, provider,
-                out var f))
+            if (float.TryParse(value, style, provider, out var f))
             {
                 result = (Half) f;
                 parseResult = true;
@@ -835,12 +834,10 @@ namespace DragonLib.Numerics
         byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
 
         char IConvertible.ToChar(IFormatProvider provider) =>
-            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half",
-                "Char"));
+            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "Char"));
 
         DateTime IConvertible.ToDateTime(IFormatProvider provider) =>
-            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half",
-                "DateTime"));
+            throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "DateTime"));
 
         decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
 
