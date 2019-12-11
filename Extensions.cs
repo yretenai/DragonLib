@@ -82,6 +82,12 @@ namespace DragonLib
             return buffer;
         }
 
+        public static string UnixPath(this string path, bool isDir)
+        {
+            var p = path.Replace('\\', '/');
+            return isDir ? p + "/" : p;
+        }
+
         public static string[] ToHexOctets(this string input)
         {
             var cleaned = input?.Replace(" ", "").Trim();
