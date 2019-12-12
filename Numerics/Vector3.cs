@@ -17,14 +17,8 @@ namespace DragonLib.Numerics
             Z = values.ElementAtOrDefault(2);
         }
 
-        public OpenTK.Vector3 ToOpenTK()
-        {
-            return new OpenTK.Vector3(X, Y, Z);
-        }
-
-        public System.Numerics.Vector3 ToNumerics()
-        {
-            return new System.Numerics.Vector3(X, Y, Z);
-        }
+        public OpenTK.Vector3 ToOpenTK() => new OpenTK.Vector3(X, Y, Z);
+        public System.Numerics.Vector3 ToNumerics() => new System.Numerics.Vector3(X, Y, Z);
+        public float[] ToArray() => new[] { X, Y, Z };
     }
 }

@@ -4,3 +4,6 @@ This file exists to describe and properly attribute the use of that code, and to
 Eric Haines, Ken Shoemake, and Academic Press for Graphics Gems IV:
     DragonLib/Numerics/Quaternion.cs uses Eul_FromQuat + Eul_FromHMatrix
     https://github.com/erich666/GraphicsGems/blob/master/gemsiv/euler_angle/EulerAngles.c#L103
+Khronos Group:
+    DragonLib/GLTF uses models present in UnityGLTF
+    https://github.com/KhronosGroup/UnityGLTF/tree/master

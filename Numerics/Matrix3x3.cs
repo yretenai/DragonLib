@@ -32,5 +32,6 @@ namespace DragonLib.Numerics
 
         public Matrix3 ToOpenTK() =>
             new Matrix3(M11, M12, M13, M21, M22, M23, M31, M32, M33);
+        public float[] ToArray() => new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33 };
     }
 }

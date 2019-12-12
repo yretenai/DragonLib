@@ -15,14 +15,8 @@ namespace DragonLib.Numerics
             Y = values.ElementAtOrDefault(1);
         }
 
-        public OpenTK.Vector2 ToOpenTK()
-        {
-            return new OpenTK.Vector2(X, Y);
-        }
-
-        public System.Numerics.Vector2 ToNumerics()
-        {
-            return new System.Numerics.Vector2(X, Y);
-        }
+        public OpenTK.Vector2 ToOpenTK() => new OpenTK.Vector2(X, Y);
+        public System.Numerics.Vector2 ToNumerics() => new System.Numerics.Vector2(X, Y);
+        public float[] ToArray() => new[] { X, Y };
     }
 }

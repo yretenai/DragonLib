@@ -20,15 +20,9 @@ namespace DragonLib.Numerics
             W = values.ElementAtOrDefault(3);
         }
 
-        public OpenTK.Quaternion ToOpenTK()
-        {
-            return new OpenTK.Quaternion(X, Y, Z, W);
-        }
-
-        public System.Numerics.Quaternion ToNumerics()
-        {
-            return new System.Numerics.Quaternion(X, Y, Z, W);
-        }
+        public OpenTK.Quaternion ToOpenTK() => new OpenTK.Quaternion(X, Y, Z, W);
+        public System.Numerics.Quaternion ToNumerics() => new System.Numerics.Quaternion(X, Y, Z, W);
+        public float[] ToArray() => new[] { X, Y, Z, W };
 
         // https://github.com/erich666/GraphicsGems/blob/master/gemsiv/euler_angle/EulerAngles.c
         public Vector3 EulerAngles()
