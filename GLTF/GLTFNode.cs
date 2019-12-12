@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFNode : GLTFProperty
+    public class GLTFNode : GLTFRootProperty
     {
         public bool? UseTRS { get; set; }
         public int? Camera { get; set; }

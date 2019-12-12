@@ -7,11 +7,8 @@ namespace DragonLib.GLTF.Extensions
     [PublicAPI, JsonConverter(typeof(JsonStringEnumConverter))]
     public enum KHRLightsPunctualType
     {
-        [EnumMember(Value = "directional")]
         Directional,
-        [EnumMember(Value = "point")]
         Point,
-        [EnumMember(Value = "spot")]
         Spot
     }
 }

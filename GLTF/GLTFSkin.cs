@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFSkin : GLTFProperty
+    public class GLTFSkin : GLTFRootProperty
     {
         public int InverseBindMatrices { get; set; }
         public int Skeleton { get; set; }

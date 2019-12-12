@@ -3,7 +3,7 @@
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFSampler : GLTFProperty
+    public class GLTFSampler : GLTFRootProperty
     {
         public GLTFMagFilterMode MagFilter { get; set; } = GLTFMagFilterMode.Linear;
         public GLTFMinFilterMode MinFilter { get; set; } = GLTFMinFilterMode.NearestMipmapLinear;

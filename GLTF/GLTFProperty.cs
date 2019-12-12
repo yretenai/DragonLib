@@ -6,6 +6,6 @@ namespace DragonLib.GLTF
     [PublicAPI]
     public class GLTFProperty
     {
-        public Dictionary<string, IGLTFExtension> Extensions { get; set; } = new Dictionary<string, IGLTFExtension>();
+        public Dictionary<string, object> Extensions { get; set; } = new Dictionary<string, object>();
     }
 }

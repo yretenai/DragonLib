@@ -3,7 +3,7 @@
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFBufferView : GLTFProperty
+    public class GLTFBufferView : GLTFRootProperty
     {
         public int Buffer { get; set; }
         public uint ByteOffset { get; set; }

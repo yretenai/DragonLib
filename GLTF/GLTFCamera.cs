@@ -3,7 +3,7 @@
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFCamera : GLTFProperty
+    public class GLTFCamera : GLTFRootProperty
     {
         public GLTFCameraOrthographic Orthographic { get; set; }
         public GLTFCameraPerspective Perspective { get; set; }

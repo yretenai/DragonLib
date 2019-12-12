@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
 using DragonLib.GLTF.Converters;
+using DragonLib.GLTF.Extensions;
 using JetBrains.Annotations;
 
 namespace DragonLib.GLTF
@@ -35,16 +36,28 @@ namespace DragonLib.GLTF
                 Converters =
                 {
                     new GLTFNumericsConverter()
-                }
+                },
+                WriteIndented = true
             });
         }
 
-        public string Serialize()
+        public string Serialize(string project)
         {
+            new DRAGONSerializerMetadata
+            {
+                DragonLib = "GLTF Version 2.0 - DragonLib Implementation - NET Core 3",
+                Project = project
+            }.Insert(this, this);
+            
             return JsonSerializer.Serialize(this, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                IgnoreNullValues = true
+                IgnoreNullValues = true,
+                Converters =
+                {
+                    new GLTFNumericsConverter()
+                },
+                WriteIndented = true
             });
         }
     }

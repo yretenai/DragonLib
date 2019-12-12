@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    public class GLTFAccessor : GLTFProperty
+    public class GLTFAccessor : GLTFRootProperty
     {
         public int BufferView { get; set; }
         public uint ByteOffset { get; set; }
