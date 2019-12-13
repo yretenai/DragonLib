@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace DragonLib.GLTF
 {
@@ -8,13 +8,13 @@ namespace DragonLib.GLTF
     {
         public double AspectRatio { get; set; }
 
-        [JsonPropertyName("yfov")]
+        [JsonProperty("yfov")]
         public double YFov { get; set; }
 
-        [JsonPropertyName("zfar")]
+        [JsonProperty("zfar")]
         public double ZFar { get; set; } = double.PositiveInfinity;
 
-        [JsonPropertyName("znear")]
+        [JsonProperty("znear")]
         public double ZNear { get; set; }
     }
 }

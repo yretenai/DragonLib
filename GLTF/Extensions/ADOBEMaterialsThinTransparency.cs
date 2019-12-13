@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace DragonLib.GLTF.Extensions
 {
@@ -11,7 +11,7 @@ namespace DragonLib.GLTF.Extensions
         public float? TransmissionFactor { get; set; }
         public GLTFTextureInfo TransmissionTexture { get; set; }
 
-        [JsonPropertyName("ior")]
+        [JsonProperty("ior")]
         public float? IOR { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)

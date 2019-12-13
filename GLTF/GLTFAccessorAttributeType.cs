@@ -1,10 +1,11 @@
-﻿using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace DragonLib.GLTF
 {
     [PublicAPI]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum GLTFAccessorAttributeType
     {
         SCALAR,

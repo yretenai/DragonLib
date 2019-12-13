@@ -1,27 +1,33 @@
 ﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using DragonLib.Numerics;
 
 namespace DragonLib.GLTF.Converters
 {
     public class HalfConverter : JsonConverter<Half?>
     {
-        public override Half? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override void WriteJson(JsonWriter writer, Half? value, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonTokenType.Null) return null;
-            return reader.TryGetSingle(out var value) ? new Half(value) : (Half?) null;
+            if (value == null)
+            {
+                writer.WriteNull();
+            }
+            else
+            {
+                writer.WriteValue((float)value);
+            }
         }
 
-        public override void Write(Utf8JsonWriter writer, Half? value, JsonSerializerOptions options)
+        public override Half? ReadJson(JsonReader reader, Type objectType, Half? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            if (!value.HasValue)
+            if (reader.TokenType == JsonToken.Null) 
             {
-                writer.WriteNullValue();
-                return;
+                return null;
             }
-
-            writer.WriteNumberValue(value.Value);
+            else
+            {
+                return new Half(reader.ReadAsDouble() ?? 0d); 
+            }
         }
     }
 }

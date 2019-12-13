@@ -1,21 +1,21 @@
-﻿using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace DragonLib.GLTF
 {
     [PublicAPI]
     public class GLTFCameraOrthographic : GLTFProperty
     {
-        [JsonPropertyName("xmag")]
+        [JsonProperty("xmag")]
         public double XMag { get; set; }
 
-        [JsonPropertyName("ymag")]
+        [JsonProperty("ymag")]
         public double YMag { get; set; }
 
-        [JsonPropertyName("zfar")]
+        [JsonProperty("zfar")]
         public double ZFar { get; set; } = double.PositiveInfinity;
 
-        [JsonPropertyName("znear")]
+        [JsonProperty("znear")]
         public double ZNear { get; set; }
     }
 }

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json;
 using DragonLib.GLTF.Converters;
 using DragonLib.GLTF.Extensions;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Serialization;
 
 namespace DragonLib.GLTF
 {
@@ -27,20 +28,32 @@ namespace DragonLib.GLTF
         public List<GLTFSkin> Skins { get; set; } = new List<GLTFSkin>();
         public List<GLTFTexture> Textures { get; set; } = new List<GLTFTexture>();
 
-        private static JsonSerializerOptions GLTFSettings = new JsonSerializerOptions
+        private static JsonSerializerSettings GLTFSettings = new JsonSerializerSettings
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            IgnoreNullValues = true,
+            ContractResolver = new IgnoreEmptyContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            },
+            Formatting = Formatting.Indented,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            ReferenceLoopHandling =  ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
             Converters =
             {
-                new GLTFNumericsConverter()
+                new HalfConverter(),
+                new Matrix3x3Converter(),
+                new Matrix4x3Converter(),
+                new Matrix4x4Converter(),
+                new QuaternionConverter(),
+                new Vector2Converter(),
+                new Vector3Converter(),
+                new Vector4Converter()
             },
-            WriteIndented = true
         };
         
         public static GLTFRoot Deserialize(string data)
         {
-            return JsonSerializer.Deserialize<GLTFRoot>(data, GLTFSettings);
+            return JsonConvert.DeserializeObject<GLTFRoot>(data, GLTFSettings);
         }
 
         public string Serialize(string project)
@@ -51,7 +64,7 @@ namespace DragonLib.GLTF
                 Project = project
             }.Insert(this, this);
 
-            return JsonSerializer.Serialize(this, GLTFSettings);
+            return JsonConvert.SerializeObject(this, GLTFSettings);
         }
     }
 }

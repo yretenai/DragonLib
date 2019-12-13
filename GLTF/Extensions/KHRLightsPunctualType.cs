@@ -1,10 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace DragonLib.GLTF.Extensions
 {
-    [PublicAPI]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [PublicAPI, JsonConverter(typeof(StringEnumConverter))]
     public enum KHRLightsPunctualType
     {
         Directional,
