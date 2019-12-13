@@ -27,18 +27,20 @@ namespace DragonLib.GLTF
         public List<GLTFSkin> Skins { get; set; } = new List<GLTFSkin>();
         public List<GLTFTexture> Textures { get; set; } = new List<GLTFTexture>();
 
+        private static JsonSerializerOptions GLTFSettings = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            IgnoreNullValues = true,
+            Converters =
+            {
+                new GLTFNumericsConverter()
+            },
+            WriteIndented = true
+        };
+        
         public static GLTFRoot Deserialize(string data)
         {
-            return JsonSerializer.Deserialize<GLTFRoot>(data, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                IgnoreNullValues = true,
-                Converters =
-                {
-                    new GLTFNumericsConverter()
-                },
-                WriteIndented = true
-            });
+            return JsonSerializer.Deserialize<GLTFRoot>(data, GLTFSettings);
         }
 
         public string Serialize(string project)
@@ -49,16 +51,7 @@ namespace DragonLib.GLTF
                 Project = project
             }.Insert(this, this);
 
-            return JsonSerializer.Serialize(this, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                IgnoreNullValues = true,
-                Converters =
-                {
-                    new GLTFNumericsConverter()
-                },
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(this, GLTFSettings);
         }
     }
 }
