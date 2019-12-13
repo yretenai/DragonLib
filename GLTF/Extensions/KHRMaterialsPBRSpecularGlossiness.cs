@@ -7,7 +7,7 @@ namespace DragonLib.GLTF.Extensions
     public class KHRMaterialsPBRSpecularGlossiness : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "KHR_materials_pbrSpecularGlossiness";
-        
+
         public Vector4? DiffuseFactor { get; set; }
         public GLTFTextureInfo DiffuseTexture { get; set; }
         public Vector3? SpecularFactor { get; set; }

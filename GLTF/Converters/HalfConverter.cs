@@ -20,6 +20,7 @@ namespace DragonLib.GLTF.Converters
                 writer.WriteNullValue();
                 return;
             }
+
             writer.WriteNumberValue(value.Value);
         }
     }

@@ -6,10 +6,10 @@ namespace DragonLib.GLTF.Extensions
     public class AGIArticulationNode : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "AGI_articulations";
-        
+
         public bool? IsAttachPoint { get; set; }
         public string ArticulationName { get; set; }
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFRoot)) return;

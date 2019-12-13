@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace DragonLib.GLTF.Extensions
@@ -16,6 +15,6 @@ namespace DragonLib.GLTF.Extensions
         XScale,
         YScale,
         ZScale,
-        UniformScale,
+        UniformScale
     }
 }

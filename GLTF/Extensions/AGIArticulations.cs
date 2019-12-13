@@ -7,9 +7,9 @@ namespace DragonLib.GLTF.Extensions
     public class AGIArticulations : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "AGI_articulations";
-        
+
         public List<AGIArticulation> Articulations { get; set; } = new List<AGIArticulation>();
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFRoot)) return;

@@ -7,6 +7,6 @@ namespace DragonLib.GLTF
     {
         None = 0,
         ArrayBuffer = 34962,
-        ElementArrayBuffer = 34963,
+        ElementArrayBuffer = 34963
     }
 }

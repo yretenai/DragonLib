@@ -6,7 +6,7 @@ namespace DragonLib.GLTF.Extensions
     public class KHRMaterialsUnlit : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "KHR_materials_unlit";
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFMaterial)) return;

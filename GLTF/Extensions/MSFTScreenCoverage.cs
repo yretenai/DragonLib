@@ -9,7 +9,7 @@ namespace DragonLib.GLTF.Extensions
     {
         public const string Identifier = "MSFT_screencoverage";
         public List<int> BackingList { get; set; } = new List<int>();
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFNode node)) return;

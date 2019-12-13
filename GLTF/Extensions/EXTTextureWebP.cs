@@ -6,9 +6,9 @@ namespace DragonLib.GLTF.Extensions
     public class EXTTextureWebP : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "EXT_texture_webp";
-        
+
         public int Source { get; set; }
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFTexture)) return;

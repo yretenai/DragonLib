@@ -7,10 +7,10 @@ namespace DragonLib.GLTF.Extensions
     public class KHRDracoMeshCompression : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "KHR_draco_mesh_compression";
-        
+
         public int BufferVIew { get; set; }
         public Dictionary<string, int> Attributes { get; set; } = new Dictionary<string, int>();
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFMeshPrimitive)) return;

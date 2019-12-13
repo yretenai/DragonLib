@@ -8,10 +8,13 @@ namespace DragonLib.GLTF
     {
         [JsonPropertyName("xmag")]
         public double XMag { get; set; }
+
         [JsonPropertyName("ymag")]
         public double YMag { get; set; }
+
         [JsonPropertyName("zfar")]
         public double ZFar { get; set; } = double.PositiveInfinity;
+
         [JsonPropertyName("znear")]
         public double ZNear { get; set; }
     }

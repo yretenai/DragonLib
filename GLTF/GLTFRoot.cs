@@ -48,7 +48,7 @@ namespace DragonLib.GLTF
                 DragonLib = "GLTF Version 2.0 - DragonLib Implementation - NET Core 3",
                 Project = project
             }.Insert(this, this);
-            
+
             return JsonSerializer.Serialize(this, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

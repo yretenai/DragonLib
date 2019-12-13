@@ -12,9 +12,8 @@ namespace DragonLib.GLTF.Converters
             if (reader.TokenType == JsonTokenType.Null) return null;
             var floats = new float[4 * 4];
             for (var i = 0; i < floats.Length; ++i)
-            {
-                if (reader.TryGetSingle(out var value)) floats[i] = value;
-            }
+                if (reader.TryGetSingle(out var value))
+                    floats[i] = value;
             return new Matrix4x4(floats);
         }
 
@@ -25,13 +24,10 @@ namespace DragonLib.GLTF.Converters
                 writer.WriteNullValue();
                 return;
             }
-            
+
             writer.WriteStartArray();
             var values = value.Value.ToArray();
-            foreach (var floatValue in values)
-            {
-                writer.WriteNumberValue(floatValue);
-            }
+            foreach (var floatValue in values) writer.WriteNumberValue(floatValue);
             writer.WriteEndArray();
         }
     }

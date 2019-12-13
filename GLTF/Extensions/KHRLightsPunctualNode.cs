@@ -6,9 +6,9 @@ namespace DragonLib.GLTF.Extensions
     public class KHRLightsPunctualNode : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "KHR_lights_punctual";
-        
+
         public int Light { get; set; }
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFNode)) return;

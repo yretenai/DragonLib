@@ -9,7 +9,7 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "MSFT_lod";
 
         public List<int> Ids { get; set; } = new List<int>();
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFMaterial) && !(gltf is GLTFNode)) return;

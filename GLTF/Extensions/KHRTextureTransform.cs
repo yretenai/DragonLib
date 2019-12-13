@@ -7,7 +7,7 @@ namespace DragonLib.GLTF.Extensions
     public class KHRTextureTransform : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "KHR_texture_transform";
-        
+
         public Vector2? Offset { get; set; }
         public float? Rotation { get; set; }
         public Vector2? Scale { get; set; }

@@ -9,7 +9,7 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "AGI_stk_metadata";
 
         public List<AGIStkMetadataGroup> Groups { get; set; } = new List<AGIStkMetadataGroup>();
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFRoot)) return;

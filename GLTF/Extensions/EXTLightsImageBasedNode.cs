@@ -8,7 +8,7 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "EXT_lights_image_based";
 
         public int Light { get; set; }
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFScene)) return;

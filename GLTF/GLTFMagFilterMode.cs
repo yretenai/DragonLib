@@ -7,6 +7,6 @@ namespace DragonLib.GLTF
     {
         None = 0,
         Nearest = 9728,
-        Linear = 9729,
+        Linear = 9729
     }
 }

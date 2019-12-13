@@ -8,7 +8,7 @@ namespace DragonLib.GLTF
         public int Buffer { get; set; }
         public uint ByteOffset { get; set; }
         public uint ByteLength { get; set; }
-        public uint ByteStride { get; set; }
-        public GLTFBufferViewTarget Target { get; set; } = GLTFBufferViewTarget.None;
+        public uint? ByteStride { get; set; }
+        public GLTFBufferViewTarget? Target { get; set; } = GLTFBufferViewTarget.None;
     }
 }

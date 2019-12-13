@@ -6,9 +6,9 @@ namespace DragonLib.GLTF.Extensions
     public class MSFTTextureDDS : GLTFProperty, IGLTFExtension
     {
         public const string Identifier = "MSFT_texture_dds";
-        
+
         public int Source { get; set; }
-        
+
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {
             if (!(gltf is GLTFTexture)) return;
