@@ -8,8 +8,8 @@ namespace DragonLib.GLTF
     {
         public Vector4? BaseColorFactor { get; set; }
         public GLTFTextureInfo BaseColorTexture { get; set; }
-        public float? MetallicFactor { get; set; }
-        public float? RoughnessFactor { get; set; }
+        public float? MetallicFactor { get; set; } = 1.0f;
+        public float? RoughnessFactor { get; set; } = 1.0f;
         public GLTFTextureInfo MetallicRoughnessTexture { get; set; }
     }
 }

@@ -16,7 +16,7 @@ namespace DragonLib.IO
 #if DEBUG
         public static bool ShowDebug = true;
 #else
-        public static bool ShowDebug = false;
+        public static bool ShowDebug;
 #endif
 
         public static bool Enabled = true;

@@ -4,7 +4,8 @@ using Newtonsoft.Json.Converters;
 
 namespace DragonLib.GLTF.Extensions
 {
-    [PublicAPI, JsonConverter(typeof(StringEnumConverter))]
+    [PublicAPI]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum KHRLightsPunctualType
     {
         Directional,

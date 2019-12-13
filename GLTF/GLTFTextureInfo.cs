@@ -6,6 +6,6 @@ namespace DragonLib.GLTF
     public class GLTFTextureInfo : GLTFProperty
     {
         public int Index { get; set; }
-        public int TexCoord { get; set; }
+        public int? TexCoord { get; set; }
     }
 }

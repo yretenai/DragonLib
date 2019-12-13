@@ -8,8 +8,8 @@ namespace DragonLib.GLTF
     {
         public GLTFPBRMetallicRoughness PbrMetallicRoughness { get; set; }
         public GLTFMaterialCommonConstant CommonConstant { get; set; }
-        public GLTFNormalTextureInfo NormalTexture { get; set; }
-        public GLTFOcclusionTextureInfo OcclusionTexture { get; set; }
+        public GLTFTextureInfo NormalTexture { get; set; }
+        public GLTFTextureInfo OcclusionTexture { get; set; }
         public GLTFTextureInfo EmissiveTexture { get; set; }
         public Vector3? EmissiveFactor { get; set; }
         public GLTFAlphaMode? AlphaMode { get; set; }

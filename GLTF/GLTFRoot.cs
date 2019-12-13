@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 using DragonLib.GLTF.Converters;
 using DragonLib.GLTF.Extensions;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace DragonLib.GLTF
@@ -10,6 +10,29 @@ namespace DragonLib.GLTF
     [PublicAPI]
     public class GLTFRoot : GLTFProperty
     {
+        private static JsonSerializerSettings GLTFSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new IgnoreEmptyContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            },
+            Formatting = Formatting.Indented,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters =
+            {
+                new HalfConverter(),
+                new Matrix3x3Converter(),
+                new Matrix4x3Converter(),
+                new Matrix4x4Converter(),
+                new QuaternionConverter(),
+                new Vector2Converter(),
+                new Vector3Converter(),
+                new Vector4Converter()
+            }
+        };
+
         public GLTFAsset Asset { get; set; }
         public int Scene { get; set; }
         public HashSet<string> ExtensionsUsed { get; set; } = new HashSet<string>();
@@ -28,29 +51,6 @@ namespace DragonLib.GLTF
         public List<GLTFSkin> Skins { get; set; } = new List<GLTFSkin>();
         public List<GLTFTexture> Textures { get; set; } = new List<GLTFTexture>();
 
-        private static JsonSerializerSettings GLTFSettings = new JsonSerializerSettings
-        {
-            ContractResolver = new IgnoreEmptyContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            },
-            Formatting = Formatting.Indented,
-            DefaultValueHandling = DefaultValueHandling.Include,
-            ReferenceLoopHandling =  ReferenceLoopHandling.Ignore,
-            NullValueHandling = NullValueHandling.Ignore,
-            Converters =
-            {
-                new HalfConverter(),
-                new Matrix3x3Converter(),
-                new Matrix4x3Converter(),
-                new Matrix4x4Converter(),
-                new QuaternionConverter(),
-                new Vector2Converter(),
-                new Vector3Converter(),
-                new Vector4Converter()
-            },
-        };
-        
         public static GLTFRoot Deserialize(string data)
         {
             return JsonConvert.DeserializeObject<GLTFRoot>(data, GLTFSettings);
