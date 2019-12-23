@@ -44,7 +44,7 @@ Section <DRAGON> Version 1
     <bool> z_up; 
 
 Section <NULL> Version 1
-    <section> meta; // meta.magic = 0x5F5F4E4F47415244 / "________"
+    <section> meta; // meta.magic = 0x5F5F5F5F5F5F5F5F / "________"
     
 Section <SETTINGS> Version 1
     <section> meta; // meta.magic = 0x53474E4954544553 / "SETTINGS"
