@@ -1,8 +1,9 @@
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
-    [PublicAPI]
+    [PublicAPI, StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct Vector4Short
     {
         public short X { get; set; }

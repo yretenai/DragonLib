@@ -1,0 +1,252 @@
+DRAGON Asset Version 1
+
+Includes common.txt
+Magic is written in LITTLE ENDIAN.
+In the case of the file being Big Endian, DRAGON.meta.magic will be 0x445241474F4E1A0A
+
+FILE
+    <DRAGON> header;
+    <section>[header.section_count];
+
+<section>
+    uint64 magic;
+    uint32 version;
+    <guid> guid;
+    int32 size; // inclusive of section header size (36 bytes as of version 1)
+    int32 count;
+
+Section descriptions
+    Dragon (DRAGON<+Z><NEWLINE>) - Header structure, general metadata for the file.
+    Null (________) - Empty structure
+    Settings (SETTINGS) - Key value settings storage
+    Skeleton (SKELETON) - Skeleton and bone hierarchy
+    Vertex Buffer (VERTEX__) - Vertex buffer and attribute information
+    Index Buffer (INDICE__) - Index buffer information
+    Geometry (GEOMETRY) - Mesh groups and submesh data
+    Materials (MATERIAL) - Material setup
+    Texture (TEXTURE_) - Texture references
+    Socket (SOCKET__) - Model hardpoint assignment
+    Reference (ASSETREF) - Asset import/reference
+    Lights (LIGHT___) - Light location and properties
+    Object (OBJECT__) - Mesh world/scene setup
+    Instance (INSTANCE) - Mesh world/scene instancing
+    Voxel Palette (VOXELPLT) - Color palette for voxel objects
+    Voxel Object (VOXELOBJ) - Voxel object data
+    Voxel Material (VOXELMAT) - Voxel material data
+    Animation (ANIMATION) - Animation binding setup
+    Animation Track (ANITRACK) - Animation curve track
+    Asset Data (ASSET) - Asset creation metadata 
+    
+Section <DRAGON> Version 1
+    <section> meta; // meta.magic = 0xA1A4E4F47415244 / "DRAGON<+Z><NEWLINE>"
+                    // meta.guid = 0xABBB0D0A1A0AABABBBBB0D0A1A0AABBB
+    uint32 total_size;
+    <bool> z_up; 
+
+Section <NULL> Version 1
+    <section> meta; // meta.magic = 0x5F5F4E4F47415244 / "________"
+    
+Section <SETTINGS> Version 1
+    <section> meta; // meta.magic = 0x53474E4954544553 / "SETTINGS"
+    <pair>[meta.count] pairs;
+
+    <pair>
+        <cstring> key;
+        <cstring> type;
+        uint32 value_size;
+        uint8[value_size] value;
+
+Section <SKELETON> Version 1
+    <section> meta; // meta.magic = 0x4E4F54454C454B53 / "SKELETON"
+    <cstring> name;
+    RotationType rotation_type;
+    <bone>[meta.count] bones;
+
+    enum RotationType
+        <vec3> = 1
+        <vec4> = 2
+        <mat3> = 3
+        <mat4> = 4
+
+    <bone>
+        <cstring> name;
+        <bool> enabled;
+        int32 parent;
+        <vec3> position; // if rotation type is NOT mat3 OR mat4
+        <T> rotation; // T = RotationType
+        <vec3> scale; // // if rotation type is NOT mat3 OR mat4
+
+Section <VERTEX> Version 1
+    <section> meta; // meta.magic = 0x5F5F584554524556 / "VERTEX__"
+    uint32 stride;
+    uint32 attribute_count;
+    <attribte> attributes;
+    uint8[meta.count] buffer;
+
+    <attribute>
+        AttributeType type;
+        D3DDECLUSAGE semantic;
+        <bool> normalized; // has to be FALSE on type == float.
+        // i.e. { type = unsigned, normalized = true,  width = 1 } = read 1 byte,  divide by 0xFF (normalized byte)
+        //      { type = float,    normalized = false, width = 4 } = read 4 bytes, cast to float  (float32)
+        uint8 width; 
+        uint8 count; // to get size of attribute: width * count. 
+        uint32 layer;
+        
+        enum AttributeType
+           float = 1
+           signed = 2
+           unsigned = 3
+        
+        enum D3DDECLUSAGE // see https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3ddeclusage
+
+Section <INDICE> Version 1
+    <section> meta; // meta.magic = 0x5F5F454349444E49 / "INDICE__"
+    uint8 width;
+    uint8[meta.count * width] buffer;
+
+Section <GEOMETRY> Version 1
+    <section> meta; // meta.magic = 0x595254454D4F4547 / "GEOMETRY"
+    <cstring> name;
+    <guid> vertex_buffer;
+    <guid> indice_buffer;
+    <guid> skeleton;
+    <guid> socket;
+    <mesh>[meta.count] meshes;
+
+    <mesh>
+        <cstring> name;
+        <guid> material;
+        DrawType type;
+        uint32 vertex_offset;
+        uint32 vertex_count;
+        uint32 face_offset;
+        uint32 face_count;
+
+        enum DrawType
+            triangle
+            triangle_strip
+            triangle_fan
+            quads
+
+Section <MATERIAL> Version 1
+    <section> meta; // meta.magic = 0x4C4149524554414D / "MATERIAL"
+    <cstring> name;
+    <cstring> shader;
+    <material_slot>[meta.count] slots;
+
+    <material_slot>
+        <cstring> target;
+        <guid> texture;
+
+Section <SOCKET> Version 1
+    <section> meta; // meta.magic = 0x5F5F54454B434F53 / "SOCKET__"
+    <cstring> name;
+    RotationType rotation_type;
+    <vec3> offset;
+    <T> rotation; // <T> = rotation_type
+    <guid> skeleton;
+    int32 bone;
+
+Section <TEXTURE> Version 1
+    <section> meta; // meta.magic = 0x5F45525554584554 / "TEXTURE_"
+    <cstring> path;
+
+Section <ASSETREF> Version 1
+    <section> meta; // meta.magic = 0x4645525445535341 / "ASSETREF"
+    <cstring> ref;
+
+Section <LIGHT> Version 1
+    <section> meta; // meta.magic = 0x5F5F5F544847494C / "LIGHT___"
+    <T> rotation; // T = RotationType
+    float32 fov;
+    vec3 color;
+    float32 strength;
+    LightType type;
+    <vec3> position;
+    <T> rotation; // T = RotationType
+
+    enum LightType
+        spot
+        point
+        sun
+        area
+
+Section <OBJECT> Version 1
+    <section> meta; // meta.magic = 0x5F5F5443454A424F / "OBJECT__"
+    <guid> material;
+    <guid> geometry;
+    RotationType rotation_type;
+    <vec3> position;
+    <T> rotation; // T = RotationType
+    <vec3> scale;
+
+
+Section <INSTANCE> Version 1
+    <section> meta; // meta.magic = 0x45434E4154534E49 / "INSTANCE"
+    RotationType rotation_type;
+    <guid> geometry;
+    uint32 count;
+    <instance>[count] instances;
+
+    <instance>
+        <guid> material;
+        uint32 count;
+        <instance_placement> placements;
+        
+        <instance_placement>
+            <vec3> position;
+            <T> rotation; // T = RotationType
+            <vec3> scale;
+
+Section <VOXELPLT> Version 1
+    <section> meta; // meta.magic = 0x544C504C45584F56 / "VOXELPLT"
+    uint32[meta.count] palette;
+
+Section <VOXELOBJ> Version 1
+    <section> meta; // meta.magic = 0x4A424F4C45584F56 / "VOXELOBJ"
+    <guid> voxel_palette;
+    <voxel> voxels[meta.count];
+
+    <voxel>
+        vec3 position;
+        <guid> voxel_material;
+        uint32 color_index;
+
+Section <VOXELMAT> Version 1
+    <section> meta; // meta.magic = 0x54414D4C45584F56 / "VOXELMAT"
+    <voxel_material_slot>[meta.count] slots;
+
+    <voxel_material_slot>
+        <cstring> target;
+        float32 value;
+
+Section <ANIMATE> Version 1
+    <section> meta; // meta.magic = 0x5F4554414D494E41 / "ANIMATE_"
+    float32 framerate;
+    <guid> skeleton;
+    <guid>[meta.count] tracks;
+
+    <track>
+        int32 bone;
+        <guid> track;
+
+Section <ANITRACK> Version 1
+    <section> meta; // meta.magic = 0x4B43415254494E41 / "ANITRACK"
+    <cstring> target; // POSITION, ROTATION, SCALE, etc.
+    AnimationType animation_type;
+    uint8 width; // frame count of one frame. 3 = vec3, 4 = vec4, 9 = matrix3, 16 = matrix4...
+    float32[meta.count] data;
+
+    enum AnimationType
+        Absolute
+        Additive
+        Relative
+        Delta
+
+Section <ASSET> Version 1
+    <section> meta; // meta.magic = 0x5F5F5F5445535341 / "ASSET___"
+    <cstring> project;
+    <cstring> copyright;
+    <cstring> creator;
+    uint64 time;
