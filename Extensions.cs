@@ -139,6 +139,17 @@ namespace DragonLib
             return -1;
         }
 
+        public static int FindFirstAlphanumericSequence(this Span<byte> buffer, int length = 1)
+        {
+            for (var ptr = 0; ptr < buffer.Length - length; ++ptr)
+            {
+                var slice = buffer.Slice(ptr, length);
+                if (slice.ToArray().All(x => x >= 0x30 && x <= 0x7F)) return ptr;
+            }
+
+            return -1;
+        }
+
         // https://stackoverflow.com/questions/15743192/check-if-number-is-prime-number
         public static bool IsPrime(this int number)
         {
