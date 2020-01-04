@@ -69,6 +69,22 @@ namespace DragonLib
             return value + (n - value % n);
         }
 
+        public static long Align(this long value, long n)
+        {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value + (n - value % n);
+        }
+
+        public static ulong Align(this ulong value, ulong n)
+        {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value + (n - value % n);
+        }
+
         public static Span<byte> ToSpan(this string str, Encoding encoding = null)
         {
             return (encoding ?? Encoding.UTF8).GetBytes(str);
