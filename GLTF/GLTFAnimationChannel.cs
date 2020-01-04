@@ -6,6 +6,6 @@ namespace DragonLib.GLTF
     public class GLTFAnimationChannel : GLTFProperty
     {
         public int Sampler { get; set; }
-        public GLTFAnimationChannelTarget Target { get; set; }
+        public GLTFAnimationChannelTarget? Target { get; set; }
     }
 }

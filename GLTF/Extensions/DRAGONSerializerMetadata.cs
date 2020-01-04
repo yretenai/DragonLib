@@ -7,8 +7,8 @@ namespace DragonLib.GLTF.Extensions
     {
         public const string Identifier = "_DRAGON_SerializerMetadata";
 
-        public string DragonLib { get; set; }
-        public string Project { get; set; }
+        public string? DragonLib { get; set; }
+        public string? Project { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {

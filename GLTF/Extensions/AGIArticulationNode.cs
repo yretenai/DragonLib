@@ -8,7 +8,7 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "AGI_articulations";
 
         public bool? IsAttachPoint { get; set; }
-        public string ArticulationName { get; set; }
+        public string? ArticulationName { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {

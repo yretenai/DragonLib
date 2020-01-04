@@ -9,7 +9,7 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "ADOBE_materials_thin_transparency";
 
         public float? TransmissionFactor { get; set; }
-        public GLTFTextureInfo TransmissionTexture { get; set; }
+        public GLTFTextureInfo? TransmissionTexture { get; set; }
 
         [JsonProperty("ior")]
         public float? IOR { get; set; }

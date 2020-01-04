@@ -18,9 +18,10 @@ namespace DragonLib
             Cache[type] = new Dictionary<object, string>();
             for (var i = 0; i < values.Length; ++i)
             {
-                var value = values.GetValue(i);
-                var extension = value.ToString().ToLower();
-                var custom = type.GetMember(value.ToString()).SelectMany(x => x.GetCustomAttributes(false)).ToArray();
+                var value = values.GetValue(i)?.ToString();
+                if (value == null) continue;
+                var extension = value.ToLower();
+                var custom = type.GetMember(value).SelectMany(x => x.GetCustomAttributes(false)).ToArray();
                 if (custom.Any(x => x is FileExtensionAttribute)) extension = ((FileExtensionAttribute) custom.First(x => x is FileExtensionAttribute)).Extension;
                 Cache[type][value] = extension;
             }

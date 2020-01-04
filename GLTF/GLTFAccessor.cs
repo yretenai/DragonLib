@@ -14,6 +14,6 @@ namespace DragonLib.GLTF
         public GLTFAccessorAttributeType Type { get; set; }
         public List<double> Max { get; set; } = new List<double>();
         public List<double> Min { get; set; } = new List<double>();
-        public GLTFAccessorSparse Sparse { get; set; }
+        public GLTFAccessorSparse? Sparse { get; set; }
     }
 }

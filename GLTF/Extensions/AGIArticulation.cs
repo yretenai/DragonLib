@@ -7,8 +7,8 @@ namespace DragonLib.GLTF.Extensions
     [PublicAPI]
     public class AGIArticulation : GLTFProperty
     {
-        public string Name { get; set; }
-        public List<AGIArticulationStage> Stages { get; set; }
+        public string? Name { get; set; }
+        public List<AGIArticulationStage>? Stages { get; set; }
         public Vector3? PointingVector { get; set; }
     }
 }

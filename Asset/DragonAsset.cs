@@ -48,7 +48,11 @@ namespace DragonLib.Asset
             ptr += header.Size;
             if (SectionTypes.TryGetValue(header.Magic, out var type))
             {
-                return (BaseSection) Activator.CreateInstance(type, header, chunk);
+                var instance = Activator.CreateInstance(type, header, chunk);
+                if (instance != null)
+                {
+                    return (BaseSection) instance;
+                }
             }
             Logger.Warn("DRAGON", $"Unhandled section type {header.Magic:G}");
             return new MemorySection(header, chunk);

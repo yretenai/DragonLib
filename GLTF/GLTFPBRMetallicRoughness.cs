@@ -7,9 +7,9 @@ namespace DragonLib.GLTF
     public class GLTFPBRMetallicRoughness : GLTFProperty
     {
         public Vector4? BaseColorFactor { get; set; }
-        public GLTFTextureInfo BaseColorTexture { get; set; }
+        public GLTFTextureInfo? BaseColorTexture { get; set; }
         public float? MetallicFactor { get; set; } = 1.0f;
         public float? RoughnessFactor { get; set; } = 1.0f;
-        public GLTFTextureInfo MetallicRoughnessTexture { get; set; }
+        public GLTFTextureInfo? MetallicRoughnessTexture { get; set; }
     }
 }

@@ -13,9 +13,11 @@ namespace DragonLib.GLTF.Converters
             JsonProperty property = base.CreateProperty(member, memberSerialization);
 
             if (property.PropertyType == typeof(string)) return property;
+            if (property.PropertyType == null) return property;
             if (property.PropertyType.GetInterface(nameof(IEnumerable)) != null && property.ShouldSerialize == null)
                 property.ShouldSerialize = instance =>
                 {
+                    if (property.UnderlyingName == null) return true;
                     var value = instance?.GetType().GetProperty(property.UnderlyingName)?.GetValue(instance);
                     switch (value)
                     {

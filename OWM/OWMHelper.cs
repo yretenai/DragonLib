@@ -11,7 +11,7 @@ namespace DragonLib.OWM
             return MemoryMarshal.Cast<T, byte>(new Span<T>(values));
         }
 
-        internal static Span<byte> GetString(string value, Encoding encoding = null)
+        internal static Span<byte> GetString(string? value, Encoding? encoding = null)
         {
             if (string.IsNullOrWhiteSpace(value)) return new Span<byte>(new byte[] { 0 });
 

@@ -9,10 +9,10 @@ namespace DragonLib.GLTF.Extensions
         public const string Identifier = "KHR_materials_pbrSpecularGlossiness";
 
         public Vector4? DiffuseFactor { get; set; }
-        public GLTFTextureInfo DiffuseTexture { get; set; }
+        public GLTFTextureInfo? DiffuseTexture { get; set; }
         public Vector3? SpecularFactor { get; set; }
         public float? GlossinessFactor { get; set; }
-        public GLTFTextureInfo SpecularGlossinessTexture { get; set; }
+        public GLTFTextureInfo? SpecularGlossinessTexture { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {

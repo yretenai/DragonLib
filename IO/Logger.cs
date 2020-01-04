@@ -22,7 +22,7 @@ namespace DragonLib.IO
         public static bool Enabled = true;
         public static bool UseColor = true;
 
-        public static void Log4Bit(ConsoleColor color, bool newLine, TextWriter writer, string category, string message)
+        public static void Log4Bit(ConsoleColor color, bool newLine, TextWriter writer, string? category, string message)
         {
             if (!Enabled) return;
 
@@ -41,7 +41,7 @@ namespace DragonLib.IO
             if (newLine) writer.WriteLine();
         }
 
-        public static void Log24Bit(ConsoleColor color, bool newline, TextWriter writer, string category, string message)
+        public static void Log24Bit(ConsoleColor color, bool newline, TextWriter writer, string? category, string message)
         {
             if (!Enabled) return;
 
@@ -54,7 +54,7 @@ namespace DragonLib.IO
             Log24Bit(color.AsDOSColor().AsXTermColor().ToForeground(), default, newline, writer, category, message);
         }
 
-        public static void Log24Bit(DOSColor color, bool newline, TextWriter writer, string category, string message)
+        public static void Log24Bit(DOSColor color, bool newline, TextWriter writer, string? category, string message)
         {
             if (!Enabled) return;
 
@@ -67,7 +67,7 @@ namespace DragonLib.IO
             Log24Bit(color.AsXTermColor().ToForeground(), default, newline, writer, category, message);
         }
 
-        public static void Log24Bit(XTermColor color, bool newline, TextWriter writer, string category, string message)
+        public static void Log24Bit(XTermColor color, bool newline, TextWriter writer, string? category, string message)
         {
             if (!Enabled) return;
 
@@ -80,7 +80,7 @@ namespace DragonLib.IO
             Log24Bit(color.ToForeground(), default, newline, writer, category, message);
         }
 
-        public static void Log24Bit(string foreground, string background, bool newLine, TextWriter writer, string category, string message)
+        public static void Log24Bit(string? foreground, string? background, bool newLine, TextWriter writer, string? category, string message)
         {
             if (!Enabled) return;
 
@@ -114,26 +114,26 @@ namespace DragonLib.IO
             if (newLine) writer.WriteLine();
         }
 
-        public static void Log(ConsoleColor color, bool newline, bool stderr, string category, string message) =>
+        public static void Log(ConsoleColor color, bool newline, bool stderr, string? category, string message) =>
             Log24Bit(color, newline, stderr ? Console.Error : Console.Out, category, message);
 
-        public static void Success(string category, string message) =>
+        public static void Success(string? category, string message) =>
             Log(ConsoleColor.Green, true, false, category, message);
 
-        public static void Info(string category, string message) =>
+        public static void Info(string? category, string message) =>
             Log(ConsoleColor.White, true, false, category, message);
 
-        public static void Debug(string category, string message)
+        public static void Debug(string? category, string message)
         {
             if (!ShowDebug) return;
 
             Log(ConsoleColor.DarkGray, true, false, category, message);
         }
 
-        public static void Warn(string category, string message) =>
+        public static void Warn(string? category, string message) =>
             Log(ConsoleColor.DarkYellow, true, false, category, message);
 
-        public static void Error(string category, string message) =>
+        public static void Error(string? category, string message) =>
             Log(ConsoleColor.Red, true, true, category, message);
 
         public static void ResetColor(TextWriter writer)
@@ -180,7 +180,7 @@ namespace DragonLib.IO
             return builder.ToString();
         }
 
-        private static string LastMessage;
+        private static string? LastMessage;
 
         public static void LogProgress(string message, string pre, string post, double value, XTermColor messageColor, XTermColor preColor, XTermColor postColor, XTermColor brickColor, XTermColor processColor, bool showProgressValue, XTermColor processValueColor)
         {
@@ -233,13 +233,13 @@ namespace DragonLib.IO
         [DebuggerHidden]
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public static bool Assert(bool condition, string message = null, params string[] detail)
+        public static bool Assert(bool condition, string? message = null, params string[] detail)
         {
             if (condition) return false;
             var trace = new StackTrace(1, true);
             var frame = trace.GetFrame(0);
 
-            Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", $"Assertion failed at {frame.ToString().Trim()}");
+            Log24Bit(XTermColor.Purple, true, Console.Error, "ASSERT", $"Assertion failed at {(frame?.ToString()?.Trim() ?? "unknown location")}");
 
             if (message != null)
                 Log24Bit(XTermColor.Purple, true, Console.Error, null, "\t -> " + message);

@@ -33,7 +33,7 @@ namespace DragonLib.GLTF
             }
         };
 
-        public GLTFAsset Asset { get; set; }
+        public GLTFAsset? Asset { get; set; }
         public int Scene { get; set; }
         public HashSet<string> ExtensionsUsed { get; set; } = new HashSet<string>();
         public HashSet<string> ExtensionsRequired { get; set; } = new HashSet<string>();
@@ -51,7 +51,7 @@ namespace DragonLib.GLTF
         public List<GLTFSkin> Skins { get; set; } = new List<GLTFSkin>();
         public List<GLTFTexture> Textures { get; set; } = new List<GLTFTexture>();
 
-        public static GLTFRoot Deserialize(string data)
+        public static GLTFRoot? Deserialize(string data)
         {
             return JsonConvert.DeserializeObject<GLTFRoot>(data, GLTFSettings);
         }

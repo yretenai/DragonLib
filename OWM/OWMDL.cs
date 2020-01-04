@@ -18,7 +18,7 @@ namespace DragonLib.OWM
         }
 
         public string Name { get; set; }
-        public string MaterialLib { get; set; }
+        public string? MaterialLib { get; set; }
         public List<OWMDLBone> Bones { get; set; } = new List<OWMDLBone>();
         public List<OWMDLMesh> Meshes { get; set; } = new List<OWMDLMesh>();
         public List<OWMDLSocket> Sockets { get; set; } = new List<OWMDLSocket>();

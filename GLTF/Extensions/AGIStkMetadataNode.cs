@@ -7,7 +7,7 @@ namespace DragonLib.GLTF.Extensions
     {
         public const string Identifier = "AGI_stk_metadata";
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public bool NoObscuration { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)

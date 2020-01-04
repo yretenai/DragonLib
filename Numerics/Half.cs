@@ -482,7 +482,7 @@ namespace DragonLib.Numerics
         ///     than value. -or- value is null.
         /// </returns>
         /// <exception cref="System.ArgumentException">value is not a System.Half</exception>
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
             var result = obj switch
             {
@@ -507,7 +507,7 @@ namespace DragonLib.Numerics
         /// </summary>
         /// <param name="obj">An System.Object.</param>
         /// <returns>true if value is a System.Half and equal to this instance; otherwise, false.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             var result = false;
             if (!(obj is Half half)) return false;
@@ -679,12 +679,12 @@ namespace DragonLib.Numerics
         ///     using the specified culture-specific format information.
         /// </summary>
         /// <param name="value">The string representation of the number to convert.</param>
-        /// <param name="provider">An System.IFormatProvider that supplies culture-specific parsing information about value.</param>
+        /// <param name="provider">An System.IFormatProvider? that supplies culture-specific parsing information about value.</param>
         /// <returns>The System.Half number equivalent to the number contained in s as specified by provider.</returns>
         /// <exception cref="System.ArgumentNullException">value is null.</exception>
         /// <exception cref="System.FormatException">value is not in the correct format.</exception>
         /// <exception cref="System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
-        public static Half Parse(string value, IFormatProvider provider) => (Half) float.Parse(value, provider);
+        public static Half Parse(string value, IFormatProvider? provider) => (Half) float.Parse(value, provider);
 
         /// <summary>
         ///     Converts the string representation of a number in a specified style to its System.Half equivalent.
@@ -715,7 +715,7 @@ namespace DragonLib.Numerics
         ///     the style elements that can be present in value. A typical value to specify is
         ///     System.Globalization.NumberStyles.Number.
         /// </param>
-        /// <param name="provider">An System.IFormatProvider object that supplies culture-specific information about the format of value.</param>
+        /// <param name="provider">An System.IFormatProvider? object that supplies culture-specific information about the format of value.</param>
         /// <returns>The System.Half number equivalent to the number contained in s as specified by style and provider.</returns>
         /// <exception cref="System.ArgumentNullException">value is null.</exception>
         /// <exception cref="System.ArgumentException">
@@ -724,7 +724,7 @@ namespace DragonLib.Numerics
         /// </exception>
         /// <exception cref="System.FormatException">value is not in the correct format.</exception>
         /// <exception cref="System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
-        public static Half Parse(string value, NumberStyles style, IFormatProvider provider) => (Half) float.Parse(value, style, provider);
+        public static Half Parse(string value, NumberStyles style, IFormatProvider? provider) => (Half) float.Parse(value, style, provider);
 
         /// <summary>
         ///     Converts the string representation of a number to its System.Half equivalent.
@@ -761,7 +761,7 @@ namespace DragonLib.Numerics
         ///     A bitwise combination of System.Globalization.NumberStyles values that indicates
         ///     the permitted format of value. A typical value to specify is System.Globalization.NumberStyles.Number.
         /// </param>
-        /// <param name="provider">An System.IFormatProvider object that supplies culture-specific parsing information about value.</param>
+        /// <param name="provider">An System.IFormatProvider? object that supplies culture-specific parsing information about value.</param>
         /// <param name="result">
         ///     When this method returns, contains the System.Half number that is equivalent
         ///     to the numeric value contained in value, if the conversion succeeded, or is zero
@@ -774,7 +774,7 @@ namespace DragonLib.Numerics
         ///     style is not a System.Globalization.NumberStyles value. -or- style
         ///     is the System.Globalization.NumberStyles.AllowHexSpecifier value.
         /// </exception>
-        public static bool TryParse(string value, NumberStyles style, IFormatProvider provider, out Half result)
+        public static bool TryParse(string value, NumberStyles style, IFormatProvider? provider, out Half result)
         {
             var parseResult = false;
             if (float.TryParse(value, style, provider, out var f))
@@ -800,9 +800,9 @@ namespace DragonLib.Numerics
         ///     Converts the numeric value of this instance to its equivalent string representation
         ///     using the specified culture-specific format information.
         /// </summary>
-        /// <param name="formatProvider">An System.IFormatProvider that supplies culture-specific formatting information.</param>
+        /// <param name="formatProvider">An System.IFormatProvider? that supplies culture-specific formatting information.</param>
         /// <returns>The string representation of the value of this instance as specified by provider.</returns>
-        public string ToString(IFormatProvider formatProvider) => ((float) this).ToString(formatProvider);
+        public string ToString(IFormatProvider? formatProvider) => ((float) this).ToString(formatProvider);
 
         /// <summary>
         ///     Converts the numeric value of this instance to its equivalent string representation, using the specified format.
@@ -816,50 +816,50 @@ namespace DragonLib.Numerics
         ///     using the specified format and culture-specific format information.
         /// </summary>
         /// <param name="format">A numeric format string.</param>
-        /// <param name="formatProvider">An System.IFormatProvider that supplies culture-specific formatting information.</param>
+        /// <param name="formatProvider">An System.IFormatProvider? that supplies culture-specific formatting information.</param>
         /// <returns>The string representation of the value of this instance as specified by format and provider.</returns>
         /// <exception cref="System.FormatException">format is invalid.</exception>
-        public string ToString(string format, IFormatProvider formatProvider) => ((float) this).ToString(format, formatProvider);
+        public string ToString(string? format, IFormatProvider? formatProvider) => ((float) this).ToString(format, formatProvider);
 
         #endregion
 
         #region IConvertible Members
 
-        float IConvertible.ToSingle(IFormatProvider provider) => this;
+        float IConvertible.ToSingle(IFormatProvider? provider) => this;
 
         TypeCode IConvertible.GetTypeCode() => GetTypeCode();
 
-        bool IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        bool IConvertible.ToBoolean(IFormatProvider? provider) => Convert.ToBoolean(this);
 
-        byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        byte IConvertible.ToByte(IFormatProvider? provider) => Convert.ToByte(this);
 
-        char IConvertible.ToChar(IFormatProvider provider) =>
+        char IConvertible.ToChar(IFormatProvider? provider) =>
             throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "Char"));
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider) =>
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider) =>
             throw new InvalidCastException(string.Format(CultureInfo.CurrentCulture, "Invalid cast from '{0}' to '{1}'.", "Half", "DateTime"));
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        decimal IConvertible.ToDecimal(IFormatProvider? provider) => Convert.ToDecimal(this);
 
-        double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        double IConvertible.ToDouble(IFormatProvider? provider) => Convert.ToDouble(this);
 
-        short IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        short IConvertible.ToInt16(IFormatProvider? provider) => Convert.ToInt16(this);
 
-        int IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        int IConvertible.ToInt32(IFormatProvider? provider) => Convert.ToInt32(this);
 
-        long IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        long IConvertible.ToInt64(IFormatProvider? provider) => Convert.ToInt64(this);
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => Convert.ToSByte(this);
 
-        string IConvertible.ToString(IFormatProvider provider) => Convert.ToString(this, CultureInfo.InvariantCulture);
+        string IConvertible.ToString(IFormatProvider? provider) => Convert.ToString(this, CultureInfo.InvariantCulture);
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((float) this as IConvertible).ToType(conversionType, provider);
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((float) this as IConvertible).ToType(conversionType, provider);
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        ushort IConvertible.ToUInt16(IFormatProvider? provider) => Convert.ToUInt16(this);
 
-        uint IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        uint IConvertible.ToUInt32(IFormatProvider? provider) => Convert.ToUInt32(this);
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        ulong IConvertible.ToUInt64(IFormatProvider? provider) => Convert.ToUInt64(this);
 
         #endregion
     }

@@ -9,7 +9,7 @@ namespace DragonLib.GLTF.Extensions
 
         public float? VertexCount { get; set; }
         public float? PrimitiveCount { get; set; }
-        public FBGeometryMetadataSceneBounds SceneBounds { get; set; }
+        public FBGeometryMetadataSceneBounds? SceneBounds { get; set; }
 
         public void Insert(GLTFProperty gltf, GLTFRoot root)
         {

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using JetBrains.Annotations;
 using LZ4;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public static class CompressionHelper
     {
         public static unsafe Span<byte> DecompressDEFLATE(Span<byte> data, int size)

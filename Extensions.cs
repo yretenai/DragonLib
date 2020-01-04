@@ -44,7 +44,7 @@ namespace DragonLib
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
 
-        public static string ReadString(this Span<byte> data, Encoding encoding = null, bool returnNull = true)
+        public static string? ReadString(this Span<byte> data, Encoding? encoding = null, bool returnNull = true)
         {
             if (data.Length == 0 || data[0] == 0) return (returnNull ? null : string.Empty);
             var index = data.IndexOf<byte>(0);
@@ -85,7 +85,7 @@ namespace DragonLib
             return value + (n - value % n);
         }
 
-        public static Span<byte> ToSpan(this string str, Encoding encoding = null)
+        public static Span<byte> ToSpan(this string str, Encoding? encoding = null)
         {
             return (encoding ?? Encoding.UTF8).GetBytes(str);
         }
@@ -107,7 +107,7 @@ namespace DragonLib
         public static string[] ToHexOctets(this string input)
         {
             var cleaned = input?.Replace(" ", "").Trim();
-            if (cleaned == null || cleaned.Length % 2 != 0) return null;
+            if (cleaned == null || cleaned.Length % 2 != 0) return new string[] { };
 
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
         }
