@@ -6,12 +6,12 @@ namespace DragonLib.Asset.Sections
     [PublicAPI]
     public class MemorySection : BaseSection
     {
-        public Memory<byte> Buffer { get; set; }
-        
         public MemorySection(DragonAssetSectionHeader header, Memory<byte> buffer) : base(header, buffer)
         {
             Buffer = buffer;
         }
+
+        public Memory<byte> Buffer { get; set; }
 
         public override Memory<byte> WriteSection() => Buffer;
     }

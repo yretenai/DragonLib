@@ -3,7 +3,8 @@ using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
-    [PublicAPI, StructLayout(LayoutKind.Sequential, Pack = 2)]
+    [PublicAPI]
+    [StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct Vector4Short
     {
         public short X { get; set; }

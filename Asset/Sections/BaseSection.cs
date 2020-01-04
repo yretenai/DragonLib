@@ -6,8 +6,7 @@ namespace DragonLib.Asset.Sections
     [PublicAPI]
     public class BaseSection
     {
-        public DragonAssetSectionHeader Header { get; set; }
-        internal static Type Type = typeof(BaseSection); 
+        internal static Type Type = typeof(BaseSection);
 
         public BaseSection(DragonAssetSectionId id, Guid guid)
         {
@@ -24,6 +23,8 @@ namespace DragonLib.Asset.Sections
         {
             Header = header;
         }
+
+        public DragonAssetSectionHeader Header { get; set; }
 
         public virtual Memory<byte> WriteSection()
         {

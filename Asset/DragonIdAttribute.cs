@@ -6,14 +6,15 @@ namespace DragonLib.Asset
     [PublicAPI]
     public class DragonIdAttribute : Attribute
     {
-        public DragonAssetSectionId Id { get; } = DragonAssetSectionId.Null;
-
         public DragonIdAttribute() { }
-        
+
         public DragonIdAttribute(DragonAssetSectionId id)
         {
             Id = id;
         }
+
+        public DragonAssetSectionId Id { get; } = DragonAssetSectionId.Null;
+        public override object TypeId => Id;
 
         public override bool Equals(object? obj)
         {
@@ -28,7 +29,6 @@ namespace DragonLib.Asset
 
         public override int GetHashCode() => Id.GetHashCode();
         public override bool Match(object? obj) => Equals(obj);
-        public override object TypeId => Id;
         public override string ToString() => $"[DragonAssetSection {Id:G}]";
         public override bool IsDefaultAttribute() => Id == DragonAssetSectionId.Null;
     }
