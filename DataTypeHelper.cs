@@ -9,13 +9,13 @@ namespace DragonLib
     [PublicAPI]
     public static class DataTypeHelper
     {
-        public static Dictionary<Type, Dictionary<object, string>> Cache { get; } = new Dictionary<Type, Dictionary<object, string>>();
+        public static Dictionary<Type, Dictionary<string, string>> Cache { get; } = new Dictionary<Type, Dictionary<string, string>>();
 
         public static void Preload<T>() where T : struct
         {
             var type = typeof(T);
             var values = Enum.GetValues(type);
-            Cache[type] = new Dictionary<object, string>();
+            Cache[type] = new Dictionary<string, string>();
             for (var i = 0; i < values.Length; ++i)
             {
                 var value = values.GetValue(i)?.ToString();
@@ -32,12 +32,12 @@ namespace DragonLib
             var type = typeof(T);
             if (!Cache.TryGetValue(type, out var cache)) return "bin";
 
-            return cache.TryGetValue(magic, out var value) ? value : "bin";
+            return cache.TryGetValue(magic.ToString() ?? "", out var ext) ? ext : "bin";
         }
 
         public static bool IsKnown<T>(T magic) where T : struct
         {
-            return Cache.TryGetValue(typeof(T), out var cache) && cache.ContainsKey(magic);
+            return Cache.TryGetValue(typeof(T), out var cache) && cache.ContainsKey(magic.ToString() ?? "");
         }
 
         public static bool Matches<T>(Span<byte> span, T magic) where T : struct => GetMagicValue<T>(span).Equals(magic);
