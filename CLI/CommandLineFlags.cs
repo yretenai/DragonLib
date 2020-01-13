@@ -283,12 +283,12 @@ namespace DragonLib.CLI
                 {
                     value = type.FullName switch
                     {
-                        "System.Long" => long.Parse(textValue, NumberStyles.Any),
-                        "System.ULong" => ulong.Parse(textValue, NumberStyles.Any),
-                        "System.Int" => int.Parse(textValue, NumberStyles.Any),
-                        "System.UInt" => uint.Parse(textValue, NumberStyles.Any),
-                        "System.Short" => short.Parse(textValue, NumberStyles.Any),
-                        "System.UShort" => ushort.Parse(textValue, NumberStyles.Any),
+                        "System.Int64" => long.Parse(textValue, NumberStyles.Any),
+                        "System.UInt64" => ulong.Parse(textValue, NumberStyles.Any),
+                        "System.Int32" => int.Parse(textValue, NumberStyles.Any),
+                        "System.UInt32" => uint.Parse(textValue, NumberStyles.Any),
+                        "System.Int16" => short.Parse(textValue, NumberStyles.Any),
+                        "System.UInt16" => ushort.Parse(textValue, NumberStyles.Any),
                         "System.Byte" => byte.Parse(textValue, NumberStyles.Any),
                         "System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
                         "System.Double" => double.Parse(textValue),
