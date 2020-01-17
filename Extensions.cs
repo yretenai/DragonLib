@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -85,9 +86,46 @@ namespace DragonLib
             return value + (n - value % n);
         }
 
-        public static Span<byte> ToSpan(this string str, Encoding? encoding = null)
+        public static int AlignReverse(this int value, int n)
         {
-            return (encoding ?? Encoding.UTF8).GetBytes(str);
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value - (value % n);
+        }
+
+        public static uint AlignReverse(this uint value, uint n)
+        {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value - (value % n);
+        }
+
+        public static long AlignReverse(this long value, long n)
+        {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value - (value % n);
+        }
+
+        public static ulong AlignReverse(this ulong value, ulong n)
+        {
+            if (value < n) return n;
+            if (value % n == 0) return value;
+
+            return value - (value % n);
+        }
+
+        public static Span<byte> ToSpan(this string str, Encoding? encoding = null, bool endNull = false)
+        {
+            var bytes = (encoding ?? Encoding.UTF8).GetBytes(str);
+            if (!endNull) return bytes;
+
+            var span = new Span<byte>(new byte[bytes.Length + 1]);
+            bytes.CopyTo(span);
+            return span;
         }
 
         public static Span<byte> ToSpan(this Stream stream)
@@ -104,7 +142,7 @@ namespace DragonLib
             return isDir ? p + "/" : p;
         }
 
-        public static string[] ToHexOctets(this string input)
+        public static string[] ToHexOctetsA(this string input)
         {
             var cleaned = input?.Replace(" ", "").Trim();
             if (cleaned == null || cleaned.Length % 2 != 0) return new string[] { };
@@ -112,9 +150,17 @@ namespace DragonLib
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
         }
 
+        public static byte[] ToHexOctetsB(this string input)
+        {
+            var cleaned = input?.Replace(" ", "").Trim();
+            if (cleaned == null || cleaned.Length % 2 != 0) return new byte[] { };
+
+            return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => byte.Parse(cleaned.Substring(x, 2), NumberStyles.HexNumber)).ToArray();
+        }
+
         public static int FindPointerFromSignature(this Span<byte> buffer, string signatureTemplate)
         {
-            var signatureOctets = signatureTemplate.ToHexOctets();
+            var signatureOctets = signatureTemplate.ToHexOctetsA();
             if (signatureOctets == null || signatureOctets.Length < 1) return -1;
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
             for (var ptr = 0; ptr < buffer.Length - signature.Length; ++ptr)
@@ -135,7 +181,7 @@ namespace DragonLib
 
         public static int FindPointerFromSignatureReverse(this Span<byte> buffer, string signatureTemplate, int start = -1)
         {
-            var signatureOctets = signatureTemplate.ToHexOctets();
+            var signatureOctets = signatureTemplate.ToHexOctetsA();
             if (signatureOctets == null || signatureOctets.Length < 1) return -1;
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
             if (start == -1 || start + signature.Length > buffer.Length) start = buffer.Length - signature.Length;
