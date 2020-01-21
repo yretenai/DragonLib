@@ -39,7 +39,7 @@ namespace DragonLib
                 iv = new byte[16];
             }
 
-            using var aes = new AesManaged()
+            using var aes = new AesManaged
             {
                 Key = key.ToArray(),
                 IV = iv.ToArray(),
@@ -55,10 +55,7 @@ namespace DragonLib
                 var block = new Span<byte>(new byte[data.Length]);
                 var aligned = data.Length.AlignReverse(16);
                 crypto.Read(block.Slice(0, aligned));
-                if (aligned < block.Length)
-                {
-                    data.Slice(aligned).CopyTo(block.Slice(aligned));
-                }
+                if (aligned < block.Length) data.Slice(aligned).CopyTo(block.Slice(aligned));
 
                 return block;
             }
