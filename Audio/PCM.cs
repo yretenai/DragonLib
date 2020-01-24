@@ -24,9 +24,8 @@ namespace DragonLib.Audio
             var channelCount = channels.Length;
             var stream = new Memory<short>(new short[samples * channelCount]);
             for (var i = 0; i < samples; ++i)
-            {
-                for (var j = 0; j < channelCount; ++j) stream.Span[i * channelCount + j] = channels[j].Span[i];
-            }
+            for (var j = 0; j < channelCount; ++j)
+                stream.Span[i * channelCount + j] = channels[j].Span[i];
 
             return stream;
         }
@@ -46,9 +45,8 @@ namespace DragonLib.Audio
             for (var i = 0; i < channelCount; ++i) channels[i] = new Memory<short>(new short[samples]);
 
             for (var i = 0; i < samples; ++i)
-            {
-                for (var j = 0; j < channelCount; ++j) channels[j].Span[i] = stream.Span[i * channelCount + j];
-            }
+            for (var j = 0; j < channelCount; ++j)
+                channels[j].Span[i] = stream.Span[i * channelCount + j];
 
             return channels;
         }
