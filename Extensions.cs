@@ -19,6 +19,8 @@ namespace DragonLib
     [PublicAPI]
     public static class Extensions
     {
+        private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
+
         public static ByteBuffer ToByteBuffer(this Stream stream)
         {
             var bytes = new byte[stream.Length];
@@ -228,6 +230,71 @@ namespace DragonLib
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     Divides value by divisor and rounds up
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="divisor"></param>
+        /// <returns></returns>
+        public static int DivideByRoundUp(this int value, int divisor)
+        {
+            return (int) Math.Ceiling((double) value / divisor);
+        }
+
+        /// <summary>
+        ///     Constraints value by Minimum and Maximum short values
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static short ShortClamp(this int value)
+        {
+            if (value > short.MaxValue)
+                return short.MaxValue;
+            if (value < short.MinValue)
+                return short.MinValue;
+            return (short) value;
+        }
+
+        /// <summary>
+        ///     Gets the higher 4 bits
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static byte GetHighNibble(this byte value)
+        {
+            return (byte) ((value >> 4) & 0xF);
+        }
+
+        /// <summary>
+        ///     Gets the lower 4 bits
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static byte GetLowNibble(this byte value)
+        {
+            return (byte) (value & 0xF);
+        }
+
+        /// <summary>
+        ///     Gets the higher 4 bits, signed
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static sbyte GetHighNibbleSigned(this byte value)
+        {
+            return SignedNibbles[value.GetHighNibble()];
+        }
+
+        /// <summary>
+        ///     Gets the lower 4 bits, signed
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static sbyte GetLowNibbleSigned(this byte value)
+        {
+            return SignedNibbles[value.GetLowNibble()];
         }
 
         #region OpenTK Math
