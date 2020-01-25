@@ -38,11 +38,13 @@ namespace DragonLib
             var packed = 0u;
             var properties = Preload<T>();
             object boxed = instance;
-            foreach (var (property, offset, mask) in properties)
+            foreach (var (property, offset, _) in properties)
             {
                 var propertyValue = property.GetMethod?.Invoke(boxed, new object[0]);
-                var intValue = (uint) Convert.ChangeType(propertyValue, TypeCode.UInt32);
-                packed |= (intValue << offset);
+                if (propertyValue == null) continue;
+                var objectValue = Convert.ChangeType(propertyValue, TypeCode.UInt32);
+                if (objectValue == null) continue;
+                packed |= (((uint) objectValue) << offset);
             }
 
             return packed;
@@ -51,6 +53,7 @@ namespace DragonLib
         public static T Unpack<T>(uint value) where T : struct
         {
             var instance = Activator.CreateInstance(typeof(T));
+            if (instance == null) return default;
             var properties = Preload<T>();
             foreach (var (property, offset, mask) in properties)
             {
