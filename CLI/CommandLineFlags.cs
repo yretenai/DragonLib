@@ -144,8 +144,8 @@ namespace DragonLib.CLI
 
                     if ((flag.Default != null && !flag.Default.Equals(def)) || type.IsEnum) requiredParts.Add($"Default: {flag.Default}");
                     if (flag.IsRequired) requiredParts.Add("Required");
-                    if (type.IsEnum) requiredParts.Add("Values: " + string.Join(", ", Enum.GetNames(type)));
-                    else if (flag.ValidValues?.Length > 0) requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
+                    if (flag.ValidValues?.Length > 0) requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
+                    else if (type.IsEnum) requiredParts.Add("Values: " + string.Join(", ", Enum.GetNames(type)));
 
                     var required = string.Join(", ", requiredParts);
                     if (required.Length > 0) required = $" ({required})";
@@ -265,20 +265,20 @@ namespace DragonLib.CLI
 
         private static bool VisitFlagValue<T>(Action<List<(CLIFlagAttribute?, Type)>> printHelp, Type type, string textValue, CLIFlagAttribute flag, Dictionary<PropertyInfo, (CLIFlagAttribute?, Type PropertyType)> typeMap, ref object? value) where T : ICLIFlags
         {
+            if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue))
+            {
+                Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
+                printHelp(typeMap.Values.ToList());
+                Environment.Exit(0);
+                return true;
+            }
+
             if (type.IsEnum)
             {
                 if (!Enum.TryParse(type, textValue, true, out value)) Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
             }
             else
             {
-                if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue))
-                {
-                    Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
-                    printHelp(typeMap.Values.ToList());
-                    Environment.Exit(0);
-                    return true;
-                }
-
                 try
                 {
                     value = type.FullName switch
