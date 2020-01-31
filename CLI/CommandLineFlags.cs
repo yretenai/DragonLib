@@ -251,7 +251,7 @@ namespace DragonLib.CLI
 
                 if (type.IsEquivalentTo(typeof(List<string>)))
                     value = positionals.Skip(flag.Positional).ToList();
-                else if (VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value)) return null;
+                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value)) return null;
 
                 property.SetValue(instance, value);
             }
