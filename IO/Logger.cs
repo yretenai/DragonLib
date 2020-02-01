@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using JetBrains.Annotations;
 using static DragonLib.IO.ConsoleSwatch;
@@ -119,6 +120,13 @@ namespace DragonLib.IO
 
         public static void Success(string? category, string message) =>
             Log(ConsoleColor.Green, true, false, category, message);
+
+        public static void PrintVersion(string? category, string template = "{0} v{1}", Assembly? asm = null)
+        {
+            asm ??= Assembly.GetEntryAssembly();
+            if (asm == null) return;
+            Info(category, string.Format(template, asm.GetName().Name, asm.GetName().Version));
+        }
 
         public static void Info(string? category, string message) =>
             Log(ConsoleColor.White, true, false, category, message);
