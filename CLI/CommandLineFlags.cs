@@ -21,11 +21,7 @@ namespace DragonLib.CLI
             var entry = Assembly.GetEntryAssembly()?.GetName();
 
             var usageSlim = "Usage: ";
-            if (entry != null)
-            {
-                Logger.Info("FLAG", $"{entry.Name} version {entry.Version}");
-                usageSlim += $"{entry.Name} ";
-            }
+            if (entry != null) usageSlim += $"{entry.Name} ";
 
             var sizes = new[] { 0, 0, 0 };
 
