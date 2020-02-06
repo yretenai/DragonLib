@@ -60,5 +60,70 @@ namespace DragonLib
                 return block;
             }
         }
+
+        // Source: QuickBMS - unz.c
+        private static unsafe int UnsafeLZ77EA_970_Readnumber(byte** inSteam)
+        {
+            int total = 0, t;
+            do
+            {
+                t = **inSteam;
+                (*inSteam)++;
+                total += t;
+            } while (t == 0xff);
+
+            return total;
+        }
+
+        // Source: QuickBMS - unz.c
+        private static unsafe int UnsafeLZ77EA_970(byte* inSteam, int insz, byte* outStream, int outsz)
+        {
+            if (insz == 0) return 0;
+            byte* inl = inSteam + insz;
+            int ret = 0;
+            while (inSteam < inl)
+            {
+                int lengthByte = *inSteam++;
+                int proceedSize = lengthByte >> 4;
+                int copySize = lengthByte & 0xf;
+
+                if (proceedSize == 0xf) proceedSize += UnsafeLZ77EA_970_Readnumber(&inSteam);
+
+                for (var i = 0; i < proceedSize; i++)
+                {
+                    if (ret >= outsz) break;
+                    outStream[ret++] = *inSteam++;
+                }
+
+                if (inSteam >= inl) break;
+
+                int offset = inSteam[0] | (inSteam[1] << 8);
+                inSteam += 2;
+
+                if (copySize == 0xf) copySize += UnsafeLZ77EA_970_Readnumber(&inSteam);
+                copySize += 4;
+
+                for (var i = 0; i < copySize; i++)
+                {
+                    if (ret >= outsz) break;
+                    outStream[ret] = outStream[ret - offset];
+                    ret++;
+                }
+            }
+
+            return ret;
+        }
+
+        // This hurts my soul.
+        public static int UnsafeDecompressLZ77EA_970(Span<byte> buffer, Span<byte> output)
+        {
+            unsafe
+            {
+                fixed (byte* inStream = &buffer.GetPinnableReference())
+                {
+                    fixed (byte* outStream = &output.GetPinnableReference()) return UnsafeLZ77EA_970(inStream, buffer.Length, outStream, output.Length);
+                }
+            }
+        }
     }
 }
