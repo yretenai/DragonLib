@@ -120,9 +120,8 @@ namespace DragonLib
             unsafe
             {
                 fixed (byte* inStream = &buffer.GetPinnableReference())
-                {
-                    fixed (byte* outStream = &output.GetPinnableReference()) return UnsafeLZ77EA_970(inStream, buffer.Length, outStream, output.Length);
-                }
+                fixed (byte* outStream = &output.GetPinnableReference())
+                    return UnsafeLZ77EA_970(inStream, buffer.Length, outStream, output.Length);
             }
         }
     }
