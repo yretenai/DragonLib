@@ -85,7 +85,7 @@ namespace DragonLib
                     } while (sum == 0xff);
                 }
 
-                cmp.Slice(cmpPos).CopyTo(dec.Slice(decPos, litCount));
+                cmp.Slice(cmpPos, litCount).CopyTo(dec.Slice(decPos, litCount));
 
                 cmpPos += litCount;
                 decPos += litCount;
@@ -113,7 +113,7 @@ namespace DragonLib
 
                 if (encCount <= back)
                 {
-                    dec.Slice(encPos).CopyTo(dec.Slice(decPos, encCount));
+                    dec.Slice(encPos, encCount).CopyTo(dec.Slice(decPos, encCount));
 
                     decPos += encCount;
                 }
