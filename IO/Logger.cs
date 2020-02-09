@@ -125,7 +125,7 @@ namespace DragonLib.IO
         {
             asm ??= Assembly.GetEntryAssembly();
             if (asm == null) return;
-            Info(category, string.Format(template, asm.GetName().Name, asm.GetName().Version));
+            Log(ConsoleColor.White, true, true, category, string.Format(template, asm.GetName().Name, asm.GetName().Version));
         }
 
         public static void Info(string? category, string message) =>
