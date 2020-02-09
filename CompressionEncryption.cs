@@ -49,9 +49,9 @@ namespace DragonLib
 
             fixed (byte* pinData = &data.GetPinnableReference())
             {
-                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                var decrypt = aes.CreateDecryptor(aes.Key, aes.IV);
                 using var stream = new UnmanagedMemoryStream(pinData, data.Length);
-                using var crypto = new CryptoStream(stream, decryptor, CryptoStreamMode.Read);
+                using var crypto = new CryptoStream(stream, decrypt, CryptoStreamMode.Read);
                 var block = new Span<byte>(new byte[data.Length]);
                 var aligned = data.Length.AlignReverse(16);
                 crypto.Read(block.Slice(0, aligned));
@@ -61,68 +61,72 @@ namespace DragonLib
             }
         }
 
-        // Source: QuickBMS - unz.c
-        private static unsafe int UnsafeLZ77EA_970_Readnumber(byte** inSteam)
+        // https://github.com/Ryujinx/Ryujinx/blob/b2b736abc2569ab5d8199da666aef8d8394844a0/Ryujinx.HLE/Loaders/Compression/Lz4.cs
+        // Adapted for Span<T>
+        public static int DecompressLZ4(Span<byte> cmp, Span<byte> dec)
         {
-            int total = 0, t;
+            int cmpPos = 0;
+            int decPos = 0;
+
             do
             {
-                t = **inSteam;
-                (*inSteam)++;
-                total += t;
-            } while (t == 0xff);
+                byte token = cmp[cmpPos++];
 
-            return total;
-        }
+                int encCount = (token >> 0) & 0xf;
+                int litCount = (token >> 4) & 0xf;
 
-        // Source: QuickBMS - unz.c
-        private static unsafe int UnsafeLZ77EA_970(byte* inSteam, int insz, byte* outStream, int outsz)
-        {
-            if (insz == 0) return 0;
-            byte* inl = inSteam + insz;
-            int ret = 0;
-            while (inSteam < inl)
-            {
-                int lengthByte = *inSteam++;
-                int proceedSize = lengthByte >> 4;
-                int copySize = lengthByte & 0xf;
-
-                if (proceedSize == 0xf) proceedSize += UnsafeLZ77EA_970_Readnumber(&inSteam);
-
-                for (var i = 0; i < proceedSize; i++)
+                // Copy literal chunk
+                if (litCount == 0xF)
                 {
-                    if (ret >= outsz) break;
-                    outStream[ret++] = *inSteam++;
+                    byte sum;
+                    do
+                    {
+                        litCount += (sum = cmp[cmpPos++]);
+                    } while (sum == 0xff);
                 }
 
-                if (inSteam >= inl) break;
+                cmp.Slice(cmpPos).CopyTo(dec.Slice(decPos, litCount));
 
-                int offset = inSteam[0] | (inSteam[1] << 8);
-                inSteam += 2;
+                cmpPos += litCount;
+                decPos += litCount;
 
-                if (copySize == 0xf) copySize += UnsafeLZ77EA_970_Readnumber(&inSteam);
-                copySize += 4;
-
-                for (var i = 0; i < copySize; i++)
+                if (cmpPos >= cmp.Length)
                 {
-                    if (ret >= outsz) break;
-                    outStream[ret] = outStream[ret - offset];
-                    ret++;
+                    break;
                 }
-            }
 
-            return ret;
-        }
+                // Copy compressed chunk
+                int back = cmp[cmpPos++] << 0 | cmp[cmpPos++] << 8;
 
-        // This hurts my soul.
-        public static int UnsafeDecompressLZ77EA_970(Span<byte> buffer, Span<byte> output)
-        {
-            unsafe
-            {
-                fixed (byte* inStream = &buffer.GetPinnableReference())
-                fixed (byte* outStream = &output.GetPinnableReference())
-                    return UnsafeLZ77EA_970(inStream, buffer.Length, outStream, output.Length);
-            }
+                if (encCount == 0xF)
+                {
+                    byte sum;
+                    do
+                    {
+                        encCount += (sum = cmp[cmpPos++]);
+                    } while (sum == 0xff);
+                }
+
+                encCount += 4;
+
+                int encPos = decPos - back;
+
+                if (encCount <= back)
+                {
+                    dec.Slice(encPos).CopyTo(dec.Slice(decPos, encCount));
+
+                    decPos += encCount;
+                }
+                else
+                {
+                    while (encCount-- > 0)
+                    {
+                        dec[decPos++] = dec[encPos++];
+                    }
+                }
+            } while (cmpPos < cmp.Length && decPos < dec.Length);
+
+            return decPos;
         }
     }
 }
