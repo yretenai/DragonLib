@@ -11,6 +11,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <DebugType>full</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
         <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
