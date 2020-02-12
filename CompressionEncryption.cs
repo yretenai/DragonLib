@@ -90,10 +90,7 @@ namespace DragonLib
                 cmpPos += litCount;
                 decPos += litCount;
 
-                if (cmpPos >= cmp.Length)
-                {
-                    break;
-                }
+                if (cmpPos >= cmp.Length) break;
 
                 // Copy compressed chunk
                 int back = cmp[cmpPos++] << 0 | cmp[cmpPos++] << 8;
@@ -119,10 +116,7 @@ namespace DragonLib
                 }
                 else
                 {
-                    while (encCount-- > 0)
-                    {
-                        dec[decPos++] = dec[encPos++];
-                    }
+                    while (encCount-- > 0) dec[decPos++] = dec[encPos++];
                 }
             } while (cmpPos < cmp.Length && decPos < dec.Length);
 
