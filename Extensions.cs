@@ -21,6 +21,8 @@ namespace DragonLib
     {
         private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
 
+        private static string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+
         public static ByteBuffer ToByteBuffer(this Stream stream)
         {
             var bytes = new byte[stream.Length];
@@ -295,6 +297,25 @@ namespace DragonLib
         public static sbyte GetLowNibbleSigned(this byte value)
         {
             return SignedNibbles[value.GetLowNibble()];
+        }
+
+        /// <summary>
+        ///     Returns human readable (12.3 GiB) format of a string
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string GetHumanReadableBytes(this ulong bytes)
+        {
+            for (var i = 0; i < BytePoints.Length; ++i)
+            {
+                var divisor = Math.Pow(0x400, i);
+                var nextDivisor = Math.Pow(0x400, i + 1);
+                if (!(bytes < nextDivisor) && i != BytePoints.Length - 1) continue;
+                var normalized = Math.Floor(bytes / (divisor / 10)) / 10;
+                return $"{normalized} {BytePoints[i]}";
+            }
+
+            return $"{bytes} B";
         }
 
         #region OpenTK Math
