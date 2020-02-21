@@ -298,7 +298,7 @@ namespace DragonLib.CLI
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} failed to parse {textValue} as a {type.Name}! {e}");
+                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
                     printHelp(typeMap.Values.ToList());
                     Environment.Exit(0);
                     return true;

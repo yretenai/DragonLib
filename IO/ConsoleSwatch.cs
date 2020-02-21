@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
@@ -8,26 +7,6 @@ namespace DragonLib.IO
     [PublicAPI]
     public static class ConsoleSwatch
     {
-        public enum DOSColor
-        {
-            Black = 0,
-            DarkBlue = 1,
-            DarkGreen = 2,
-            DarkCyan = 3,
-            DarkRed = 4,
-            DarkMagenta = 5,
-            DarkYellow = 6,
-            Gray = 7,
-            DarkGray = 8,
-            Blue = 9,
-            Green = 10,
-            Cyan = 11,
-            Red = 12,
-            Magenta = 13,
-            Yellow = 14,
-            White = 15
-        }
-
         public enum XTermColor : byte
         {
             Black = 0,
@@ -297,31 +276,9 @@ namespace DragonLib.IO
         public static bool IsVTEnabled { get; private set; }
         public static bool IsVTCapable { get; private set; } = Environment.OSVersion.Version.Major >= 6;
 
-        public static ConsoleColor AsConsoleColor(this DOSColor color) => (ConsoleColor) color;
-
-        public static DOSColor AsDOSColor(this ConsoleColor color) => (DOSColor) color;
-
-        public static XTermColor AsXTermColor(this DOSColor color)
-        {
-#pragma warning disable IDE0066 // Convert switch statement to expression
-            return color switch
-            {
-                DOSColor.DarkGray => XTermColor.Grey,
-                DOSColor.DarkYellow => XTermColor.Yellow,
-                DOSColor.Yellow => XTermColor.LightYellow,
-                DOSColor.Gray => XTermColor.LightSlateGrey,
-                _ => (Enum.TryParse(color.ToString(), out XTermColor col) ? col : XTermColor.DarkSlateGray)
-            };
-#pragma warning restore IDE0066 // Convert switch statement to expression
-        }
-
         public static string ToForeground(this XTermColor color) => $"\x1b[38;5;{(byte) color}m";
 
         public static string ToBackground(this XTermColor color) => $"\x1b[48;5;{(byte) color}m";
-
-        public static string ToForeground(this Color color) => $"\x1b[38;2;{color.R};{color.G};{color.B}m";
-
-        public static string ToBackground(this Color color) => $"\x1b[48;2;{color.R};{color.G};{color.B}m";
 
         public static bool EnableVT()
         {
