@@ -13,7 +13,7 @@ namespace DragonLib.CLI
     [PublicAPI]
     public static class CommandLineFlags
     {
-        public static void PrintHelp(List<(CLIFlagAttribute? Flag, Type FlagType)> flags)
+        public static void PrintHelp(List<(CLIFlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked)
         {
             flags = flags.Where(x => x.Flag?.Hidden == false).ToList();
             var grouped = flags.GroupBy(x => x.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
@@ -140,8 +140,16 @@ namespace DragonLib.CLI
 
                     if ((flag.Default != null && !flag.Default.Equals(def)) || type.IsEnum) requiredParts.Add($"Default: {flag.Default}");
                     if (flag.IsRequired) requiredParts.Add("Required");
-                    if (flag.ValidValues?.Length > 0) requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
-                    else if (type.IsEnum) requiredParts.Add("Values: " + string.Join(", ", Enum.GetNames(type)));
+                    if (flag.ValidValues?.Length > 0)
+                    {
+                        requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
+                    }
+                    else if (type.IsEnum)
+                    {
+                        var names = Enum.GetNames(type);
+                        requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
+                        if (!helpInvoked && names.Length > 3) requiredParts[^1] += $", and {names.Length - 3} more";
+                    }
 
                     var required = string.Join(", ", requiredParts);
                     if (required.Length > 0) required = $" ({required})";
@@ -155,11 +163,25 @@ namespace DragonLib.CLI
             }
         }
 
-        public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>> printHelp, params string[] arguments) where T : ICLIFlags
+        public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, params string[] arguments) where T : ICLIFlags
         {
+            var shouldExit = false;
             var instance = Activator.CreateInstance<T>();
+            var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+            var typeMap = properties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
+            var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
+            foreach (var @interface in typeof(T).GetInterfaces())
+            {
+                var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+                foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).Where(x => x.Item2 != null))
+                {
+                    if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1?.Equals(default) == false) continue;
+                    propertySet.Item1 = info;
+                    typeMap[propertyImplementation] = propertySet;
+                }
+            }
 
-            var typeMap = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty).Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>())).Where(x => x.Item2 != null).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
+            typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
 
             var argMap = new Dictionary<string, int>();
             var positionalMap = new HashSet<int>();
@@ -180,6 +202,14 @@ namespace DragonLib.CLI
                 }
             }
 
+            if (propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry))
+                if (helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag)))
+                {
+                    printHelp(typeMap.Values.ToList(), true);
+                    Environment.Exit(0);
+                    return null;
+                }
+
             foreach (var (property, (flag, type)) in typeMap.Where(x => x.Value.Item1?.Positional == -1))
             {
                 if (flag == null) continue;
@@ -194,9 +224,7 @@ namespace DragonLib.CLI
                 if (index == -1 && flag.IsRequired)
                 {
                     Logger.Info("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} needs a value!");
-                    printHelp(typeMap.Values.ToList());
-                    Environment.Exit(0);
-                    return null;
+                    shouldExit = true;
                 }
 
                 var value = flag.Default;
@@ -215,9 +243,7 @@ namespace DragonLib.CLI
                         if (textValue.StartsWith("-"))
                         {
                             Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} needs a value!");
-                            printHelp(typeMap.Values.ToList());
-                            Environment.Exit(0);
-                            return null;
+                            shouldExit = true;
                         }
 
                         positionalMap.Remove(index + 1);
@@ -238,9 +264,7 @@ namespace DragonLib.CLI
                 if (flag.IsRequired && flag.Positional >= positionalMap.Count)
                 {
                     Logger.Error("FLAG", $"Positional {flag.Flag} needs a value!");
-                    printHelp(typeMap.Values.ToList());
-                    Environment.Exit(0);
-                    return null;
+                    shouldExit = true;
                 }
 
                 var value = flag.Default;
@@ -249,25 +273,23 @@ namespace DragonLib.CLI
                     value = positionals.Skip(flag.Positional).ToList();
                 else if (type.IsEquivalentTo(typeof(HashSet<string>)))
                     value = positionals.Skip(flag.Positional).ToHashSet();
-                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value)) return null;
+                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value)) shouldExit = true;
 
                 property.SetValue(instance, value);
             }
 
-            if (!instance.Help) return instance;
+            if (!instance.Help && !shouldExit) return instance;
 
-            printHelp(typeMap.Values.ToList());
+            printHelp(typeMap.Values.ToList(), instance.Help);
             Environment.Exit(0);
             return null;
         }
 
-        private static bool VisitFlagValue<T>(Action<List<(CLIFlagAttribute?, Type)>> printHelp, Type type, string textValue, CLIFlagAttribute flag, Dictionary<PropertyInfo, (CLIFlagAttribute?, Type PropertyType)> typeMap, ref object? value) where T : ICLIFlags
+        private static bool VisitFlagValue<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, Type type, string textValue, CLIFlagAttribute flag, Dictionary<PropertyInfo, (CLIFlagAttribute?, Type PropertyType)> typeMap, ref object? value) where T : ICLIFlags
         {
             if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue))
             {
                 Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
-                printHelp(typeMap.Values.ToList());
-                Environment.Exit(0);
                 return true;
             }
 
@@ -299,8 +321,6 @@ namespace DragonLib.CLI
                 catch (Exception e)
                 {
                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
-                    printHelp(typeMap.Values.ToList());
-                    Environment.Exit(0);
                     return true;
                 }
             }

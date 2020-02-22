@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 namespace DragonLib.CLI
 {
     [PublicAPI]
+    [AttributeUsage(AttributeTargets.Property)]
     public class CLIFlagAttribute : Attribute
     {
         public CLIFlagAttribute(string flag)
