@@ -35,7 +35,7 @@ namespace DragonLib.IO
 
             var (prefix, content) = FormatMessage(category, level, message);
             if (UseColor) Console.ForegroundColor = ConsoleColor.Gray;
-            writer.Write(prefix);
+            writer.Write(prefix ?? string.Empty);
             if (UseColor) Console.ForegroundColor = color;
             writer.Write(content);
             if (UseColor) Console.ForegroundColor = ConsoleColor.Gray;
@@ -43,7 +43,7 @@ namespace DragonLib.IO
             if (newLine) writer.WriteLine();
         }
 
-        private static (string prefix, string content) FormatMessage(string? category, string? level, string? message)
+        private static (string? prefix, string content) FormatMessage(string? category, string? level, string? message)
         {
             var parts = new List<string>();
             if (ShowTime) parts.Add(DateTimeOffset.UtcNow.ToString("s"));
@@ -83,7 +83,7 @@ namespace DragonLib.IO
             if (!string.IsNullOrWhiteSpace(category) && UseColor && Console.CursorLeft == 0)
             {
                 writer.Write(XTermColor.Grey24.ToForeground());
-                writer.Write(prefix + " ");
+                writer.Write((prefix ?? "") + " ");
                 writer.Write(COLOR_RESET);
                 prefix = "";
             }
@@ -122,7 +122,7 @@ namespace DragonLib.IO
         }
 
         public static void Warn(string? category, string message) =>
-            Log(XTermColor.LightYellow, true, Console.Out, category, "WARN", message);
+            Log(XTermColor.LightYellow, true, Console.Error, category, "WARN", message);
 
         public static void Error(string? category, string message) =>
             Log(XTermColor.Red, true, Console.Out, category, "ERROR", message);

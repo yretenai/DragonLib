@@ -50,7 +50,7 @@ namespace DragonLib.CLI
             return Flags.Any(flag => otherFlags.Contains(flag));
         }
 
-        public override bool IsDefaultAttribute() => Flag == null;
+        public override bool IsDefaultAttribute() => string.IsNullOrWhiteSpace(Flag);
 
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Attribute properties tend to not get updated")]
         public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Flag, HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden), IsRequired, Positional, Default, ValidValues, Aliases);
