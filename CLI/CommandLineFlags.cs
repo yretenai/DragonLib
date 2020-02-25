@@ -203,7 +203,7 @@ namespace DragonLib.CLI
             }
 
             if (propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry))
-                if (helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag)))
+                if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag)))
                 {
                     printHelp(typeMap.Values.ToList(), true);
                     Environment.Exit(0);
