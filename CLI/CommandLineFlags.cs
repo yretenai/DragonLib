@@ -26,11 +26,11 @@ namespace DragonLib.CLI
             var sizes = new[] { 0, 0, 0 };
 
             var usageSlimOneCh = "-";
-            var usageSlimOneChValue = "";
-            var usageSlimOneChValueOptional = "";
+            var usageSlimOneChValue = string.Empty;
+            var usageSlimOneChValueOptional = string.Empty;
             var usageSlimOneChOptional = "[-";
-            var usageSlimMultiCh = "";
-            var usageSlimPositional = "";
+            var usageSlimMultiCh = string.Empty;
+            var usageSlimPositional = string.Empty;
 
             foreach (var (flag, type) in flags)
             {
@@ -47,7 +47,7 @@ namespace DragonLib.CLI
 
                 var hasValue = type.FullName != "System.Boolean";
                 var flagStr = flag.Flag;
-                if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : "")}{sw}{(hasValue ? " value" : "")}"));
+                if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
                 sizes[0] = Math.Max(sizes[0], flagStr.Length);
 
                 if (flag.Positional == -1)
@@ -129,7 +129,7 @@ namespace DragonLib.CLI
                         tn = type.Name.Substring(0, type.Name.IndexOf('`')) + $"<{string.Join(", ", parameters)}>";
                     }
 
-                    var tp = "";
+                    var tp = string.Empty;
                     if (flag.Positional > -1) tp += $"Positional {flag.Positional + 1}";
                     tn = tn.PadRight(sizes[1]);
                     tp = tp.PadLeft(sizes[2]);
@@ -155,7 +155,7 @@ namespace DragonLib.CLI
                     if (required.Length > 0) required = $" ({required})";
 
                     var flagStr = flag.Flag;
-                    if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : "")}{sw}{(hasValue ? " value" : "")}"));
+                    if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
                     Logger.Info("FLAG", flagStr.PadRight(sizes[0]) + "\t" + tn + "\t" + tp + "\t" + flag.Help + required);
                 }
 
@@ -223,7 +223,7 @@ namespace DragonLib.CLI
 
                 if (index == -1 && flag.IsRequired)
                 {
-                    Logger.Info("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} needs a value!");
+                    Logger.Info("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                     shouldExit = true;
                 }
 
@@ -242,7 +242,7 @@ namespace DragonLib.CLI
                         var textValue = arguments[index + 1];
                         if (textValue.StartsWith("-"))
                         {
-                            Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} needs a value!");
+                            Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                             shouldExit = true;
                         }
 
@@ -289,13 +289,13 @@ namespace DragonLib.CLI
         {
             if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue))
             {
-                Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
+                Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
                 return true;
             }
 
             if (type.IsEnum)
             {
-                if (!Enum.TryParse(type, textValue, true, out value)) Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
+                if (!Enum.TryParse(type, textValue, true, out value)) Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
             }
             else
             {
@@ -320,7 +320,7 @@ namespace DragonLib.CLI
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : "")}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
+                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
                     return true;
                 }
             }

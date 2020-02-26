@@ -49,13 +49,18 @@ namespace DragonLib
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
 
-        public static string? ReadString(this Span<byte> data, Encoding? encoding = null, bool returnNull = true)
+        public static string? ReadString(this Span<byte> data, Encoding? encoding = null)
         {
-            if (data.Length == 0 || data[0] == 0) return (returnNull ? null : string.Empty);
+            if (data.Length == 0 || data[0] == 0) return null;
             var index = data.IndexOf<byte>(0);
             if (index <= -1) index = data.Length;
 
             return (encoding ?? Encoding.UTF8).GetString(data.Slice(0, index));
+        }
+
+        public static string ReadStringNonNull(this Span<byte> data, Encoding? encoding = null)
+        {
+            return ReadString(data, encoding) ?? string.Empty;
         }
 
         public static int Align(this int value, int n)
@@ -148,7 +153,7 @@ namespace DragonLib
 
         public static string[] ToHexOctetsA(this string input)
         {
-            var cleaned = input?.Replace(" ", "").Trim();
+            var cleaned = input?.Replace(" ", string.Empty).Trim();
             if (cleaned == null || cleaned.Length % 2 != 0) return new string[] { };
 
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
@@ -156,7 +161,7 @@ namespace DragonLib
 
         public static byte[] ToHexOctetsB(this string input)
         {
-            var cleaned = input?.Replace(" ", "").Trim();
+            var cleaned = input?.Replace(" ", string.Empty).Trim();
             if (cleaned == null || cleaned.Length % 2 != 0) return new byte[] { };
 
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => byte.Parse(cleaned.Substring(x, 2), NumberStyles.HexNumber)).ToArray();
@@ -165,7 +170,7 @@ namespace DragonLib
         public static int FindPointerFromSignature(this Span<byte> buffer, string signatureTemplate)
         {
             var signatureOctets = signatureTemplate.ToHexOctetsA();
-            if (signatureOctets == null || signatureOctets.Length < 1) return -1;
+            if (signatureOctets.Length < 1) return -1;
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
             for (var ptr = 0; ptr < buffer.Length - signature.Length; ++ptr)
             {
@@ -186,7 +191,7 @@ namespace DragonLib
         public static int FindPointerFromSignatureReverse(this Span<byte> buffer, string signatureTemplate, int start = -1)
         {
             var signatureOctets = signatureTemplate.ToHexOctetsA();
-            if (signatureOctets == null || signatureOctets.Length < 1) return -1;
+            if (signatureOctets.Length < 1) return -1;
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
             if (start == -1 || start + signature.Length > buffer.Length) start = buffer.Length - signature.Length;
             for (var ptr = start; ptr > 0; --ptr)

@@ -50,9 +50,9 @@ namespace DragonLib.IO
             if (!string.IsNullOrWhiteSpace(category) && ShowCategory) parts.Add(category);
             if (!string.IsNullOrWhiteSpace(level) && ShowLevel) parts.Add(level);
             if (ShowThread) parts.Add(Thread.CurrentThread.ManagedThreadId.ToString("D"));
-            var content = message ?? "";
+            var content = message ?? string.Empty;
             var prefix = default(string);
-            if (parts.Count > 0) prefix = string.Join("", parts.Select(x => $"[{x}]"));
+            if (parts.Count > 0) prefix = string.Join(string.Empty, parts.Select(x => $"[{x}]"));
             return (prefix, content);
         }
 
@@ -83,9 +83,9 @@ namespace DragonLib.IO
             if (!string.IsNullOrWhiteSpace(category) && UseColor && Console.CursorLeft == 0)
             {
                 writer.Write(XTermColor.Grey24.ToForeground());
-                writer.Write((prefix ?? "") + " ");
+                writer.Write((prefix ?? string.Empty) + " ");
                 writer.Write(COLOR_RESET);
-                prefix = "";
+                prefix = string.Empty;
             }
 
             if (UseColor && !string.IsNullOrWhiteSpace(foreground)) writer.Write(foreground);
@@ -212,7 +212,7 @@ namespace DragonLib.IO
                 empty = new char[remaining];
                 Array.Fill(empty, ' ');
                 Array.Fill(empty, '=', 0, (int) Math.Round(remaining * Math.Min(value, 1)));
-                Log(processColor, false, Console.Out, default, default, string.Join("", empty));
+                Log(processColor, false, Console.Out, default, default, string.Join(string.Empty, empty));
                 Log(brickColor, false, Console.Out, default, default, "] ");
 
                 if (showProgressValue && remaining > 6)

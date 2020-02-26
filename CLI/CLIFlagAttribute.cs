@@ -40,7 +40,7 @@ namespace DragonLib.CLI
 
         protected bool Equals(CLIFlagAttribute other) => base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category && Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly && IsRequired == other.IsRequired && Positional == other.Positional && Default?.Equals(other.Default) == true && ValidValues.Equals(other.ValidValues) && Aliases.Equals(other.Aliases);
 
-        public override string ToString() => $"-{(Flag.Length > 1 ? "-" : "")}{Flag}: {Help}";
+        public override string ToString() => $"-{(Flag.Length > 1 ? "-" : string.Empty)}{Flag}: {Help}";
 
         public override bool Match(object? obj)
         {

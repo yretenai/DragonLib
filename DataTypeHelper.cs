@@ -32,12 +32,12 @@ namespace DragonLib
             var type = typeof(T);
             if (!Cache.TryGetValue(type, out var cache)) return "bin";
 
-            return cache.TryGetValue(magic.ToString() ?? "", out var ext) ? ext : "bin";
+            return cache.TryGetValue(magic.ToString() ?? string.Empty, out var ext) ? ext : "bin";
         }
 
         public static bool IsKnown<T>(T magic) where T : struct
         {
-            return Cache.TryGetValue(typeof(T), out var cache) && cache.ContainsKey(magic.ToString() ?? "");
+            return Cache.TryGetValue(typeof(T), out var cache) && cache.ContainsKey(magic.ToString() ?? string.Empty);
         }
 
         public static bool Matches<T>(Span<byte> span, T magic) where T : struct => GetMagicValue<T>(span).Equals(magic);
