@@ -183,7 +183,7 @@ namespace DragonLib.CLI
 
             typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
 
-            var argMap = new Dictionary<string, int>();
+            var argMap = new Dictionary<string, HashSet<int>>();
             var positionalMap = new HashSet<int>();
             for (var index = 0; index < arguments.Length; index++)
             {
@@ -191,10 +191,28 @@ namespace DragonLib.CLI
                 if (argument.StartsWith("-"))
                 {
                     if (argument.StartsWith("--"))
-                        argMap[argument.Substring(2)] = index;
+                    {
+                        if (!argMap.TryGetValue(argument.Substring(2), out var argIndex))
+                        {
+                            argIndex = new HashSet<int>();
+                            argMap[argument.Substring(2)] = argIndex;
+                        }
+
+                        argIndex.Add(index);
+                    }
                     else
+                    {
                         foreach (var argc in argument.Substring(1))
-                            argMap[argc.ToString()] = index;
+                        {
+                            if (!argMap.TryGetValue(argc.ToString(), out var argIndex))
+                            {
+                                argIndex = new HashSet<int>();
+                                argMap[argc.ToString()] = argIndex;
+                            }
+
+                            argIndex.Add(index);
+                        }
+                    }
                 }
                 else
                 {
@@ -213,15 +231,12 @@ namespace DragonLib.CLI
             foreach (var (property, (flag, type)) in typeMap.Where(x => x.Value.Item1?.Positional == -1))
             {
                 if (flag == null) continue;
-                var index = -1;
+                var indexList = default(HashSet<int>);
                 foreach (var sw in flag.Flags)
-                {
-                    if (argMap.TryGetValue(sw, out index)) break;
+                    if (argMap.TryGetValue(sw, out indexList))
+                        break;
 
-                    index = -1;
-                }
-
-                if (index == -1 && flag.IsRequired)
+                if (indexList == null && flag.IsRequired)
                 {
                     Logger.Info("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                     shouldExit = true;
@@ -229,38 +244,39 @@ namespace DragonLib.CLI
 
                 var value = flag.Default;
 
-                if (index > -1)
-                {
-                    if (type.FullName == "System.Boolean")
+                if (indexList != null)
+                    foreach (var index in indexList)
                     {
-                        if (!(value is bool b)) b = false;
+                        if (type.FullName == "System.Boolean")
+                        {
+                            if (!(value is bool b)) b = false;
 
-                        value = !b;
+                            value = !b;
+                        }
+                        else
+                        {
+                            var textValue = arguments[index + 1];
+                            if (textValue.StartsWith("-"))
+                            {
+                                Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
+                                shouldExit = true;
+                            }
+
+                            positionalMap.Remove(index + 1);
+
+                            if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
+                            {
+                                var temp = default(object?);
+                                if (VisitFlagValue<T>(printHelp, type.GetGenericArguments()[0], textValue, flag, typeMap, ref temp)) return null;
+                                value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
+                                type.GetMethod("Add")?.Invoke(value, new[] { temp });
+                            }
+                            else if (VisitFlagValue<T>(printHelp, type, textValue, flag, typeMap, ref value))
+                            {
+                                return null;
+                            }
+                        }
                     }
-                    else
-                    {
-                        var textValue = arguments[index + 1];
-                        if (textValue.StartsWith("-"))
-                        {
-                            Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
-                            shouldExit = true;
-                        }
-
-                        positionalMap.Remove(index + 1);
-
-                        if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
-                        {
-                            var temp = default(object?);
-                            if (VisitFlagValue<T>(printHelp, type.GetGenericArguments()[0], textValue, flag, typeMap, ref temp)) return null;
-                            value = property.GetValue(instance) ?? (value ?? Activator.CreateInstance(type));
-                            type.GetMethod("Add")?.Invoke(value, new[] { temp });
-                        }
-                        else if (VisitFlagValue<T>(printHelp, type, textValue, flag, typeMap, ref value))
-                        {
-                            return null;
-                        }
-                    }
-                }
 
                 property.SetValue(instance, value);
             }
@@ -283,7 +299,7 @@ namespace DragonLib.CLI
                 if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
                 {
                     var temp = default(object?);
-                    value = property.GetValue(instance) ?? (value ?? Activator.CreateInstance(type));
+                    value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                     foreach (var textValue in positionals.Skip(flag.Positional))
                     {
                         if (VisitFlagValue<T>(printHelp, type.GetGenericArguments()[0], textValue, flag, typeMap, ref temp)) return null;
