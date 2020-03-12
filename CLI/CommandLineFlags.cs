@@ -248,7 +248,17 @@ namespace DragonLib.CLI
 
                         positionalMap.Remove(index + 1);
 
-                        if (VisitFlagValue<T>(printHelp, type, textValue, flag, typeMap, ref value)) return null;
+                        if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
+                        {
+                            var temp = default(object?);
+                            if (VisitFlagValue<T>(printHelp, type.GetGenericArguments()[0], textValue, flag, typeMap, ref temp)) return null;
+                            value = property.GetValue(instance) ?? (value ?? Activator.CreateInstance(type));
+                            type.GetMethod("Add")?.Invoke(value, new[] { temp });
+                        }
+                        else if (VisitFlagValue<T>(printHelp, type, textValue, flag, typeMap, ref value))
+                        {
+                            return null;
+                        }
                     }
                 }
 
@@ -269,11 +279,21 @@ namespace DragonLib.CLI
 
                 var value = flag.Default;
 
-                if (type.IsEquivalentTo(typeof(List<string>)))
-                    value = positionals.Skip(flag.Positional).ToList();
-                else if (type.IsEquivalentTo(typeof(HashSet<string>)))
-                    value = positionals.Skip(flag.Positional).ToHashSet();
-                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value)) shouldExit = true;
+
+                if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
+                {
+                    var temp = default(object?);
+                    value = property.GetValue(instance) ?? (value ?? Activator.CreateInstance(type));
+                    foreach (var textValue in positionals.Skip(flag.Positional))
+                    {
+                        if (VisitFlagValue<T>(printHelp, type.GetGenericArguments()[0], textValue, flag, typeMap, ref temp)) return null;
+                        type.GetMethod("Add")?.Invoke(value, new[] { temp });
+                    }
+                }
+                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(printHelp, type, positionals[flag.Positional], flag, typeMap, ref value))
+                {
+                    shouldExit = true;
+                }
 
                 property.SetValue(instance, value);
             }
@@ -304,13 +324,13 @@ namespace DragonLib.CLI
                     value = type.FullName switch
                     {
                         "System.Int64" => long.Parse(textValue, NumberStyles.Any),
-                        "System.UInt64" => ulong.Parse(textValue, NumberStyles.Any),
+                        "System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
                         "System.Int32" => int.Parse(textValue, NumberStyles.Any),
-                        "System.UInt32" => uint.Parse(textValue, NumberStyles.Any),
+                        "System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
                         "System.Int16" => short.Parse(textValue, NumberStyles.Any),
-                        "System.UInt16" => ushort.Parse(textValue, NumberStyles.Any),
-                        "System.Byte" => byte.Parse(textValue, NumberStyles.Any),
+                        "System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
                         "System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
+                        "System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
                         "System.Double" => double.Parse(textValue),
                         "System.Single" => float.Parse(textValue),
                         "System.String" => textValue,
