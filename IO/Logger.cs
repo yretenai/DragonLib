@@ -46,7 +46,7 @@ namespace DragonLib.IO
         private static (string? prefix, string content) FormatMessage(string? category, string? level, string? message)
         {
             var parts = new List<string>();
-            if (ShowTime) parts.Add(DateTimeOffset.UtcNow.ToString("s"));
+            if (!string.IsNullOrWhiteSpace(category) && ShowTime) parts.Add(DateTimeOffset.UtcNow.ToString("s"));
             if (!string.IsNullOrWhiteSpace(category) && ShowCategory) parts.Add(category);
             if (!string.IsNullOrWhiteSpace(level) && ShowLevel) parts.Add(level);
             if (ShowThread) parts.Add(Thread.CurrentThread.ManagedThreadId.ToString("D"));

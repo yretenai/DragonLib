@@ -159,6 +159,11 @@ namespace DragonLib
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
         }
 
+        public static string ToHexString(this Span<byte> input)
+        {
+            return string.Join("", input.ToArray().Select(x => x.ToString("X2") + " "));
+        }
+
         public static byte[] ToHexOctetsB(this string input)
         {
             var cleaned = input?.Replace(" ", string.Empty).Trim();
