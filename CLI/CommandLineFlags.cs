@@ -233,8 +233,10 @@ namespace DragonLib.CLI
                 if (flag == null) continue;
                 var indexList = default(HashSet<int>);
                 foreach (var sw in flag.Flags)
+                {
                     if (argMap.TryGetValue(sw, out indexList))
                         break;
+                }
 
                 if (indexList == null && flag.IsRequired)
                 {
