@@ -6,10 +6,7 @@ namespace DragonLib.OWM
 {
     internal static class OWMHelper
     {
-        internal static Span<byte> GetBytes<T>(params T[] values) where T : struct
-        {
-            return MemoryMarshal.Cast<T, byte>(new Span<T>(values));
-        }
+        internal static Span<byte> GetBytes<T>(params T[] values) where T : struct => MemoryMarshal.Cast<T, byte>(new Span<T>(values));
 
         internal static Span<byte> GetString(string? value, Encoding? encoding = null)
         {

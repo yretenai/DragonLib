@@ -10,10 +10,7 @@ namespace DragonLib.CLI
     [AttributeUsage(AttributeTargets.Property)]
     public class CLIFlagAttribute : Attribute
     {
-        public CLIFlagAttribute(string flag)
-        {
-            Flag = flag;
-        }
+        public CLIFlagAttribute(string flag) => Flag = flag;
 
         public string Flag { get; set; }
         public string? Help { get; set; }

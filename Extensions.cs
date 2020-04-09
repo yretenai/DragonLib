@@ -30,10 +30,7 @@ namespace DragonLib
             return new ByteBuffer(bytes);
         }
 
-        public static ByteBuffer ToByteBuffer<T>(this Span<T> span) where T : struct
-        {
-            return new ByteBuffer(MemoryMarshal.AsBytes(span).ToArray());
-        }
+        public static ByteBuffer ToByteBuffer<T>(this Span<T> span) where T : struct => new ByteBuffer(MemoryMarshal.AsBytes(span).ToArray());
 
         public static string SanitizeFilename(this string path)
         {
@@ -58,10 +55,7 @@ namespace DragonLib
             return (encoding ?? Encoding.UTF8).GetString(data.Slice(0, index));
         }
 
-        public static string ReadStringNonNull(this Span<byte> data, Encoding? encoding = null)
-        {
-            return ReadString(data, encoding) ?? string.Empty;
-        }
+        public static string ReadStringNonNull(this Span<byte> data, Encoding? encoding = null) => ReadString(data, encoding) ?? string.Empty;
 
         public static int Align(this int value, int n)
         {
@@ -100,7 +94,7 @@ namespace DragonLib
             if (value < n) return n;
             if (value % n == 0) return value;
 
-            return value - (value % n);
+            return value - value % n;
         }
 
         public static uint AlignReverse(this uint value, uint n)
@@ -108,7 +102,7 @@ namespace DragonLib
             if (value < n) return n;
             if (value % n == 0) return value;
 
-            return value - (value % n);
+            return value - value % n;
         }
 
         public static long AlignReverse(this long value, long n)
@@ -116,7 +110,7 @@ namespace DragonLib
             if (value < n) return n;
             if (value % n == 0) return value;
 
-            return value - (value % n);
+            return value - value % n;
         }
 
         public static ulong AlignReverse(this ulong value, ulong n)
@@ -124,7 +118,7 @@ namespace DragonLib
             if (value < n) return n;
             if (value % n == 0) return value;
 
-            return value - (value % n);
+            return value - value % n;
         }
 
         public static Span<byte> ToSpan(this string str, Encoding? encoding = null, bool endNull = false)
@@ -159,10 +153,7 @@ namespace DragonLib
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
         }
 
-        public static string ToHexString(this Span<byte> input)
-        {
-            return string.Join("", input.ToArray().Select(x => x.ToString("X2") + " "));
-        }
+        public static string ToHexString(this Span<byte> input) => string.Join("", input.ToArray().Select(x => x.ToString("X2") + " "));
 
         public static byte[] ToHexOctetsB(this string input)
         {
@@ -235,7 +226,7 @@ namespace DragonLib
 
             var boundary = (int) Math.Floor(Math.Sqrt(number));
 
-            for (int i = 3; i <= boundary; i += 2)
+            for (var i = 3; i <= boundary; i += 2)
             {
                 if (number % i == 0)
                     return false;
@@ -250,10 +241,7 @@ namespace DragonLib
         /// <param name="value"></param>
         /// <param name="divisor"></param>
         /// <returns></returns>
-        public static int DivideByRoundUp(this int value, int divisor)
-        {
-            return (int) Math.Ceiling((double) value / divisor);
-        }
+        public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
 
         /// <summary>
         ///     Constraints value by Minimum and Maximum short values
@@ -274,40 +262,28 @@ namespace DragonLib
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static byte GetHighNibble(this byte value)
-        {
-            return (byte) ((value >> 4) & 0xF);
-        }
+        public static byte GetHighNibble(this byte value) => (byte) (value >> 4 & 0xF);
 
         /// <summary>
         ///     Gets the lower 4 bits
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static byte GetLowNibble(this byte value)
-        {
-            return (byte) (value & 0xF);
-        }
+        public static byte GetLowNibble(this byte value) => (byte) (value & 0xF);
 
         /// <summary>
         ///     Gets the higher 4 bits, signed
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static sbyte GetHighNibbleSigned(this byte value)
-        {
-            return SignedNibbles[value.GetHighNibble()];
-        }
+        public static sbyte GetHighNibbleSigned(this byte value) => SignedNibbles[value.GetHighNibble()];
 
         /// <summary>
         ///     Gets the lower 4 bits, signed
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static sbyte GetLowNibbleSigned(this byte value)
-        {
-            return SignedNibbles[value.GetLowNibble()];
-        }
+        public static sbyte GetLowNibbleSigned(this byte value) => SignedNibbles[value.GetLowNibble()];
 
         /// <summary>
         ///     Returns human readable (12.3 GiB) format of a string
@@ -330,71 +306,35 @@ namespace DragonLib
 
         #region OpenTK Math
 
-        public static Matrix4x4 ToDragon(this Matrix4 matrix)
-        {
-            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
-        }
+        public static Matrix4x4 ToDragon(this Matrix4 matrix) => new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
 
-        public static Matrix4x3 ToDragon(this OpenTK.Matrix4x3 matrix)
-        {
-            return new Matrix4x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33, matrix.M41, matrix.M42, matrix.M43);
-        }
+        public static Matrix4x3 ToDragon(this OpenTK.Matrix4x3 matrix) => new Matrix4x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33, matrix.M41, matrix.M42, matrix.M43);
 
-        public static Matrix3x3 ToDragon(this Matrix3 matrix)
-        {
-            return new Matrix3x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33);
-        }
+        public static Matrix3x3 ToDragon(this Matrix3 matrix) => new Matrix3x3(matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33);
 
-        public static Vector2 ToDragon(this OpenTK.Vector2 vector)
-        {
-            return new Vector2(vector.X, vector.Y);
-        }
+        public static Vector2 ToDragon(this OpenTK.Vector2 vector) => new Vector2(vector.X, vector.Y);
 
-        public static Vector3 ToDragon(this OpenTK.Vector3 vector)
-        {
-            return new Vector3(vector.X, vector.Y, vector.Z);
-        }
+        public static Vector3 ToDragon(this OpenTK.Vector3 vector) => new Vector3(vector.X, vector.Y, vector.Z);
 
 
-        public static Vector4 ToDragon(this OpenTK.Vector4 vector)
-        {
-            return new Vector4(vector.X, vector.Y, vector.Z);
-        }
+        public static Vector4 ToDragon(this OpenTK.Vector4 vector) => new Vector4(vector.X, vector.Y, vector.Z);
 
-        public static Quaternion ToDragon(this OpenTK.Quaternion quaternion)
-        {
-            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-        }
+        public static Quaternion ToDragon(this OpenTK.Quaternion quaternion) => new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 
         #endregion
 
         #region System.Numerics
 
-        public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix)
-        {
-            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
-        }
+        public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix) => new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
 
-        public static Vector2 ToDragon(this System.Numerics.Vector2 vector)
-        {
-            return new Vector2(vector.X, vector.Y);
-        }
+        public static Vector2 ToDragon(this System.Numerics.Vector2 vector) => new Vector2(vector.X, vector.Y);
 
-        public static Vector3 ToDragon(this System.Numerics.Vector3 vector)
-        {
-            return new Vector3(vector.X, vector.Y, vector.Z);
-        }
+        public static Vector3 ToDragon(this System.Numerics.Vector3 vector) => new Vector3(vector.X, vector.Y, vector.Z);
 
 
-        public static Vector4 ToDragon(this System.Numerics.Vector4 vector)
-        {
-            return new Vector4(vector.X, vector.Y, vector.Z);
-        }
+        public static Vector4 ToDragon(this System.Numerics.Vector4 vector) => new Vector4(vector.X, vector.Y, vector.Z);
 
-        public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion)
-        {
-            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-        }
+        public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) => new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 
         #endregion
     }

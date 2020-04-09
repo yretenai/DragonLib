@@ -8,24 +8,19 @@ namespace DragonLib.Asset
     {
         public DragonIdAttribute() { }
 
-        public DragonIdAttribute(DragonAssetSectionId id)
-        {
-            Id = id;
-        }
+        public DragonIdAttribute(DragonAssetSectionId id) => Id = id;
 
         public DragonAssetSectionId Id { get; } = DragonAssetSectionId.Null;
         public override object TypeId => Id;
 
-        public override bool Equals(object? obj)
-        {
-            return obj switch
+        public override bool Equals(object? obj) =>
+            obj switch
             {
                 DragonIdAttribute attr => attr.Id.Equals(Id),
                 DragonAssetSectionId id => id.Equals(Id),
                 ulong number => number.Equals((ulong) Id),
                 _ => base.Equals(obj)
             };
-        }
 
         public override int GetHashCode() => Id.GetHashCode();
         public override bool Match(object? obj) => Equals(obj);

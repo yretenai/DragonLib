@@ -44,7 +44,7 @@ namespace DragonLib
                 if (propertyValue == null) continue;
                 var objectValue = Convert.ChangeType(propertyValue, TypeCode.UInt32);
                 if (objectValue == null) continue;
-                packed |= (((uint) objectValue) << offset);
+                packed |= (uint) objectValue << offset;
             }
 
             return packed;
@@ -57,7 +57,7 @@ namespace DragonLib
             var properties = Preload<T>();
             foreach (var (property, offset, mask) in properties)
             {
-                var propertyValue = (value >> offset) & mask;
+                var propertyValue = value >> offset & mask;
                 var intValue = Convert.ChangeType(propertyValue, property.PropertyType);
                 property.SetValue(instance, intValue, null);
             }

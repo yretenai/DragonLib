@@ -138,7 +138,7 @@ namespace DragonLib.CLI
                     object? def = null;
                     if (type.IsValueType) def = Activator.CreateInstance(type);
 
-                    if ((flag.Default != null && !flag.Default.Equals(def)) || type.IsEnum) requiredParts.Add($"Default: {flag.Default}");
+                    if (flag.Default != null && !flag.Default.Equals(def) || type.IsEnum) requiredParts.Add($"Default: {flag.Default}");
                     if (flag.IsRequired) requiredParts.Add("Required");
                     if (flag.ValidValues?.Length > 0)
                     {

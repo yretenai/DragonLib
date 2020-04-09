@@ -11,9 +11,6 @@ namespace DragonLib.Asset.Sections
 
         public NullSection(DragonAssetSectionHeader header, Memory<byte> buffer) : base(header, buffer) { }
 
-        public override Memory<byte> WriteSection()
-        {
-            return Memory<byte>.Empty;
-        }
+        public override Memory<byte> WriteSection() => Memory<byte>.Empty;
     }
 }

@@ -244,7 +244,7 @@ namespace DragonLib.IO
             var trace = new StackTrace(1, true);
             var frame = trace.GetFrame(0);
 
-            Log(XTermColor.Purple, true, Console.Error, default, "ASSERT", $"Assertion failed at {(frame?.ToString().Trim() ?? "unknown location")}");
+            Log(XTermColor.Purple, true, Console.Error, default, "ASSERT", $"Assertion failed at {frame?.ToString().Trim() ?? "unknown location"}");
 
             if (message != null)
                 Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + message);

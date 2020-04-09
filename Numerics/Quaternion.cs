@@ -28,8 +28,8 @@ namespace DragonLib.Numerics
         public Vector3 EulerAngles()
         {
             var m = new double[4, 4];
-            float nq = X * X + Y * Y + Z * Z + W * W;
-            float s = nq > 0.0f ? 2.0f / nq : 0.0f;
+            var nq = X * X + Y * Y + Z * Z + W * W;
+            var s = nq > 0.0f ? 2.0f / nq : 0.0f;
             float xs = X * s, ys = Y * s, zs = Z * s;
             float wx = W * xs, wy = W * ys, wz = W * zs;
             float xx = X * xs, xy = X * ys, xz = X * zs;

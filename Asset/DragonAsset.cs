@@ -50,9 +50,6 @@ namespace DragonLib.Asset
             return new MemorySection(header, chunk);
         }
 
-        public Span<byte> Write()
-        {
-            throw new NotImplementedException();
-        }
+        public Span<byte> Write() => throw new NotImplementedException();
     }
 }

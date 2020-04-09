@@ -22,10 +22,7 @@ namespace DragonLib
             }
         }
 
-        public static Span<byte> DecompressLZ4(Span<byte> data, int size)
-        {
-            return LZ4Codec.Decode(data.ToArray(), 0, data.Length, size);
-        }
+        public static Span<byte> DecompressLZ4(Span<byte> data, int size) => LZ4Codec.Decode(data.ToArray(), 0, data.Length, size);
 
         public static unsafe Span<byte> CryptAESCBC(Span<byte> data, Span<byte> key, Span<byte> iv)
         {
@@ -65,15 +62,15 @@ namespace DragonLib
         // Adapted for Span<T>
         public static int DecompressLZ4(Span<byte> cmp, Span<byte> dec)
         {
-            int cmpPos = 0;
-            int decPos = 0;
+            var cmpPos = 0;
+            var decPos = 0;
 
             do
             {
-                byte token = cmp[cmpPos++];
+                var token = cmp[cmpPos++];
 
-                int encCount = (token >> 0) & 0xf;
-                int litCount = (token >> 4) & 0xf;
+                var encCount = token >> 0 & 0xf;
+                var litCount = token >> 4 & 0xf;
 
                 // Copy literal chunk
                 if (litCount == 0xF)
@@ -81,7 +78,7 @@ namespace DragonLib
                     byte sum;
                     do
                     {
-                        litCount += (sum = cmp[cmpPos++]);
+                        litCount += sum = cmp[cmpPos++];
                     } while (sum == 0xff);
                 }
 
@@ -93,20 +90,20 @@ namespace DragonLib
                 if (cmpPos >= cmp.Length) break;
 
                 // Copy compressed chunk
-                int back = cmp[cmpPos++] << 0 | cmp[cmpPos++] << 8;
+                var back = cmp[cmpPos++] << 0 | cmp[cmpPos++] << 8;
 
                 if (encCount == 0xF)
                 {
                     byte sum;
                     do
                     {
-                        encCount += (sum = cmp[cmpPos++]);
+                        encCount += sum = cmp[cmpPos++];
                     } while (sum == 0xff);
                 }
 
                 encCount += 4;
 
-                int encPos = decPos - back;
+                var encPos = decPos - back;
 
                 if (encCount <= back)
                 {

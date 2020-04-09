@@ -51,10 +51,7 @@ namespace DragonLib.GLTF
         public List<GLTFSkin> Skins { get; set; } = new List<GLTFSkin>();
         public List<GLTFTexture> Textures { get; set; } = new List<GLTFTexture>();
 
-        public static GLTFRoot? Deserialize(string data)
-        {
-            return JsonConvert.DeserializeObject<GLTFRoot>(data, GLTFSettings);
-        }
+        public static GLTFRoot? Deserialize(string data) => JsonConvert.DeserializeObject<GLTFRoot>(data, GLTFSettings);
 
         public string Serialize(string project)
         {

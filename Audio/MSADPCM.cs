@@ -16,8 +16,8 @@ namespace DragonLib.Audio
 
         private static int MSADPCMExpandNibble(ref MSADPCMState channel, int nibble)
         {
-            var nibbleSign = nibble - (((nibble & 0x08) != 0) ? 0x10 : 0);
-            var predictor = ((channel.Sample1 * channel.Coefficient1) + (channel.Sample2 * channel.Coefficient2)) / 256 + (nibbleSign * channel.Delta);
+            var nibbleSign = nibble - ((nibble & 0x08) != 0 ? 0x10 : 0);
+            var predictor = (channel.Sample1 * channel.Coefficient1 + channel.Sample2 * channel.Coefficient2) / 256 + nibbleSign * channel.Delta;
 
             if (predictor < -32768)
                 predictor = -32768;
@@ -27,7 +27,7 @@ namespace DragonLib.Audio
             channel.Sample2 = channel.Sample1;
             channel.Sample1 = predictor;
 
-            channel.Delta = (StepTable[nibble] * channel.Delta) / 256;
+            channel.Delta = StepTable[nibble] * channel.Delta / 256;
             if (channel.Delta < 16)
                 channel.Delta = 16;
 
@@ -42,9 +42,9 @@ namespace DragonLib.Audio
             var sampleCountFullBlock = (blockAlignment - 7) * 2 + 2;
             var sampleCountLastBlock = 0;
             var count = buffer.Length;
-            if ((count % blockAlignment) > 0)
+            if (count % blockAlignment > 0)
                 sampleCountLastBlock = (count % blockAlignment - 7) * 2 + 2;
-            var sampleCount = ((count / blockAlignment) * sampleCountFullBlock) + sampleCountLastBlock;
+            var sampleCount = count / blockAlignment * sampleCountFullBlock + sampleCountLastBlock;
             var samples = new byte[sampleCount * sizeof(short)];
             var sampleOffset = 0;
             var offset = 0;
@@ -92,10 +92,10 @@ namespace DragonLib.Audio
                 samples[sampleOffset + 3] = (byte) (state.Sample1 >> 8);
                 sampleOffset += 4;
 
-                blockSize -= (offset - offsetStart);
+                blockSize -= offset - offsetStart;
                 for (var i = 0; i < blockSize; ++i)
                 {
-                    byte nibbles = buffer[offset];
+                    var nibbles = buffer[offset];
 
                     var sample = MSADPCMExpandNibble(ref state, nibbles.GetHighNibble());
                     samples[sampleOffset] = (byte) sample;

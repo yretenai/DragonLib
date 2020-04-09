@@ -12,10 +12,7 @@ namespace DragonLib.OWM
         private const short VERSION_MAJOR = 0x1;
         private const short VERSION_MINOR = 0x6;
 
-        public OWMDL(string name = "")
-        {
-            Name = name;
-        }
+        public OWMDL(string name = "") => Name = name;
 
         public string Name { get; set; }
         public string? MaterialLib { get; set; }

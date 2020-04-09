@@ -42,7 +42,7 @@ namespace DragonLib.Audio
                     var distance = scale * adpcmSample;
                     var predictedSample = coef1 * hist1 + coef2 * hist2;
                     var correctedSample = predictedSample + distance;
-                    var scaledSample = (correctedSample + 1024) >> 11;
+                    var scaledSample = correctedSample + 1024 >> 11;
                     var clampedSample = scaledSample.ShortClamp();
 
                     hist2 = hist1;
