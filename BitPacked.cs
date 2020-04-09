@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace DragonLib
 {
+    [PublicAPI]
     public static class BitPacked
     {
         private static Dictionary<Type, List<(PropertyInfo, int, int)>> CachedBits { get; } = new Dictionary<Type, List<(PropertyInfo, int, int)>>();

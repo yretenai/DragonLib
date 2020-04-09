@@ -1,5 +1,7 @@
 using JetBrains.Annotations;
 
+// ReSharper disable InconsistentNaming
+
 namespace DragonLib.Imaging.DXGI
 {
     [PublicAPI]

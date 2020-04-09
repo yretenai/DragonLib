@@ -7,6 +7,7 @@ namespace DragonLib.IO
     [PublicAPI]
     public static class ConsoleSwatch
     {
+        [PublicAPI]
         public enum XTermColor : byte
         {
             Black = 0,

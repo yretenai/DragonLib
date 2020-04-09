@@ -175,7 +175,7 @@ namespace DragonLib
                 for (var i = 0; i < signature.Length; ++i)
                 {
                     var b = signature[i];
-                    if (b.HasValue && b.Value != slice[i]) found = false;
+                    if (b != null && b != slice[i]) found = false;
                 }
 
                 if (found) return ptr;
@@ -197,7 +197,7 @@ namespace DragonLib
                 for (var i = 0; i < signature.Length; ++i)
                 {
                     var b = signature[i];
-                    if (b.HasValue && b.Value != slice[i]) found = false;
+                    if (b != null && b != slice[i]) found = false;
                 }
 
                 if (found) return ptr;

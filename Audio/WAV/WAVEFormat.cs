@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace DragonLib.Audio.WAV
 {
+    [PublicAPI]
     public struct WAVEFormat
     {
         public int Magic { get; set; }
