@@ -6,9 +6,9 @@ using JetBrains.Annotations;
 namespace DragonLib.Audio.WWise
 {
     [PublicAPI]
-    public class BNKSection
+    public abstract class BNKSection
     {
-        public BNKSection(Span<byte> data)
+        protected BNKSection(Span<byte> data)
         {
             Magic = Encoding.ASCII.GetString(data.Slice(0, 4));
             Length = BinaryPrimitives.ReadInt32LittleEndian(data.Slice(4));

@@ -14,7 +14,7 @@ namespace DragonLib.Audio.WWise
             while (cursor < buffer.Length)
             {
                 var magic = Encoding.ASCII.GetString(buffer.Slice(cursor, 4));
-                var instance = magic switch
+                BNKSection instance = magic switch
                 {
                     "BKHD" => new BKHD(buffer.Slice(cursor)),
                     "DATA" => new DATA(buffer.Slice(cursor)),
@@ -23,7 +23,7 @@ namespace DragonLib.Audio.WWise
                     // "FXPR" => new FXPR(buffer.Slice(cursor)),
                     "HIRC" => new HIRC(buffer.Slice(cursor)),
                     // "STID" => new STID(buffer.Slice(cursor)),
-                    _ => new BNKSection(buffer.Slice(cursor))
+                    _ => new DATA(buffer.Slice(cursor))
                 };
                 cursor += 8 + instance.Length;
                 Sections.Add(instance);

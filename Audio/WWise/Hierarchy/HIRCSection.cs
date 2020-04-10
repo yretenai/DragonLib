@@ -8,9 +8,9 @@ using Newtonsoft.Json.Converters;
 namespace DragonLib.Audio.WWise.Hierarchy
 {
     [PublicAPI]
-    public class HIRCSection
+    public abstract class HIRCSection
     {
-        public HIRCSection(Span<byte> data)
+        protected HIRCSection(Span<byte> data)
         {
             Type = MemoryMarshal.Read<HIRCSectionEnum>(data);
             Length = BinaryPrimitives.ReadInt32LittleEndian(data.Slice(1));
@@ -20,6 +20,14 @@ namespace DragonLib.Audio.WWise.Hierarchy
         public HIRCSectionEnum Type { get; }
         public int Length { get; }
         public uint Id { get; }
+    }
+
+    [PublicAPI]
+    public class BlankHIRC : HIRCSection
+    {
+        public BlankHIRC(Span<byte> data) : base(data) => Buffer = data.Slice(9, Length - 4).ToArray();
+
+        public byte[] Buffer { get; }
     }
 
     [PublicAPI]

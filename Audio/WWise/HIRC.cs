@@ -17,9 +17,9 @@ namespace DragonLib.Audio.WWise
             for (var i = 0; i < Count; ++i)
             {
                 var kind = (HIRCSectionEnum) data[cursor];
-                var section = kind switch
+                HIRCSection section = kind switch
                 {
-                    //HIRCSectionEnum.Settings => ,
+                    HIRCSectionEnum.Settings => new Settings(data.Slice(cursor)),
                     //HIRCSectionEnum.SoundEffect => ,
                     //HIRCSectionEnum.EventAction => ,
                     //HIRCSectionEnum.Event => ,
@@ -29,7 +29,7 @@ namespace DragonLib.Audio.WWise
                     //HIRCSectionEnum.AudioBus => ,
                     //HIRCSectionEnum.BlendContainer => ,
                     //HIRCSectionEnum.MusicSegment => ,
-                    //HIRCSectionEnum.MusicTrack => ,
+                    HIRCSectionEnum.MusicTrack => new MusicTrack(data.Slice(cursor)),
                     //HIRCSectionEnum.MusicSwitch => ,
                     //HIRCSectionEnum.MusicPlaylist => ,
                     //HIRCSectionEnum.Attenuation => ,
@@ -38,10 +38,10 @@ namespace DragonLib.Audio.WWise
                     //HIRCSectionEnum.MotionEffect => ,
                     //HIRCSectionEnum.Effect => ,
                     //HIRCSectionEnum.AuxiliaryBus => ,
-                    _ => new HIRCSection(data.Slice(cursor))
+                    _ => new BlankHIRC(data.Slice(cursor))
                 };
-                Sections.Add(section);
                 cursor += 5 + section.Length;
+                Sections.Add(section);
             }
         }
 
