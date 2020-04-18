@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using JetBrains.Annotations;
 using static DragonLib.IO.ConsoleSwatch;
@@ -104,11 +105,12 @@ namespace DragonLib.IO
         public static void Success(string? category, string message) =>
             Log(XTermColor.Green, true, Console.Out, category, "OK", message);
 
-        public static void PrintVersion(string? category, string template = "{0} v{1}", Assembly? asm = null)
+        public static void PrintVersion(string? category, string template = "{0} v{1}", Assembly? asm = null, string argsTemplate = "Arguments: {0}")
         {
             asm ??= Assembly.GetEntryAssembly();
             if (asm == null) return;
             Log(XTermColor.White, true, Console.Error, category, default, string.Format(template, asm.GetName().Name, asm.GetName().Version));
+            Log(XTermColor.White, true, Console.Error, category, default, string.Format(argsTemplate, JsonSerializer.Serialize(Environment.GetCommandLineArgs().Skip(1))));
         }
 
         public static void Info(string? category, string message) =>
