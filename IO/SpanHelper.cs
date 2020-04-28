@@ -1,11 +1,8 @@
-﻿// TODO: Move To DragonLib.
-
 using System;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
-// ReSharper disable once CheckNamespace
 namespace DragonLib.IO
 {
     [PublicAPI]
