@@ -15,6 +15,7 @@
         <Authors>yretenai</Authors>
         <PackageDescription>Shared Code because I'm tired of writing the same thing over and over.</PackageDescription>
         <RepositoryUrl>https://github.com/healingbrew/DragonLib</RepositoryUrl>
+        <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" \\source "github" -->
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
