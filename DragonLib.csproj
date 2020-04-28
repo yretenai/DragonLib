@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp5.0</TargetFramework>
+        <!-- <TargetFramework>netcoreapp5.0</TargetFramework> -->
+        <TargetFramework>netcoreapp3.1</TargetFramework>
         <Platforms>x64</Platforms>
         <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -9,6 +10,11 @@
         <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
+        <PackageId>DragonLib</PackageId>
+        <Version>1.0.2</Version>
+        <Authors>yretenai</Authors>
+        <PackageDescription>Shared Code because I'm tired of writing the same thing over and over.</PackageDescription>
+        <RepositoryUrl>https://github.com/healingbrew/DragonLib</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
