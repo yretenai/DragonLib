@@ -44,7 +44,7 @@ namespace DragonLib.JSON
                 writer.WritePropertyName(key);
                 writer.WriteStartArray();
                 writer.WriteStringValue(value?.GetType().AssemblyQualifiedName);
-                JsonSerializer.Serialize(writer, value, options);
+                JsonSerializer.Serialize(writer, value, value?.GetType(), options);
                 writer.WriteEndArray();
             }
 

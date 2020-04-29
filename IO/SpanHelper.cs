@@ -130,114 +130,147 @@ namespace DragonLib.IO
             return value;
         }
 
-        public static void WriteByte(Span<byte> buffer, byte value, ref int cursor) => buffer[cursor++] = value;
-
-        public static void WriteSByte(Span<byte> buffer, sbyte value, ref int cursor) => buffer[cursor++] = (byte) value;
-
-        public static void WriteLittleShort(Span<byte> buffer, short value, ref int cursor)
+        public static void WriteByte(ref Memory<byte> buffer, byte value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt16LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(byte));
+            buffer.Span[cursor++] = value;
+        }
+
+        public static void WriteSByte(ref Memory<byte> buffer, sbyte value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(sbyte));
+            buffer.Span[cursor++] = (byte) value;
+        }
+
+        public static void WriteLittleShort(ref Memory<byte> buffer, short value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(short));
+            BinaryPrimitives.WriteInt16LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(short);
         }
 
-        public static void WriteBigShort(Span<byte> buffer, short value, ref int cursor)
+        public static void WriteBigShort(ref Memory<byte> buffer, short value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt16BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(short));
+            BinaryPrimitives.WriteInt16BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(short);
         }
 
-
-        public static void WriteLittleUShort(Span<byte> buffer, ushort value, ref int cursor)
+        public static void WriteLittleUShort(ref Memory<byte> buffer, ushort value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt16LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(ushort));
+            BinaryPrimitives.WriteUInt16LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(short);
         }
 
-        public static void WriteBigUShort(Span<byte> buffer, ushort value, ref int cursor)
+        public static void WriteBigUShort(ref Memory<byte> buffer, ushort value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(ushort));
+            BinaryPrimitives.WriteUInt16BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(short);
         }
 
-        public static void WriteLittleInt(Span<byte> buffer, int value, ref int cursor)
+        public static void WriteLittleInt(ref Memory<byte> buffer, int value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt32LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(int));
+            BinaryPrimitives.WriteInt32LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(int);
         }
 
-        public static void WriteBigInt(Span<byte> buffer, int value, ref int cursor)
+        public static void WriteBigInt(ref Memory<byte> buffer, int value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt32BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(int));
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(int);
         }
 
-        public static void WriteLittleUInt(Span<byte> buffer, uint value, ref int cursor)
+        public static void WriteLittleUInt(ref Memory<byte> buffer, uint value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt32LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(uint));
+            BinaryPrimitives.WriteUInt32LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(int);
         }
 
-        public static void WriteBigUInt(Span<byte> buffer, uint value, ref int cursor)
+        public static void WriteBigUInt(ref Memory<byte> buffer, uint value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt32BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(uint));
+            BinaryPrimitives.WriteUInt32BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(int);
         }
 
-        public static void WriteLittleLong(Span<byte> buffer, long value, ref int cursor)
+        public static void WriteLittleLong(ref Memory<byte> buffer, long value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(long));
+            BinaryPrimitives.WriteInt64LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(long);
         }
 
-        public static void WriteBigLong(Span<byte> buffer, long value, ref int cursor)
+        public static void WriteBigLong(ref Memory<byte> buffer, long value, ref int cursor)
         {
-            BinaryPrimitives.WriteInt64BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(long));
+            BinaryPrimitives.WriteInt64BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(long);
         }
 
 
-        public static void WriteLittleULong(Span<byte> buffer, ulong value, ref int cursor)
+        public static void WriteLittleULong(ref Memory<byte> buffer, ulong value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(ulong));
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(long);
         }
 
-        public static void WriteBigULong(Span<byte> buffer, ulong value, ref int cursor)
+        public static void WriteBigULong(ref Memory<byte> buffer, ulong value, ref int cursor)
         {
-            BinaryPrimitives.WriteUInt64BigEndian(buffer.Slice(cursor), value);
+            EnsureSpace(ref buffer, cursor + sizeof(ulong));
+            BinaryPrimitives.WriteUInt64BigEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(long);
         }
 
-        public static void WriteLittleSingle(Span<byte> buffer, float value, ref int cursor)
+        public static void WriteLittleSingle(ref Memory<byte> buffer, float value, ref int cursor)
         {
+            EnsureSpace(ref buffer, cursor + sizeof(float));
             var bytes = BitConverter.GetBytes(value);
             bytes.CopyTo(buffer.Slice(cursor));
             cursor += sizeof(float);
         }
 
-        public static void WriteBigSingle(Span<byte> buffer, float value, ref int cursor) => throw new NotImplementedException();
+        public static void WriteBigSingle(ref Memory<byte> buffer, float value, ref int cursor) => throw new NotImplementedException();
 
-        public static void WriteLittleDouble(Span<byte> buffer, double value, ref int cursor)
+        public static void WriteLittleDouble(ref Memory<byte> buffer, double value, ref int cursor)
         {
+            EnsureSpace(ref buffer, cursor + sizeof(double));
             var bytes = BitConverter.GetBytes(value);
             bytes.CopyTo(buffer.Slice(cursor));
             cursor += sizeof(float);
         }
 
-        public static void WriteBigDouble(Span<byte> buffer, double value, ref int cursor) => throw new NotImplementedException();
+        public static void WriteBigDouble(ref Memory<byte> buffer, double value, ref int cursor) => throw new NotImplementedException();
 
-        public static void WriteStructArray<T>(Span<byte> buffer, T[] value, ref int cursor) where T : struct
+        public static void WriteStructArray<T>(ref Memory<byte> buffer, T[] value, ref int cursor) where T : struct
         {
             if (value.Length <= 0) return;
+            EnsureSpace(ref buffer, cursor + SizeHelper.SizeOf<T>() * value.Length);
             var data = MemoryMarshal.Cast<T, byte>(value);
-            data.CopyTo(buffer.Slice(cursor));
+            data.CopyTo(buffer.Span.Slice(cursor));
             cursor += data.Length;
         }
 
-        public static void WriteStruct<T>(Span<byte> buffer, T value, ref int cursor) where T : struct
+        public static void WriteStruct<T>(ref Memory<byte> buffer, T value, ref int cursor) where T : struct
         {
-            MemoryMarshal.Write(buffer, ref value);
+            EnsureSpace(ref buffer, cursor + SizeHelper.SizeOf<T>());
+            MemoryMarshal.Write(buffer.Span, ref value);
             cursor += SizeHelper.SizeOf<T>();
+        }
+
+        public static void EnsureSpace(ref Memory<byte> buffer, int size)
+        {
+            if (buffer.Length < size)
+            {
+                var tmp = new Memory<byte>(new byte[size]);
+                buffer.CopyTo(tmp);
+                buffer = tmp;
+            }
         }
     }
 }
