@@ -130,6 +130,35 @@ namespace DragonLib.IO
             return value;
         }
 
+        public static unsafe Array ReadStructArray(Span<byte> buffer, Type T, int count, ref int cursor)
+        {
+            if (count <= 0) return Array.CreateInstance(T, 0);
+            var size = SizeHelper.SizeOf(T);
+            var arraySize = count * size;
+            var refptr = 0;
+            var array = Array.CreateInstance(T, count);
+            for (var i = 0; i < count; ++i)
+            {
+                fixed (byte* pin = &buffer.Slice(cursor + refptr).GetPinnableReference())
+                {
+                    array.SetValue(Marshal.PtrToStructure(new IntPtr(pin), T), i);
+                    refptr += size;
+                }
+            }
+
+            cursor += arraySize;
+            return array;
+        }
+
+        public static unsafe object? ReadStruct(Span<byte> buffer, Type T, ref int cursor)
+        {
+            object? value;
+            fixed (byte* pin = &buffer.Slice(cursor).GetPinnableReference()) value = Marshal.PtrToStructure(new IntPtr(pin), T);
+
+            cursor += SizeHelper.SizeOf(T);
+            return value;
+        }
+
         public static void WriteByte(ref Memory<byte> buffer, byte value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(byte));
@@ -261,6 +290,37 @@ namespace DragonLib.IO
             EnsureSpace(ref buffer, cursor + SizeHelper.SizeOf<T>());
             MemoryMarshal.Write(buffer.Span, ref value);
             cursor += SizeHelper.SizeOf<T>();
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern unsafe void RtlCopyMemory([Out] void* dest, [In] void* src, [In] int len);
+
+        public static unsafe void WriteStructArray(ref Memory<byte> buffer, Type T, Array value, ref int cursor)
+        {
+            if (value.Length <= 0) return;
+            EnsureSpace(ref buffer, cursor + SizeHelper.SizeOf(T) * value.Length);
+            var size = SizeHelper.SizeOf(T);
+            var ptr = IntPtr.Zero;
+            for (var i = 0; i < value.Length; ++i)
+            {
+                var entry = value.GetValue(i);
+                if (entry == null) continue;
+                Marshal.StructureToPtr(entry, ptr, false);
+                using var destPtr = buffer.Slice(cursor + size * i).Pin();
+                RtlCopyMemory(destPtr.Pointer, ptr.ToPointer(), size);
+            }
+
+            cursor += size * value.Length;
+        }
+
+        public static unsafe void WriteStruct(ref Memory<byte> buffer, Type T, object value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + SizeHelper.SizeOf(T));
+            using var destPtr = buffer.Slice(cursor).Pin();
+            var ptr = IntPtr.Zero;
+            Marshal.StructureToPtr(value, ptr, false);
+            RtlCopyMemory(destPtr.Pointer, ptr.ToPointer(), SizeHelper.SizeOf(T));
+            cursor += SizeHelper.SizeOf(T);
         }
 
         public static void EnsureSpace(ref Memory<byte> buffer, int size)
