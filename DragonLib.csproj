@@ -11,7 +11,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.0.6</Version>
+        <Version>1.0.7</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Shared Code because I'm tired of writing the same thing over and over.</PackageDescription>
         <RepositoryUrl>https://github.com/healingbrew/DragonLib</RepositoryUrl>
