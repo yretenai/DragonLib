@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using JetBrains.Annotations;
 
@@ -6,12 +7,24 @@ namespace DragonLib.Indent
     [PublicAPI]
     public class IndentHelperBase
     {
-        private string CachedTabs = "";
+        internal string? CachedTabs;
         protected int TabSize { get; set; }
 
         protected virtual string TabCharacter { get; } = "";
+        
+        protected bool Equals(IndentHelperBase other) => TabSize == other.TabSize && TabCharacter == other.TabCharacter;
 
-        public override string ToString() => CachedTabs;
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((IndentHelperBase) obj);
+        }
+
+        // ReSharper disable once NonReadonlyMemberInGetHashCode
+        public override int GetHashCode() => HashCode.Combine(TabSize, TabCharacter);
+
+        public override string ToString() => CachedTabs ?? "";
 
         public static IndentHelperBase operator +(IndentHelperBase a, int b)
         {
@@ -30,12 +43,16 @@ namespace DragonLib.Indent
             return c;
         }
 
+        public static bool operator ==(IndentHelperBase a, int c) => a.TabSize == c;
+
+        public static bool operator !=(IndentHelperBase a, int c) => a.TabSize != c;
+
         protected virtual IndentHelperBase Clone() =>
             new IndentHelperBase
             {
                 TabSize = TabSize
             };
 
-        private string Compile() => string.Join(string.Empty, Enumerable.Repeat(TabCharacter, TabSize));
+        public string Compile() => string.Join(string.Empty, Enumerable.Repeat(TabCharacter, TabSize));
     }
 }
