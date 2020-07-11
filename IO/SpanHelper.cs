@@ -114,6 +114,15 @@ namespace DragonLib.IO
 
         public static double ReadBigDouble(Span<byte> buffer, ref int cursor) => throw new NotImplementedException();
 
+        public static decimal ReadLittleDecimal(Span<byte> buffer, ref int cursor)
+        {
+            var value = buffer.Slice(cursor, sizeof(int) * 4);
+            cursor += sizeof(int) * 4;
+            return new decimal(MemoryMarshal.Cast<byte, int>(value).ToArray());
+        }
+
+        public static decimal ReadBigDecimal(Span<byte> buffer, ref int cursor) => throw new NotImplementedException();
+
         public static T[] ReadStructArray<T>(Span<byte> buffer, int count, ref int cursor) where T : struct
         {
             if (count <= 0) return Array.Empty<T>();
@@ -275,6 +284,10 @@ namespace DragonLib.IO
         }
 
         public static void WriteBigDouble(ref Memory<byte> buffer, double value, ref int cursor) => throw new NotImplementedException();
+
+        public static void WriteLittleDecimal(ref Memory<byte> buffer, decimal value, ref int cursor) => throw new NotImplementedException();
+
+        public static void WriteBigDecimal(ref Memory<byte> buffer, decimal value, ref int cursor) => throw new NotImplementedException();
 
         public static void WriteStructArray<T>(ref Memory<byte> buffer, T[] value, ref int cursor) where T : struct
         {
