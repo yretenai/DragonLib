@@ -251,7 +251,7 @@ namespace DragonLib.IO
             if (message != null)
                 Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + message);
 
-            if (!(detail?.Length > 0)) return true;
+            if (!(detail.Length > 0)) return true;
             foreach (var line in detail) Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + line);
 
             return true;

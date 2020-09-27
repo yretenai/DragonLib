@@ -21,10 +21,10 @@ namespace DragonLib.CLI
         public bool IsRequired { get; set; }
         public int Positional { get; set; } = -1;
         public object? Default { get; set; }
-        public string[] ValidValues { get; set; } = new string[0];
-        public string[] Aliases { get; set; } = new string[0];
+        public string[]? ValidValues { get; set; } = new string[0];
+        public string[]? Aliases { get; set; } = new string[0];
 
-        public string[] Flags => Aliases.Concat(new[] { Flag }).Distinct().Reverse().ToArray();
+        public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };
 
         public override object TypeId => Flag;
 
@@ -35,7 +35,7 @@ namespace DragonLib.CLI
             return base.Equals(obj);
         }
 
-        protected bool Equals(CLIFlagAttribute other) => base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category && Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly && IsRequired == other.IsRequired && Positional == other.Positional && Default?.Equals(other.Default) == true && ValidValues.Equals(other.ValidValues) && Aliases.Equals(other.Aliases);
+        protected bool Equals(CLIFlagAttribute other) => base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category && Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly && IsRequired == other.IsRequired && Positional == other.Positional && Default?.Equals(other.Default) == true && ValidValues?.Equals(other.ValidValues) == true && Aliases?.Equals(other.Aliases) == true;
 
         public override string ToString() => $"-{(Flag.Length > 1 ? "-" : string.Empty)}{Flag}: {Help}";
 
