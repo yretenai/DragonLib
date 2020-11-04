@@ -22,7 +22,7 @@ namespace DragonLib
         private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
 
         private static string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
-
+        
         public static ByteBuffer ToByteBuffer(this Stream stream)
         {
             var bytes = new byte[stream.Length];
@@ -145,7 +145,7 @@ namespace DragonLib
             return isDir ? p + "/" : p;
         }
 
-        public static string[] ToHexOctetsA(this string input)
+        public static string[] ToHexOctetsA(this string? input)
         {
             var cleaned = input?.Replace(" ", string.Empty).Trim();
             if (cleaned == null || cleaned.Length % 2 != 0) return new string[] { };
@@ -155,7 +155,7 @@ namespace DragonLib
 
         public static string ToHexString(this Span<byte> input) => string.Join("", input.ToArray().Select(x => x.ToString("X2") + " "));
 
-        public static byte[] ToHexOctetsB(this string input)
+        public static byte[] ToHexOctetsB(this string? input)
         {
             var cleaned = input?.Replace(" ", string.Empty).Trim();
             if (cleaned == null || cleaned.Length % 2 != 0) return new byte[] { };

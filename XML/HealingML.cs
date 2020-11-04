@@ -15,59 +15,61 @@ namespace DragonLib.XML
         private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
         private static readonly Dictionary<Type, HMLSerializationTarget> TargetCache = new Dictionary<Type, HMLSerializationTarget>();
 
-        public static string? HMLNamespace = "dragon";
-
-        public static string CreateNamespacedTag(string? tag)
+        public static string CreateNamespacedTag(string? tag, string? ns)
         {
             if (tag == null) return "";
-            return HMLNamespace == null ? tag : $"{HMLNamespace}:{tag}";
+            return ns == null ? tag : $"{ns}:{tag}";
         }
 
-        public static string? Print(object? instance, IReadOnlyDictionary<Type, IHMLSerializer>? customTypeSerializers = null) => Print(instance, customTypeSerializers ?? new Dictionary<Type, IHMLSerializer>(), new HashSet<object?>(), new SpaceIndentHelper(), null);
+        public static string? Print(object? instance, HealingMLSettings? settings = null) => Print(instance, new Dictionary<object, int>(), new SpaceIndentHelper(), null, settings ?? HealingMLSettings.Default);
 
-        public static string? Print(object? instance, IReadOnlyDictionary<Type, IHMLSerializer> customTypeSerializers, HashSet<object?> visited, IndentHelperBase indents, string? valueName)
+        public static string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indents, string? valueName, HealingMLSettings settings)
         {
             var type = instance?.GetType();
             IHMLSerializer? customSerializer = null;
-            var target = GetCustomSerializer(customTypeSerializers, type, ref customSerializer);
+            var target = GetCustomSerializer(settings.TypeSerializers, type, ref customSerializer);
 
             var hmlNameTag = string.Empty;
-            if (!string.IsNullOrWhiteSpace(valueName)) hmlNameTag = $" {CreateNamespacedTag("name")}=\"{valueName}\"";
+            if (!string.IsNullOrWhiteSpace(valueName)) hmlNameTag = $" {CreateNamespacedTag("name", settings.Namespace)}=\"{valueName}\"";
 
             var innerIndent = indents + 1;
 
             switch (target)
             {
                 case HMLSerializationTarget.Null:
-                    return $"{indents}<{CreateNamespacedTag("null")}{hmlNameTag} />\n";
+                    return $"{indents}<{CreateNamespacedTag("null", settings.Namespace)}{hmlNameTag} />\n";
                 case HMLSerializationTarget.Object when type != null && customSerializer != null:
                 case HMLSerializationTarget.Array when type != null && customSerializer != null:
-                    return customSerializer.Print(instance, customTypeSerializers, visited, indents, valueName) as string;
+                    return customSerializer.Print(instance, visited, indents, valueName, settings) as string;
                 case HMLSerializationTarget.Value when type != null:
-                    return $"{indents}<{FormatName(type?.Name)}>{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(instance, customTypeSerializers, visited, innerIndent, valueName))}</{FormatName(type?.Name)}>\n";
+                    return $"{indents}<{FormatName(type.Name)}>{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(instance, visited, innerIndent, valueName, settings))}</{FormatName(type.Name)}>\n";
                 case HMLSerializationTarget.Array when type != null:
                 case HMLSerializationTarget.Enumerable when type != null:
-                    if (visited.Add(instance))
+                    if (!visited.ContainsKey(instance!))
                     {
-                        var tag = $"{indents}<{CreateNamespacedTag("array")} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag}>\n";
+                        visited[instance!] = visited.Count;
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
                         if (target == HMLSerializationTarget.Enumerable && instance is IEnumerable enumerable) instance = enumerable.Cast<object>().ToArray();
                         if (!(instance is Array array))
-                            tag += $"{innerIndent}<{CreateNamespacedTag("null")} />\n";
+                            tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)} />\n";
                         else
                             for (long i = 0; i < array.LongLength; ++i)
-                                tag += Print(array.GetValue(i), customTypeSerializers, visited, innerIndent, null);
+                                tag += Print(array.GetValue(i), visited, innerIndent, null, settings);
 
-                        tag += $"{indents}</{CreateNamespacedTag("array")}>\n";
+                        tag += $"{indents}</{CreateNamespacedTag("array", settings.Namespace)}>\n";
                         return tag;
                     }
                     else
                     {
-                        return $"{indents}<{CreateNamespacedTag("ref")} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag} />\n";
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
                 case HMLSerializationTarget.Object when type != null:
-                    if (visited.Add(instance))
+                    if(!visited.ContainsKey(instance!))
                     {
-                        var tag = $"{indents}<{FormatName(type?.Name)} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag}";
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        var tag = $"{indents}<{FormatName(type.Name)}{hmlIdTag}{hmlNameTag}";
                         var members = GetMembers(type);
                         var complexMembers = new List<(object? value, string memberName, IHMLSerializer? custom)>();
                         foreach (var member in members)
@@ -75,12 +77,12 @@ namespace DragonLib.XML
                             var value = GetMemberValue(instance, member);
                             var valueType = value?.GetType();
                             IHMLSerializer? targetCustomSerializer = null;
-                            var targetMemberTarget = GetCustomSerializer(customTypeSerializers, valueType, ref targetCustomSerializer);
+                            var targetMemberTarget = GetCustomSerializer(settings.TypeSerializers, valueType, ref targetCustomSerializer);
 
                             if (targetMemberTarget >= HMLSerializationTarget.Complex)
                                 complexMembers.Add((value, member.Name, targetCustomSerializer));
                             else
-                                tag += $" {member.Name}=\"{(targetCustomSerializer != null ? targetCustomSerializer.Print(value, customTypeSerializers, visited, indents, member.Name) : FormatValueType(value))}\"";
+                                tag += $" {member.Name}=\"{(targetCustomSerializer != null ? targetCustomSerializer.Print(value, visited, indents, member.Name, settings) : FormatValueType(value))}\"";
                         }
 
                         if (complexMembers.Count == 0)
@@ -90,19 +92,20 @@ namespace DragonLib.XML
                         else
                         {
                             tag += ">\n";
-                            foreach (var (value, name, custom) in complexMembers) tag += custom != null ? custom.Print(value, customTypeSerializers, visited, innerIndent, name) : Print(value, customTypeSerializers, visited, innerIndent, name);
+                            foreach (var (value, name, custom) in complexMembers) tag += custom != null ? custom.Print(value, visited, innerIndent, name, settings) : Print(value, visited, innerIndent, name, settings);
 
-                            tag += $"{indents}</{FormatName(type?.Name)}>\n";
+                            tag += $"{indents}</{FormatName(type.Name)}>\n";
                         }
 
                         return tag;
                     }
                     else
                     {
-                        return $"{indents}<{CreateNamespacedTag("ref")} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag} />\n";
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
                 case HMLSerializationTarget.Dictionary when type != null:
-                    if (visited.Add(instance))
+                    if (!visited.ContainsKey(instance!))
                     {
                         var hmlKeyTag = string.Empty;
                         var hmlValueTag = string.Empty;
@@ -115,8 +118,8 @@ namespace DragonLib.XML
                                 var args = @base.GetGenericArguments();
                                 if (args.Length > 1)
                                 {
-                                    hmlKeyTag = $" {CreateNamespacedTag("key")}=\"{args[0].Name}\"";
-                                    hmlValueTag = $" {CreateNamespacedTag("value")}=\"{args[1].Name}\"";
+                                    hmlKeyTag = $" {CreateNamespacedTag("key", settings.Namespace)}=\"{args[0].Name}\"";
+                                    hmlValueTag = $" {CreateNamespacedTag("value", settings.Namespace)}=\"{args[1].Name}\"";
                                     break;
                                 }
                             }
@@ -124,7 +127,8 @@ namespace DragonLib.XML
                             @base = @base.BaseType;
                         }
 
-                        var tag = $"{indents}<{CreateNamespacedTag("map")} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag}{hmlKeyTag}{hmlValueTag}";
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        var tag = $"{indents}<{CreateNamespacedTag("map", settings.Namespace)}{hmlIdTag}{hmlNameTag}{hmlKeyTag}{hmlValueTag}";
 
                         if (!(instance is IDictionary dictionary)) return null;
 
@@ -152,20 +156,20 @@ namespace DragonLib.XML
                             IHMLSerializer? customValueSerializer = null;
                             IHMLSerializer? customKeySerializer = null;
 
-                            var valueTarget = GetCustomSerializer(customTypeSerializers, valueType, ref customValueSerializer);
-                            var keyTarget = GetCustomSerializer(customTypeSerializers, keyType, ref customKeySerializer);
+                            var valueTarget = GetCustomSerializer(settings.TypeSerializers, valueType, ref customValueSerializer);
+                            var keyTarget = GetCustomSerializer(settings.TypeSerializers, keyType, ref customKeySerializer);
 
                             if (valueTarget == HMLSerializationTarget.Null)
-                                tag += $"{innerIndent}<{CreateNamespacedTag("null")}";
+                                tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)}";
                             else
                                 // ReSharper disable once PossibleNullReferenceException
                                 tag += $"{innerIndent}<{FormatName(valueType?.Name)}";
 
                             if (keyTarget == HMLSerializationTarget.Null)
                                 tag += " />";
-                            else if (keyTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("key")}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(key, customTypeSerializers, visited, innerIndent, valueName))}\"";
+                            else if (keyTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
 
-                            if (valueTarget != HMLSerializationTarget.Null && valueTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("value")}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(value, customTypeSerializers, visited, innerIndent, valueName))}\"";
+                            if (valueTarget != HMLSerializationTarget.Null && valueTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("value", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(value, visited, innerIndent, valueName, settings))}\"";
 
                             if (valueTarget < HMLSerializationTarget.Complex && keyTarget < HMLSerializationTarget.Complex)
                             {
@@ -174,22 +178,23 @@ namespace DragonLib.XML
                             else
                             {
                                 tag += ">\n";
-                                if (keyTarget >= HMLSerializationTarget.Complex) tag += Print(key, customTypeSerializers, visited, innerInnerIndent, CreateNamespacedTag("key"));
-                                if (valueTarget >= HMLSerializationTarget.Complex) tag += Print(value, customTypeSerializers, visited, innerInnerIndent, CreateNamespacedTag("value"));
+                                if (keyTarget >= HMLSerializationTarget.Complex) tag += Print(key, visited, innerInnerIndent, CreateNamespacedTag("key", settings.Namespace), settings);
+                                if (valueTarget >= HMLSerializationTarget.Complex) tag += Print(value, visited, innerInnerIndent, CreateNamespacedTag("value", settings.Namespace), settings);
                                 if (valueTarget == HMLSerializationTarget.Null)
-                                    tag += $"{innerIndent}</{CreateNamespacedTag("null")}>\n";
+                                    tag += $"{innerIndent}</{CreateNamespacedTag("null", settings.Namespace)}>\n";
                                 else
                                     // ReSharper disable once PossibleNullReferenceException
                                     tag += $"{innerIndent}</{FormatName(valueType?.Name)}>\n";
                             }
                         }
 
-                        tag += $"{indents}</{CreateNamespacedTag("map")}>\n";
+                        tag += $"{indents}</{CreateNamespacedTag("map", settings.Namespace)}>\n";
                         return tag;
                     }
                     else
                     {
-                        return $"{indents}<{CreateNamespacedTag("ref")} {CreateNamespacedTag("id")}=\"{instance?.GetHashCode()}\"{hmlNameTag} />\n";
+                        var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
+                        return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -217,12 +222,12 @@ namespace DragonLib.XML
             return target;
         }
 
-        private static string? FormatTextValueType(object? instance) => instance == null ? "{null}" : instance?.ToString()?.Replace("\\", "\\\\")?.Replace("\r", "\\r")?.Replace("\n", "\\n")?.Replace("<", "\\<")?.Replace(">", "\\>");
+        private static string? FormatTextValueType(object? instance) => instance == null ? "{null}" : instance.ToString()?.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("<", "\\<").Replace(">", "\\>");
 
 
-        private static string? FormatValueType(object? instance) => instance == null ? "{null}" : instance?.ToString()?.Replace("\\", "\\\\")?.Replace("\r", "\\r")?.Replace("\n", "\\n")?.Replace("\"", "\\\"");
+        private static string? FormatValueType(object? instance) => instance == null ? "{null}" : instance.ToString()?.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"");
 
-        private static string? FormatName(string? typeName) => typeName?.Replace('<', '_')?.Replace('>', '_')?.Replace('`', '_');
+        private static string? FormatName(string? typeName) => typeName?.Replace('<', '_').Replace('>', '_').Replace('`', '_');
 
         private static object? GetMemberValue(object? instance, MemberInfo member) =>
             member switch
@@ -231,7 +236,6 @@ namespace DragonLib.XML
                 PropertyInfo property => property.GetValue(instance),
                 _ => null
             };
-
         private static IEnumerable<MemberInfo> GetMembers(Type? type)
         {
             if (type == null) return ArraySegment<MemberInfo>.Empty;

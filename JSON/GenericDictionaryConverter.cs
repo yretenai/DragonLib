@@ -2,53 +2,55 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
     [PublicAPI]
-    public class GenericDictionaryConverter<T> : JsonConverter<Dictionary<string, T>>
+    public class GenericDictionaryConverter<TKey, TValue> : JsonConverter<Dictionary<TKey, TValue>> where TKey : notnull
     {
-        public override Dictionary<string, T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Dictionary<TKey, TValue> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
+            if (reader.TokenType != JsonTokenType.StartArray) throw new JsonException();
 
-            var dict = new Dictionary<string, T>();
+            var dict = new Dictionary<TKey, TValue>();
+
             while (reader.Read())
             {
-                if (reader.TokenType == JsonTokenType.EndObject) return dict;
-                if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
+                if (reader.TokenType == JsonTokenType.EndArray) return dict;
 
-                var key = reader.GetString();
-                reader.Read();
-                if (reader.TokenType != JsonTokenType.StartArray) throw new JsonException();
+                if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
 
-                reader.Read();
-                var typeinfo = reader.GetString() ?? throw new JsonException();
-                reader.Read();
-                var type = Type.GetType(typeinfo) ?? throw new TypeUnloadedException();
-                var value = JsonSerializer.Deserialize(ref reader, type, options);
-                dict[key!] = (T) value!;
-                reader.Read();
-                if (reader.TokenType != JsonTokenType.EndArray) throw new JsonException();
+                if (!GenericListConverter<TKey>.TryReadValue(ref reader, options, out var key)) throw new JsonException();
+                if (!GenericListConverter<TValue>.TryReadValue(ref reader, options, out var value)) throw new JsonException();
+
+                dict[key] = value;
             }
 
             return dict;
         }
 
-        public override void Write(Utf8JsonWriter writer, Dictionary<string, T> dict, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Dictionary<TKey, TValue> dict, JsonSerializerOptions options)
         {
-            writer.WriteStartObject();
+            writer.WriteStartArray();
+
             foreach (var (key, value) in dict)
             {
-                writer.WritePropertyName(key);
-                writer.WriteStartArray();
-                writer.WriteStringValue(value?.GetType().AssemblyQualifiedName);
-                JsonSerializer.Serialize(writer, value, value?.GetType(), options);
-                writer.WriteEndArray();
+                writer.WriteStartObject();
+
+                writer.WritePropertyName("Key");
+
+                GenericListConverter<TKey>.WriteValue(writer, key, key.GetType(), options);
+
+                writer.WritePropertyName("Value");
+
+                GenericListConverter<TValue>.WriteValue(writer, value, value?.GetType(), options);
+
+                writer.WriteEndObject();
             }
 
-            writer.WriteEndObject();
+            writer.WriteEndArray();
         }
     }
 }

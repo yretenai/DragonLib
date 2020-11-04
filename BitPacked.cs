@@ -45,7 +45,6 @@ namespace DragonLib
                 var propertyValue = property.GetMethod?.Invoke(boxed, new object[0]);
                 if (propertyValue == null) continue;
                 var objectValue = Convert.ChangeType(propertyValue, TypeCode.UInt32);
-                if (objectValue == null) continue;
                 packed |= (uint) objectValue << offset;
             }
 

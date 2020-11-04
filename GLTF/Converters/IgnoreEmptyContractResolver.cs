@@ -18,7 +18,7 @@ namespace DragonLib.GLTF.Converters
                 property.ShouldSerialize = instance =>
                 {
                     if (property.UnderlyingName == null) return true;
-                    var value = instance?.GetType().GetProperty(property.UnderlyingName)?.GetValue(instance);
+                    var value = instance.GetType().GetProperty(property.UnderlyingName)?.GetValue(instance);
                     switch (value)
                     {
                         case null:
