@@ -11,7 +11,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.0.8</Version>
+        <Version>1.0.9</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Shared Code because I'm tired of writing the same thing over and over.</PackageDescription>
         <RepositoryUrl>https://github.com/healingbrew/DragonLib</RepositoryUrl>
@@ -25,6 +25,7 @@
 
     <ItemGroup>
         <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
+        <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
         <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
         <PackageReference Include="lz4net" Version="1.0.15.93" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
