@@ -24,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
+        <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.639" />
         <PackageReference Include="DotNetZip" Version="1.14.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
         <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
