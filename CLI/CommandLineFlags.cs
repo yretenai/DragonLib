@@ -7,6 +7,7 @@ using System.Reflection;
 using DragonLib.IO;
 using DragonLib.Numerics;
 using JetBrains.Annotations;
+using Half = DragonLib.Numerics.Half;
 
 namespace DragonLib.CLI
 {
@@ -351,6 +352,7 @@ namespace DragonLib.CLI
                         "System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
                         "System.Double" => double.Parse(textValue),
                         "System.Single" => float.Parse(textValue),
+                        "System.Half" => System.Half.Parse(textValue),
                         "System.String" => textValue,
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
                         _ => InvokeVisitor<T>(flag, type, textValue)

@@ -1,6 +1,6 @@
 ﻿using System;
-using DragonLib.Numerics;
 using Newtonsoft.Json;
+using Half = DragonLib.Numerics.Half;
 
 namespace DragonLib.GLTF.Converters
 {

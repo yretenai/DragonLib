@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!-- <TargetFramework>netcoreapp5.0</TargetFramework> -->
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <Platforms>x64</Platforms>
         <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,10 +10,10 @@
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.0.10</Version>
+        <Version>1.0.11</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
-        <RepositoryUrl>https://github.com/healingbrew/DragonLib</RepositoryUrl>
+        <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" \\source "github" -->
     </PropertyGroup>

@@ -7,6 +7,7 @@ using System.Text;
 using DragonLib.Numerics;
 using FlatBuffers;
 using JetBrains.Annotations;
+using Half = DragonLib.Numerics.Half;
 
 namespace DragonLib
 {
@@ -310,6 +311,8 @@ namespace DragonLib
         public static Vector4 ToDragon(this System.Numerics.Vector4 vector) => new Vector4(vector.X, vector.Y, vector.Z);
 
         public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) => new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+
+        public static Half ToDragon(this System.Half half) => new Half((float)half);
 
         #endregion
     }

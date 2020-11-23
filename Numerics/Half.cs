@@ -530,6 +530,18 @@ namespace DragonLib.Numerics
         /// <returns>The enumerated constant (TypeCode)255.</returns>
         public static TypeCode GetTypeCode() => (TypeCode) 255;
 
+        /// <summary>
+        ///     Returns the underlying 16-bit integer.
+        /// </summary>
+        /// <returns>Binary representation of System.Half value</returns>
+        public ushort ToValue() => Value;
+
+        /// <summary>
+        ///     Return a System.Half of the same value.
+        /// </summary>
+        /// <returns>System.Half implementation</returns>
+        public System.Half ToNumerics() => (System.Half) (float) this;
+
         #region BitConverter & Math methods for Half
 
         /// <summary>

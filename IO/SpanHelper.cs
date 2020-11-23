@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using Half = DragonLib.Numerics.Half;
 
 namespace DragonLib.IO
 {
@@ -96,32 +97,67 @@ namespace DragonLib.IO
             return value;
         }
 
-        public static float ReadLittleSingle(Span<byte> buffer, ref int cursor)
+        public static Half ReadLittleHalf(Span<byte> buffer, ref int cursor)
         {
-            var value = buffer.Slice(cursor, sizeof(float));
-            cursor += sizeof(float);
-            return BitConverter.ToSingle(value);
+            var value = BinaryPrimitives.ReadUInt16BigEndian(buffer.Slice(cursor));
+            cursor += sizeof(ushort);
+            return Half.ToHalf(value);
         }
 
-        public static float ReadBigSingle(Span<byte> buffer, ref int cursor) => throw new NotImplementedException();
+        public static Half ReadBigHalf(Span<byte> buffer, ref int cursor)
+        {
+            var value = BinaryPrimitives.ReadUInt16BigEndian(buffer.Slice(cursor));
+            cursor += sizeof(ushort);
+            return Half.ToHalf(value);
+        }
+
+        public static float ReadLittleSingle(Span<byte> buffer, ref int cursor)
+        {
+            var value = BinaryPrimitives.ReadSingleLittleEndian(buffer.Slice(cursor));
+            cursor += sizeof(float);
+            return value;
+        }
+
+        public static float ReadBigSingle(Span<byte> buffer, ref int cursor)
+        {
+            var value = BinaryPrimitives.ReadSingleBigEndian(buffer.Slice(cursor));
+            cursor += sizeof(float);
+            return value;
+        }
 
         public static double ReadLittleDouble(Span<byte> buffer, ref int cursor)
         {
-            var value = buffer.Slice(cursor, sizeof(double));
+            var value = BinaryPrimitives.ReadDoubleLittleEndian(buffer.Slice(cursor));
             cursor += sizeof(double);
-            return BitConverter.ToSingle(value);
+            return value;
         }
 
-        public static double ReadBigDouble(Span<byte> buffer, ref int cursor) => throw new NotImplementedException();
+        public static double ReadBigDouble(Span<byte> buffer, ref int cursor)
+        {
+            var value = BinaryPrimitives.ReadDoubleBigEndian(buffer.Slice(cursor));
+            cursor += sizeof(double);
+            return value;
+        }
 
         public static decimal ReadLittleDecimal(Span<byte> buffer, ref int cursor)
         {
-            var value = buffer.Slice(cursor, sizeof(int) * 4);
+            var a = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor));
+            var b = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor + sizeof(int)));
+            var c = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor + sizeof(int) * 2));
+            var d = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor + sizeof(int) * 3));
             cursor += sizeof(int) * 4;
-            return new decimal(MemoryMarshal.Cast<byte, int>(value).ToArray());
+            return new decimal(new [] { a, b, c, d });
         }
 
-        public static decimal ReadBigDecimal(Span<byte> buffer, ref int cursor) => throw new NotImplementedException();
+        public static decimal ReadBigDecimal(Span<byte> buffer, ref int cursor)
+        {
+            var a = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor));
+            var b = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor + sizeof(int)));
+            var c = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor + sizeof(int) * 2));
+            var d = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor + sizeof(int) * 3));
+            cursor += sizeof(int) * 4;
+            return new decimal(new [] { a, b, c, d });
+        }
 
         public static T[] ReadStructArray<T>(Span<byte> buffer, int count, ref int cursor) where T : struct
         {
@@ -265,29 +301,69 @@ namespace DragonLib.IO
             cursor += sizeof(long);
         }
 
+        public static void WriteLittleHalf(ref Memory<byte> buffer, Half value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(short));
+            BinaryPrimitives.WriteUInt16LittleEndian(buffer.Span.Slice(cursor), value.ToValue());
+            cursor += sizeof(short);
+        }
+
+        public static void WriteBigSingle(ref Memory<byte> buffer, Half value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(short));
+            BinaryPrimitives.WriteUInt16BigEndian(buffer.Span.Slice(cursor), value.ToValue());
+            cursor += sizeof(short);
+        }
+
         public static void WriteLittleSingle(ref Memory<byte> buffer, float value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(float));
-            var bytes = BitConverter.GetBytes(value);
-            bytes.CopyTo(buffer.Slice(cursor));
+            BinaryPrimitives.WriteSingleLittleEndian(buffer.Span.Slice(cursor), value);
             cursor += sizeof(float);
         }
 
-        public static void WriteBigSingle(ref Memory<byte> buffer, float value, ref int cursor) => throw new NotImplementedException();
-
+        public static void WriteBigSingle(ref Memory<byte> buffer, float value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(float));
+            BinaryPrimitives.WriteSingleBigEndian(buffer.Span.Slice(cursor), value);
+            cursor += sizeof(float);
+        }
+        
         public static void WriteLittleDouble(ref Memory<byte> buffer, double value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(double));
-            var bytes = BitConverter.GetBytes(value);
-            bytes.CopyTo(buffer.Slice(cursor));
-            cursor += sizeof(float);
+            BinaryPrimitives.WriteDoubleLittleEndian(buffer.Span.Slice(cursor), value);
+            cursor += sizeof(double);
         }
 
-        public static void WriteBigDouble(ref Memory<byte> buffer, double value, ref int cursor) => throw new NotImplementedException();
+        public static void WriteBigDouble(ref Memory<byte> buffer, double value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(double));
+            BinaryPrimitives.WriteDoubleBigEndian(buffer.Span.Slice(cursor), value);
+            cursor += sizeof(double);
+        }
 
-        public static void WriteLittleDecimal(ref Memory<byte> buffer, decimal value, ref int cursor) => throw new NotImplementedException();
+        public static void WriteLittleDecimal(ref Memory<byte> buffer, decimal value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(int) * 4);
+            var bits = Decimal.GetBits(value);
+            BinaryPrimitives.WriteInt32LittleEndian(buffer.Span.Slice(cursor), bits[0]);
+            BinaryPrimitives.WriteInt32LittleEndian(buffer.Span.Slice(cursor + sizeof(int)), bits[1]);
+            BinaryPrimitives.WriteInt32LittleEndian(buffer.Span.Slice(cursor + sizeof(int) * 2), bits[2]);
+            BinaryPrimitives.WriteInt32LittleEndian(buffer.Span.Slice(cursor + sizeof(int) * 3), bits[3]);
+            cursor += sizeof(int) * 4;
+        }
 
-        public static void WriteBigDecimal(ref Memory<byte> buffer, decimal value, ref int cursor) => throw new NotImplementedException();
+        public static void WriteBigDecimal(ref Memory<byte> buffer, decimal value, ref int cursor)
+        {
+            EnsureSpace(ref buffer, cursor + sizeof(int) * 4);
+            var bits = Decimal.GetBits(value);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor), bits[0]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int)), bits[1]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 2), bits[2]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 3), bits[3]);
+            cursor += sizeof(int) * 4;
+        }
 
         public static void WriteStructArray<T>(ref Memory<byte> buffer, T[] value, ref int cursor) where T : struct
         {
