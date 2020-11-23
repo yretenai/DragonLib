@@ -35,9 +35,6 @@ namespace DragonLib.Numerics
             M43 = values.ElementAtOrDefault(11);
         }
 
-        public OpenTK.Matrix4x3 ToOpenTK() =>
-            new OpenTK.Matrix4x3(M11, M12, M13, M21, M22, M23, M31, M32, M33, M41, M42, M43);
-
         public float[] ToArray() => new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33, M41, M42, M43 };
     }
 }

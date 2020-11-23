@@ -20,7 +20,6 @@ namespace DragonLib.Numerics
             W = values.ElementAtOrDefault(3);
         }
 
-        public OpenTK.Quaternion ToOpenTK() => new OpenTK.Quaternion(X, Y, Z, W);
         public System.Numerics.Quaternion ToNumerics() => new System.Numerics.Quaternion(X, Y, Z, W);
         public float[] ToArray() => new[] { X, Y, Z, W };
 

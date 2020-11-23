@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using DragonLib.IO;
+using DragonLib.Numerics;
 using JetBrains.Annotations;
-using OpenTK;
 
 namespace DragonLib.CLI
 {

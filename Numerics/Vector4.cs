@@ -19,7 +19,6 @@ namespace DragonLib.Numerics
             W = values.ElementAtOrDefault(3);
         }
 
-        public OpenTK.Vector4 ToOpenTK() => new OpenTK.Vector4(X, Y, Z, W);
         public System.Numerics.Vector4 ToNumerics() => new System.Numerics.Vector4(X, Y, Z, W);
         public float[] ToArray() => new[] { X, Y, Y, Z };
     }
