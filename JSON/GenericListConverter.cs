@@ -39,7 +39,7 @@ namespace DragonLib.JSON
             if (value == null)
                 writer.WriteNullValue();
             else
-                JsonSerializer.Serialize(writer, value, valueType, options);
+                JsonSerializer.Serialize(writer, value, valueType ?? typeof(T), options);
 
             writer.WriteEndArray();
         }

@@ -31,17 +31,17 @@ namespace DragonLib.JSON
             {
                 if (IsStringKey)
                 {
-                    writer.WritePropertyName(key.ToString());
+                    writer.WritePropertyName(key?.ToString() ?? "");
                 }
                 else
                 {
                     writer.WriteStartObject();
                     writer.WritePropertyName("Key");
-                    JsonSerializer.Serialize(writer, key, key.GetType(), options);
+                    JsonSerializer.Serialize(writer, key, key?.GetType() ?? typeof(TKey), options);
                     writer.WritePropertyName("Value");
                 }
 
-                JsonSerializer.Serialize(writer, value, value?.GetType(), options);
+                JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(TValue), options);
 
                 if (!IsStringKey) writer.WriteEndObject();
             }

@@ -14,7 +14,10 @@ namespace DragonLib.JSON
         public override void Write(Utf8JsonWriter writer, List<T> list, JsonSerializerOptions options)
         {
             writer.WriteStartArray();
-            foreach (var value in list) JsonSerializer.Serialize(writer, value, value?.GetType(), options);
+            foreach (var value in list)
+            {
+                JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(T), options);
+            }
             writer.WriteEndArray();
         }
     }

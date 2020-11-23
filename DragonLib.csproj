@@ -15,7 +15,7 @@
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" \\source "github" -->
+        <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
