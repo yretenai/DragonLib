@@ -7,7 +7,9 @@ using System.Text;
 using DragonLib.Numerics;
 using FlatBuffers;
 using JetBrains.Annotations;
+#if NET5_0
 using Half = DragonLib.Numerics.Half;
+#endif
 
 namespace DragonLib
 {
@@ -312,8 +314,10 @@ namespace DragonLib
 
         public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) => new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 
+        #if NET5_0
         public static Half ToDragon(this System.Half half) => new Half((float)half);
-
+        #endif
+        
         #endregion
     }
 }

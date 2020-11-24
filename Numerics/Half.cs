@@ -536,11 +536,13 @@ namespace DragonLib.Numerics
         /// <returns>Binary representation of System.Half value</returns>
         public ushort ToValue() => Value;
 
+#if NET5_0
         /// <summary>
         ///     Return a System.Half of the same value.
         /// </summary>
         /// <returns>System.Half implementation</returns>
         public System.Half ToNumerics() => (System.Half) (float) this;
+#endif
 
         #region BitConverter & Math methods for Half
 

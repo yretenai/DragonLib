@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using JetBrains.Annotations;
-using LZ4;
+using K4os.Compression.LZ4;
 
 namespace DragonLib
 {
@@ -22,17 +22,6 @@ namespace DragonLib
             }
         }
 
-        public static unsafe Span<byte> DecompressDEFLATEIonic(Span<byte> data, int size)
-        {
-            fixed (byte* pinData = &data.GetPinnableReference())
-            {
-                using var stream = new UnmanagedMemoryStream(pinData, data.Length);
-                using var inflateStream = new Ionic.Zlib.DeflateStream(stream, Ionic.Zlib.CompressionMode.Decompress);
-                var block = new Span<byte>(new byte[size]);
-                inflateStream.Read(block);
-                return block;
-            }
-        }
         public static Span<byte> CompressDEFLATE(Span<byte> data, int compressionLevel = 1)
         {
             using var stream = new MemoryStream();
@@ -46,20 +35,12 @@ namespace DragonLib
             return compressed;
         }
 
-        public static Span<byte> CompressDEFLATEIonic(Span<byte> data, int compressionLevel = 9)
+        public static Span<byte> DecompressLZ4(Span<byte> data, int size)
         {
-            using var stream = new MemoryStream();
-            using var inflateStream = new Ionic.Zlib.DeflateStream(stream, Ionic.Zlib.CompressionMode.Compress, (Ionic.Zlib.CompressionLevel) compressionLevel, true);
-            inflateStream.Write(data);
-            inflateStream.Flush();
-            inflateStream.Close();
-            var compressed = new Span<byte>(new byte[stream.Position]);
-            stream.Position = 0;
-            stream.Read(compressed);
-            return compressed;
+            var target = new byte[size];
+            LZ4Codec.Decode(data, target);
+            return target;
         }
-
-        public static Span<byte> DecompressLZ4(Span<byte> data, int size) => LZ4Codec.Decode(data.ToArray(), 0, data.Length, size);
 
         public static unsafe Span<byte> CryptAESCBC(Span<byte> data, Span<byte> key, Span<byte> iv)
         {

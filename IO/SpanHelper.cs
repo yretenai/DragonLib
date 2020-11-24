@@ -1,7 +1,11 @@
+using JetBrains.Annotations;
 using System;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
+#if !NET5_0
+using System.Linq;
+#endif
+
 using Half = DragonLib.Numerics.Half;
 
 namespace DragonLib.IO
@@ -113,28 +117,44 @@ namespace DragonLib.IO
 
         public static float ReadLittleSingle(Span<byte> buffer, ref int cursor)
         {
+#if NET5_0
             var value = BinaryPrimitives.ReadSingleLittleEndian(buffer.Slice(cursor));
+#else
+            var value = BitConverter.ToSingle(buffer.Slice(cursor, 4));
+#endif
             cursor += sizeof(float);
             return value;
         }
 
         public static float ReadBigSingle(Span<byte> buffer, ref int cursor)
         {
+#if NET5_0
             var value = BinaryPrimitives.ReadSingleBigEndian(buffer.Slice(cursor));
+#else
+            var value = BitConverter.ToSingle(buffer.Slice(cursor, 4).ToArray().Reverse().ToArray());
+#endif
             cursor += sizeof(float);
             return value;
         }
 
         public static double ReadLittleDouble(Span<byte> buffer, ref int cursor)
         {
+#if NET5_0
             var value = BinaryPrimitives.ReadDoubleLittleEndian(buffer.Slice(cursor));
+#else
+            var value = BitConverter.ToDouble(buffer.Slice(cursor, 4));
+#endif
             cursor += sizeof(double);
             return value;
         }
 
         public static double ReadBigDouble(Span<byte> buffer, ref int cursor)
         {
+#if NET5_0
             var value = BinaryPrimitives.ReadDoubleBigEndian(buffer.Slice(cursor));
+#else
+            var value = BitConverter.ToSingle(buffer.Slice(cursor, 4).ToArray().Reverse().ToArray());
+#endif
             cursor += sizeof(double);
             return value;
         }
@@ -146,7 +166,7 @@ namespace DragonLib.IO
             var c = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor + sizeof(int) * 2));
             var d = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(cursor + sizeof(int) * 3));
             cursor += sizeof(int) * 4;
-            return new decimal(new [] { a, b, c, d });
+            return new decimal(new[] { a, b, c, d });
         }
 
         public static decimal ReadBigDecimal(Span<byte> buffer, ref int cursor)
@@ -156,7 +176,7 @@ namespace DragonLib.IO
             var c = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor + sizeof(int) * 2));
             var d = BinaryPrimitives.ReadInt32BigEndian(buffer.Slice(cursor + sizeof(int) * 3));
             cursor += sizeof(int) * 4;
-            return new decimal(new [] { a, b, c, d });
+            return new decimal(new[] { d, c, b, a });
         }
 
         public static T[] ReadStructArray<T>(Span<byte> buffer, int count, ref int cursor) where T : struct
@@ -308,7 +328,7 @@ namespace DragonLib.IO
             cursor += sizeof(short);
         }
 
-        public static void WriteBigSingle(ref Memory<byte> buffer, Half value, ref int cursor)
+        public static void WriteBigHalf(ref Memory<byte> buffer, Half value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(short));
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Span.Slice(cursor), value.ToValue());
@@ -318,28 +338,48 @@ namespace DragonLib.IO
         public static void WriteLittleSingle(ref Memory<byte> buffer, float value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(float));
+
+#if NET5_0
             BinaryPrimitives.WriteSingleLittleEndian(buffer.Span.Slice(cursor), value);
+#else
+            BitConverter.GetBytes(value).CopyTo(buffer.Span.Slice(cursor));
+#endif
             cursor += sizeof(float);
         }
 
         public static void WriteBigSingle(ref Memory<byte> buffer, float value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(float));
+
+#if NET5_0
             BinaryPrimitives.WriteSingleBigEndian(buffer.Span.Slice(cursor), value);
+#else
+            BitConverter.GetBytes(value).Reverse().ToArray().CopyTo(buffer.Span.Slice(cursor));
+#endif
             cursor += sizeof(float);
         }
-        
+
         public static void WriteLittleDouble(ref Memory<byte> buffer, double value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(double));
+
+#if NET5_0
             BinaryPrimitives.WriteDoubleLittleEndian(buffer.Span.Slice(cursor), value);
+#else
+            BitConverter.GetBytes(value).CopyTo(buffer.Span.Slice(cursor));
+#endif
             cursor += sizeof(double);
         }
 
         public static void WriteBigDouble(ref Memory<byte> buffer, double value, ref int cursor)
         {
             EnsureSpace(ref buffer, cursor + sizeof(double));
+
+#if NET5_0
             BinaryPrimitives.WriteDoubleBigEndian(buffer.Span.Slice(cursor), value);
+#else
+            BitConverter.GetBytes(value).Reverse().ToArray().CopyTo(buffer.Span.Slice(cursor));
+#endif
             cursor += sizeof(double);
         }
 
@@ -358,10 +398,10 @@ namespace DragonLib.IO
         {
             EnsureSpace(ref buffer, cursor + sizeof(int) * 4);
             var bits = Decimal.GetBits(value);
-            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor), bits[0]);
-            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int)), bits[1]);
-            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 2), bits[2]);
-            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 3), bits[3]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor), bits[3]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int)), bits[2]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 2), bits[1]);
+            BinaryPrimitives.WriteInt32BigEndian(buffer.Span.Slice(cursor + sizeof(int) * 3), bits[0]);
             cursor += sizeof(int) * 4;
         }
 

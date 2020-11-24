@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using Squish;
 
 namespace DragonLib.Imaging.DXGI
 {
@@ -104,28 +103,19 @@ namespace DragonLib.Imaging.DXGI
                 case DXGIPixelFormat.BC1_UNORM:
                 case DXGIPixelFormat.BC1_UNORM_SRGB:
                 {
-                    var dec = new byte[req];
-                    var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt1);
-                    return new Span<byte>(dec);
+                    throw new NotImplementedException();
                 }
                 case DXGIPixelFormat.BC2_TYPELESS:
                 case DXGIPixelFormat.BC2_UNORM:
                 case DXGIPixelFormat.BC2_UNORM_SRGB:
                 {
-                    var dec = new byte[req];
-                    var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt3);
-                    return new Span<byte>(dec);
+                    throw new NotImplementedException();
                 }
                 case DXGIPixelFormat.BC3_TYPELESS:
                 case DXGIPixelFormat.BC3_UNORM:
                 case DXGIPixelFormat.BC3_UNORM_SRGB:
                 {
-                    var dec = new byte[req];
-                    var dataArray = data.ToArray();
-                    Squish.Squish.DecompressImage(dec, width, height, ref dataArray, SquishFlags.kDxt5);
-                    return new Span<byte>(dec);
+                    throw new NotImplementedException();
                 }
                 default:
                     throw new InvalidOperationException($"Format {format} is not supported yet!");

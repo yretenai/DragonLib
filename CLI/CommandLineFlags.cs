@@ -352,7 +352,9 @@ namespace DragonLib.CLI
                         "System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
                         "System.Double" => double.Parse(textValue),
                         "System.Single" => float.Parse(textValue),
+                        #if NET5_0
                         "System.Half" => System.Half.Parse(textValue),
+                        #endif
                         "System.String" => textValue,
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
                         _ => InvokeVisitor<T>(flag, type, textValue)

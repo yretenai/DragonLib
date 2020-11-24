@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <Platforms>x64</Platforms>
-        <RuntimeIdentifiers>win10-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+        <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+        <Platforms>x86;x64;AnyCPU</Platforms>
+        <RuntimeIdentifiers>win10;osx;linux</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>NU1701</NoWarn>
         <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.0.11</Version>
+        <Version>1.0.12</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
@@ -19,14 +19,21 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <DebugType>full</DebugType>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugType>full</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DotNetZip" Version="1.15.0" />
+        <PackageReference Include="FlatBuffers.Core" Version="1.12.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
-        <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
-        <PackageReference Include="lz4net" Version="1.0.15.93" />
+        <PackageReference Include="K4os.Compression.LZ4" Version="1.2.6" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
     
