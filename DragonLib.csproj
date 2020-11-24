@@ -2,7 +2,8 @@
 
     <PropertyGroup>
         <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-        <Platforms>x86;x64;AnyCPU</Platforms>
+        <Platform>AnyCPU</Platform>
+        <PlatformTarget>AnyCPU</PlatformTarget>
         <RuntimeIdentifiers>win10;osx;linux</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>NU1701</NoWarn>
@@ -18,15 +19,7 @@
         <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-        <DebugType>full</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-        <DebugType>full</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DebugType>full</DebugType>
     </PropertyGroup>
 
