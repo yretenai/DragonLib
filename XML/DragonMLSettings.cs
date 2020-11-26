@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DragonLib.XML
 {
-    public class HealingMLSettings
+    public class DragonMLSettings
     {
         /// <summary>
         /// Use ids in dragon:ref tags.
@@ -14,16 +14,16 @@ namespace DragonLib.XML
         /// <summary>
         /// Custom Type Serializers
         /// </summary>
-        public Dictionary<Type, IHMLSerializer> TypeSerializers = new Dictionary<Type, IHMLSerializer>();
+        public Dictionary<Type, IDragonMLSerializer> TypeSerializers = new Dictionary<Type, IDragonMLSerializer>();
 
         /// <summary>
         /// Prefix namespace for system tags
         /// </summary>
         public string Namespace { get; set; } = "dragon";
 
-        public static HealingMLSettings Default => new HealingMLSettings();
+        public static DragonMLSettings Default => new DragonMLSettings();
 
-        public static HealingMLSettings Slim => new HealingMLSettings
+        public static DragonMLSettings Slim => new DragonMLSettings
         {
             UseRefId = false
         };

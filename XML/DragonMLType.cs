@@ -1,6 +1,6 @@
 namespace DragonLib.XML
 {
-    public enum HMLSerializationTarget
+    public enum DragonMLType
     {
         Null,
         Value,

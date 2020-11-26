@@ -33,7 +33,6 @@ namespace DragonLib.JSON
         {
             writer.WriteStartArray();
             
-            Console.WriteLine(valueType?.AssemblyQualifiedName);
             writer.WriteStringValue(valueType?.AssemblyQualifiedName);
 
             if (value == null)

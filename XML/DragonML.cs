@@ -13,7 +13,7 @@ namespace DragonLib.XML
     public static class HealingML
     {
         private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
-        private static readonly Dictionary<Type, HMLSerializationTarget> TargetCache = new Dictionary<Type, HMLSerializationTarget>();
+        private static readonly Dictionary<Type, DragonMLType> TargetCache = new Dictionary<Type, DragonMLType>();
 
         public static string CreateNamespacedTag(string? tag, string? ns)
         {
@@ -21,12 +21,12 @@ namespace DragonLib.XML
             return ns == null ? tag : $"{ns}:{tag}";
         }
 
-        public static string? Print(object? instance, HealingMLSettings? settings = null) => Print(instance, new Dictionary<object, int>(), new SpaceIndentHelper(), null, settings ?? HealingMLSettings.Default);
+        public static string? Print(object? instance, DragonMLSettings? settings = null) => Print(instance, new Dictionary<object, int>(), new SpaceIndentHelper(), null, settings ?? DragonMLSettings.Default);
 
-        public static string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indents, string? valueName, HealingMLSettings settings)
+        public static string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indents, string? valueName, DragonMLSettings settings)
         {
             var type = instance?.GetType();
-            IHMLSerializer? customSerializer = null;
+            IDragonMLSerializer? customSerializer = null;
             var target = GetCustomSerializer(settings.TypeSerializers, type, ref customSerializer);
 
             var hmlNameTag = string.Empty;
@@ -36,21 +36,21 @@ namespace DragonLib.XML
 
             switch (target)
             {
-                case HMLSerializationTarget.Null:
+                case DragonMLType.Null:
                     return $"{indents}<{CreateNamespacedTag("null", settings.Namespace)}{hmlNameTag} />\n";
-                case HMLSerializationTarget.Object when type != null && customSerializer != null:
-                case HMLSerializationTarget.Array when type != null && customSerializer != null:
+                case DragonMLType.Object when type != null && customSerializer != null:
+                case DragonMLType.Array when type != null && customSerializer != null:
                     return customSerializer.Print(instance, visited, indents, valueName, settings) as string;
-                case HMLSerializationTarget.Value when type != null:
-                    return $"{indents}<{FormatName(type.Name)}>{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(instance, visited, innerIndent, valueName, settings))}</{FormatName(type.Name)}>\n";
-                case HMLSerializationTarget.Array when type != null:
-                case HMLSerializationTarget.Enumerable when type != null:
+                case DragonMLType.Value when type != null:
+                    return $"{indents}<{FormatName(type.Name)}>{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(instance, visited, innerIndent, valueName, settings))}</{FormatName(type.Name)}>\n";
+                case DragonMLType.Array when type != null:
+                case DragonMLType.Enumerable when type != null:
                     if (!visited.ContainsKey(instance!))
                     {
                         visited[instance!] = visited.Count;
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
-                        if (target == HMLSerializationTarget.Enumerable && instance is IEnumerable enumerable) instance = enumerable.Cast<object>().ToArray();
+                        if (target == DragonMLType.Enumerable && instance is IEnumerable enumerable) instance = enumerable.Cast<object>().ToArray();
                         if (!(instance is Array array))
                             tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)} />\n";
                         else
@@ -65,21 +65,22 @@ namespace DragonLib.XML
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
-                case HMLSerializationTarget.Object when type != null:
+                case DragonMLType.Object when type != null:
                     if(!visited.ContainsKey(instance!))
                     {
+                        visited[instance!] = visited.Count;
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         var tag = $"{indents}<{FormatName(type.Name)}{hmlIdTag}{hmlNameTag}";
                         var members = GetMembers(type);
-                        var complexMembers = new List<(object? value, string memberName, IHMLSerializer? custom)>();
+                        var complexMembers = new List<(object? value, string memberName, IDragonMLSerializer? custom)>();
                         foreach (var member in members)
                         {
                             var value = GetMemberValue(instance, member);
                             var valueType = value?.GetType();
-                            IHMLSerializer? targetCustomSerializer = null;
+                            IDragonMLSerializer? targetCustomSerializer = null;
                             var targetMemberTarget = GetCustomSerializer(settings.TypeSerializers, valueType, ref targetCustomSerializer);
 
-                            if (targetMemberTarget >= HMLSerializationTarget.Complex)
+                            if (targetMemberTarget >= DragonMLType.Complex)
                                 complexMembers.Add((value, member.Name, targetCustomSerializer));
                             else
                                 tag += $" {member.Name}=\"{(targetCustomSerializer != null ? targetCustomSerializer.Print(value, visited, indents, member.Name, settings) : FormatValueType(value))}\"";
@@ -104,9 +105,11 @@ namespace DragonLib.XML
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
-                case HMLSerializationTarget.Dictionary when type != null:
+                case DragonMLType.Dictionary when type != null:
                     if (!visited.ContainsKey(instance!))
                     {
+                        visited[instance!] = visited.Count;
+                        
                         var hmlKeyTag = string.Empty;
                         var hmlValueTag = string.Empty;
 
@@ -153,34 +156,34 @@ namespace DragonLib.XML
                             var valueType = value?.GetType();
                             var keyType = key?.GetType();
 
-                            IHMLSerializer? customValueSerializer = null;
-                            IHMLSerializer? customKeySerializer = null;
+                            IDragonMLSerializer? customValueSerializer = null;
+                            IDragonMLSerializer? customKeySerializer = null;
 
                             var valueTarget = GetCustomSerializer(settings.TypeSerializers, valueType, ref customValueSerializer);
                             var keyTarget = GetCustomSerializer(settings.TypeSerializers, keyType, ref customKeySerializer);
 
-                            if (valueTarget == HMLSerializationTarget.Null)
+                            if (valueTarget == DragonMLType.Null)
                                 tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)}";
                             else
                                 // ReSharper disable once PossibleNullReferenceException
                                 tag += $"{innerIndent}<{FormatName(valueType?.Name)}";
 
-                            if (keyTarget == HMLSerializationTarget.Null)
+                            if (keyTarget == DragonMLType.Null)
                                 tag += " />";
-                            else if (keyTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
+                            else if (keyTarget < DragonMLType.Complex) tag += $" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
 
-                            if (valueTarget != HMLSerializationTarget.Null && valueTarget < HMLSerializationTarget.Complex) tag += $" {CreateNamespacedTag("value", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? HMLToStringSerializer.Default).Print(value, visited, innerIndent, valueName, settings))}\"";
+                            if (valueTarget != DragonMLType.Null && valueTarget < DragonMLType.Complex) tag += $" {CreateNamespacedTag("value", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(value, visited, innerIndent, valueName, settings))}\"";
 
-                            if (valueTarget < HMLSerializationTarget.Complex && keyTarget < HMLSerializationTarget.Complex)
+                            if (valueTarget < DragonMLType.Complex && keyTarget < DragonMLType.Complex)
                             {
                                 tag += " />\n";
                             }
                             else
                             {
                                 tag += ">\n";
-                                if (keyTarget >= HMLSerializationTarget.Complex) tag += Print(key, visited, innerInnerIndent, CreateNamespacedTag("key", settings.Namespace), settings);
-                                if (valueTarget >= HMLSerializationTarget.Complex) tag += Print(value, visited, innerInnerIndent, CreateNamespacedTag("value", settings.Namespace), settings);
-                                if (valueTarget == HMLSerializationTarget.Null)
+                                if (keyTarget >= DragonMLType.Complex) tag += Print(key, visited, innerInnerIndent, CreateNamespacedTag("key", settings.Namespace), settings);
+                                if (valueTarget >= DragonMLType.Complex) tag += Print(value, visited, innerInnerIndent, CreateNamespacedTag("value", settings.Namespace), settings);
+                                if (valueTarget == DragonMLType.Null)
                                     tag += $"{innerIndent}</{CreateNamespacedTag("null", settings.Namespace)}>\n";
                                 else
                                     // ReSharper disable once PossibleNullReferenceException
@@ -201,9 +204,9 @@ namespace DragonLib.XML
             }
         }
 
-        private static HMLSerializationTarget GetCustomSerializer(IReadOnlyDictionary<Type, IHMLSerializer> customTypeSerializers, Type? type, ref IHMLSerializer? customSerializer)
+        private static DragonMLType GetCustomSerializer(IReadOnlyDictionary<Type, IDragonMLSerializer> customTypeSerializers, Type? type, ref IDragonMLSerializer? customSerializer)
         {
-            HMLSerializationTarget target;
+            DragonMLType target;
             if (type != null && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type)))
             {
                 customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type)).Value;
@@ -216,7 +219,7 @@ namespace DragonLib.XML
             }
             else
             {
-                target = GetSerializationTarget(type);
+                target = GetSerializationType(type);
             }
 
             return target;
@@ -250,23 +253,23 @@ namespace DragonLib.XML
             return members;
         }
 
-        public static HMLSerializationTarget GetSerializationTarget(Type? type)
+        public static DragonMLType GetSerializationType(Type? type)
         {
-            if (type == null) return HMLSerializationTarget.Null;
+            if (type == null) return DragonMLType.Null;
 
             // ReSharper disable once InvertIf
             if (!TargetCache.TryGetValue(type, out var target))
             {
                 if (type.IsArray || typeof(Array).IsAssignableFrom(type))
-                    target = HMLSerializationTarget.Array;
+                    target = DragonMLType.Array;
                 else if (type.IsEnum || type.IsPrimitive || type == typeof(string))
-                    target = HMLSerializationTarget.Value;
+                    target = DragonMLType.Value;
                 else if (typeof(IDictionary).IsAssignableFrom(type))
-                    target = HMLSerializationTarget.Dictionary;
+                    target = DragonMLType.Dictionary;
                 else if (typeof(IEnumerable).IsAssignableFrom(type))
-                    target = HMLSerializationTarget.Enumerable;
+                    target = DragonMLType.Enumerable;
                 else
-                    target = HMLSerializationTarget.Object;
+                    target = DragonMLType.Object;
 
                 TargetCache.Add(type, target);
             }
