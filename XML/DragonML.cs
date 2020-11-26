@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 namespace DragonLib.XML
 {
     [PublicAPI]
-    public static class HealingML
+    public static class DragonML
     {
         private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
         private static readonly Dictionary<Type, DragonMLType> TargetCache = new Dictionary<Type, DragonMLType>();
