@@ -11,23 +11,28 @@
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
+        <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryBranch>main</RepositoryBranch>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DebugType>full</DebugType>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSource>true</IncludeSource>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FlatBuffers.Core" Version="1.12.0" />
-        <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
         <PackageReference Include="K4os.Compression.LZ4" Version="1.2.6" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     </ItemGroup>
     
 </Project>
