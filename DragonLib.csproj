@@ -11,7 +11,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>8.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.2.1</Version>
+        <Version>1.1.3</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
@@ -24,6 +24,9 @@
         <IncludeSymbols>true</IncludeSymbols>
         <IncludeSource>true</IncludeSource>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+        <DeterministicSourcePaths>true</DeterministicSourcePaths>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
     </PropertyGroup>
