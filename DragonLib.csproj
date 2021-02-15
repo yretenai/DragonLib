@@ -9,9 +9,9 @@
         <NoWarn>NU1701</NoWarn>
         <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
         <Nullable>enable</Nullable>
-        <LangVersion>8.0</LangVersion>
+        <LangVersion>9.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.3</Version>
+        <Version>1.1.4</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
@@ -36,7 +36,7 @@
         <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
         <PackageReference Include="K4os.Compression.LZ4" Version="1.2.6" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
     
 </Project>
