@@ -14,10 +14,13 @@ namespace DragonLib.XML
     {
         private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
         private static readonly Dictionary<Type, DragonMLType> TargetCache = new Dictionary<Type, DragonMLType>();
-
+        private static HashSet<string> UsedNameSpaces = new HashSet<string>();
         public static string CreateNamespacedTag(string? tag, string? ns)
         {
             if (tag == null) return "";
+
+            UsedNameSpaces.Add(ns);
+
             return ns == null ? tag : $"{ns}:{tag}";
         }
 
@@ -85,7 +88,15 @@ namespace DragonLib.XML
                             else
                                 tag += $" {member.Name}=\"{(targetCustomSerializer != null ? targetCustomSerializer.Print(value, visited, indents, member.Name, settings) : FormatValueType(value))}\"";
                         }
-
+                        if (visited.Count == 1)
+                        {
+                            UsedNameSpaces.Add(settings.Namespace);
+                            foreach (var ns in UsedNameSpaces)
+                            {
+                                tag += $" xmlns:{ns}=\"{settings.NamespaceUri}\"";
+                            }
+                            UsedNameSpaces.Clear();
+                        }
                         if (complexMembers.Count == 0)
                         {
                             tag += " />\n";
@@ -97,7 +108,6 @@ namespace DragonLib.XML
 
                             tag += $"{indents}</{FormatName(type.Name)}>\n";
                         }
-
                         return tag;
                     }
                     else
