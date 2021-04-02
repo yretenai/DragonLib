@@ -20,7 +20,7 @@ namespace DragonLib.XML
         /// Prefix namespace for system tags
         /// </summary>
         public string Namespace { get; set; } = "dragon";
-
+        public string NamespaceUri { get; set; } = "d.ml";
         public static DragonMLSettings Default => new DragonMLSettings();
 
         public static DragonMLSettings Slim => new DragonMLSettings
