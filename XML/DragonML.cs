@@ -14,20 +14,22 @@ namespace DragonLib.XML
     {
         private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
         private static readonly Dictionary<Type, DragonMLType> TargetCache = new Dictionary<Type, DragonMLType>();
-        private static HashSet<string> UsedNameSpaces = new HashSet<string>();
         public static string CreateNamespacedTag(string? tag, string? ns)
         {
             if (tag == null) return "";
 
-            UsedNameSpaces.Add(ns);
-
             return ns == null ? tag : $"{ns}:{tag}";
         }
 
-        public static string? Print(object? instance, DragonMLSettings? settings = null) => Print(instance, new Dictionary<object, int>(), new SpaceIndentHelper(), null, settings ?? DragonMLSettings.Default);
+        public static string? Print(object? instance, DragonMLSettings? settings = null) => Print(instance, new Dictionary<object, int>(), new SpaceIndentHelper(), null, settings ?? DragonMLSettings.Default, true);
 
-        public static string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indents, string? valueName, DragonMLSettings settings)
+        public static string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indents, string? valueName, DragonMLSettings settings, bool root = false)
         {
+            if (root && settings.WriteXmlHeader)
+            {
+                return "<?xml version=“1.0” encoding=“utf-8”?>\n" + Print(instance, visited, indents, valueName, settings);
+            }
+            
             var type = instance?.GetType();
             IDragonMLSerializer? customSerializer = null;
             var target = GetCustomSerializer(settings.TypeSerializers, type, ref customSerializer);
@@ -90,12 +92,15 @@ namespace DragonLib.XML
                         }
                         if (visited.Count == 1)
                         {
-                            UsedNameSpaces.Add(settings.Namespace);
-                            foreach (var ns in UsedNameSpaces)
+                            foreach (var (ns, nsUri) in settings.Namespaces)
                             {
-                                tag += $" xmlns:{ns}=\"{settings.NamespaceUri}\"";
+                                tag += $" xmlns:{ns}=\"{nsUri}\"";
                             }
-                            UsedNameSpaces.Clear();
+
+                            if (!settings.Namespaces.ContainsKey(settings.Namespace))
+                            {
+                                tag += $" xmlns:{settings.Namespace}=\"https://yretenai.com/dragonml/v1\"";
+                            }
                         }
                         if (complexMembers.Count == 0)
                         {

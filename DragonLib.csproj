@@ -13,7 +13,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>9.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.4.1</Version>
+        <Version>1.1.5.0</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>

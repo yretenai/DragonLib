@@ -164,6 +164,11 @@ namespace DragonLib.CLI
             }
         }
 
+        public static T? ParseFlags<T>(params string[] arguments) where T : ICLIFlags
+        {
+            return ParseFlags<T>(PrintHelp, arguments);
+        }
+
         public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, params string[] arguments) where T : ICLIFlags
         {
             var shouldExit = false;
@@ -258,14 +263,28 @@ namespace DragonLib.CLI
                         }
                         else
                         {
-                            var textValue = arguments[index + 1];
-                            if (textValue.StartsWith("-"))
+                            var argument = arguments[index];
+                            var hasInnateValue = argument.Contains('=');
+                            string textValue;
+                            if (hasInnateValue) 
                             {
-                                Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
-                                shouldExit = true;
+                                textValue = argument.Substring(argument.IndexOf('=') + 1);
+                                if (string.IsNullOrWhiteSpace(textValue))
+                                {
+                                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
+                                    shouldExit = true;
+                                }
                             }
-
-                            positionalMap.Remove(index + 1);
+                            else
+                            {
+                                if (!positionalMap.Contains(index + 1))
+                                {
+                                    Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
+                                    shouldExit = true;
+                                }
+                                textValue = arguments[index + 1];
+                                positionalMap.Remove(index + 1);
+                            }
 
                             if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
                             {
