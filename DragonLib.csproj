@@ -13,14 +13,14 @@
         <Nullable>enable</Nullable>
         <LangVersion>9.0</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.5.0</Version>
+        <Version>1.1.5.1</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <RepositoryBranch>main</RepositoryBranch>
-        <RepositoryCommit>0023baa4fc9b1d4e5aa1cb6df2232acb6250d2e9</RepositoryCommit>
+        <RepositoryCommit>867b92123fd3722b60eac9dd7a0aa57229a3215d</RepositoryCommit>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <DebugType>portable</DebugType>
         <IncludeSymbols>true</IncludeSymbols>
