@@ -27,7 +27,7 @@ namespace DragonLib.XML
         {
             if (root && settings.WriteXmlHeader)
             {
-                return "<?xml version=“1.0” encoding=“utf-8”?>\n" + Print(instance, visited, indents, valueName, settings);
+                return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + Print(instance, visited, indents, valueName, settings);
             }
             
             var type = instance?.GetType();
