@@ -33,9 +33,12 @@ namespace DragonLib.CLI
             var usageSlimMultiCh = string.Empty;
             var usageSlimPositional = string.Empty;
 
-            foreach (var (flag, type) in flags)
+            foreach (var (flag, originalType) in flags)
             {
                 if (flag == null) continue;
+                var type = originalType;
+                if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    type = type.GetGenericArguments()[0];
                 var tn = type.Name;
                 if (type.IsConstructedGenericType)
                 {
@@ -118,9 +121,12 @@ namespace DragonLib.CLI
             {
                 Logger.Info("FLAG", $"{group}:");
 
-                foreach (var (flag, type) in attributes)
+                foreach (var (flag, originalType) in attributes)
                 {
                     if (flag == null) continue;
+                    var type = originalType;
+                    if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        type = type.GetGenericArguments()[0];
                     var hasValue = type.FullName != "System.Boolean";
 
                     var tn = type.Name;
@@ -162,6 +168,11 @@ namespace DragonLib.CLI
 
                 Logger.Info("FLAG", string.Empty);
             }
+        }
+
+        public static T? ParseFlags<T>() where T : ICLIFlags
+        {
+            return ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
         }
 
         public static T? ParseFlags<T>(params string[] arguments) where T : ICLIFlags
@@ -234,9 +245,13 @@ namespace DragonLib.CLI
                     return null;
                 }
 
-            foreach (var (property, (flag, type)) in typeMap.Where(x => x.Value.Item1?.Positional == -1))
+            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional == -1))
             {
                 if (flag == null) continue;
+                var type = originalType;
+                var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+                if (isNullable)
+                    type = type.GetGenericArguments()[0];
                 var indexList = default(HashSet<int>);
                 foreach (var sw in flag.Flags)
                 {
@@ -266,7 +281,7 @@ namespace DragonLib.CLI
                             var argument = arguments[index];
                             var hasInnateValue = argument.Contains('=');
                             string textValue;
-                            if (hasInnateValue) 
+                            if (hasInnateValue)
                             {
                                 textValue = argument.Substring(argument.IndexOf('=') + 1);
                                 if (string.IsNullOrWhiteSpace(textValue))
@@ -282,6 +297,7 @@ namespace DragonLib.CLI
                                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                                     shouldExit = true;
                                 }
+
                                 textValue = arguments[index + 1];
                                 positionalMap.Remove(index + 1);
                             }
@@ -300,15 +316,21 @@ namespace DragonLib.CLI
                         }
                     }
 
+                if (isNullable)
+                    value = Activator.CreateInstance(originalType, value);
+                
                 property.SetValue(instance, value);
             }
 
             var positionals = positionalMap.Select(x => arguments[x]).ToList();
 
-            foreach (var (property, (flag, type)) in typeMap.Where(x => x.Value.Item1?.Positional > -1))
+            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional > -1))
             {
                 if (flag == null) continue;
-
+                var type = originalType;
+                var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+                if (isNullable)
+                    type = type.GetGenericArguments()[0];
                 if (flag.IsRequired && flag.Positional >= positionalMap.Count)
                 {
                     Logger.Error("FLAG", $"Positional {flag.Flag} needs a value!");
@@ -332,6 +354,9 @@ namespace DragonLib.CLI
                 {
                     shouldExit = true;
                 }
+
+                if (isNullable)
+                    value = Activator.CreateInstance(originalType, value);
 
                 property.SetValue(instance, value);
             }
@@ -371,9 +396,9 @@ namespace DragonLib.CLI
                         "System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
                         "System.Double" => double.Parse(textValue),
                         "System.Single" => float.Parse(textValue),
-                        #if NET5_0
+#if NET5_0
                         "System.Half" => System.Half.Parse(textValue),
-                        #endif
+#endif
                         "System.String" => textValue,
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
                         _ => InvokeVisitor<T>(flag, type, textValue)
