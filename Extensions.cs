@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using DragonLib.Numerics;
-using FlatBuffers;
 using JetBrains.Annotations;
 #if NET5_0
 using Half = DragonLib.Numerics.Half;
@@ -20,15 +19,6 @@ namespace DragonLib
 
         private static string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
         
-        public static ByteBuffer ToByteBuffer(this Stream stream)
-        {
-            var bytes = new byte[stream.Length];
-            stream.Read(bytes, 0, bytes.Length);
-            return new ByteBuffer(bytes);
-        }
-
-        public static ByteBuffer ToByteBuffer<T>(this Span<T> span) where T : struct => new ByteBuffer(MemoryMarshal.AsBytes(span).ToArray());
-
         public static string SanitizeFilename(this string path)
         {
             var illegal = Path.GetInvalidFileNameChars();
