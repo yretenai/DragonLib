@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
 
-namespace DragonLib {
+namespace DragonLib.IO {
     public static class CompressionEncryption {
         public static unsafe Span<byte> DecompressDEFLATE(Span<byte> data, int size) {
             fixed (byte* pinData = &data.GetPinnableReference()) {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace DragonLib {
+namespace DragonLib.IO {
     public static class BitPacked {
         private static Dictionary<Type, List<(PropertyInfo, int, ulong)>> CachedBits { get; } = new();
 

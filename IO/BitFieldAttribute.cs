@@ -1,6 +1,6 @@
 using System;
 
-namespace DragonLib {
+namespace DragonLib.IO {
     [AttributeUsage(AttributeTargets.Property)]
     public class BitFieldAttribute : Attribute {
         public BitFieldAttribute(int length) {

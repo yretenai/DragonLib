@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace DragonLib {
+namespace DragonLib.IO {
     public static class DataTypeHelper {
         public static Dictionary<Type, Dictionary<string, string>> Cache { get; } = new();
 

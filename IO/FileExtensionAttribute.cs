@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DragonLib {
+namespace DragonLib.IO {
     [AttributeUsage(AttributeTargets.Field)]
     public class FileExtensionAttribute : Attribute {
         public FileExtensionAttribute(string extension) {
