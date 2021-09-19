@@ -1,8 +1,6 @@
-﻿namespace DragonLib.Audio.WWise
-{
+﻿namespace DragonLib.Audio.WWise {
     // Effect Product
-    public class FXPR
-    {
+    public class FXPR {
         // TODO
     }
 }

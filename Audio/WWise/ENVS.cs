@@ -1,8 +1,6 @@
-﻿namespace DragonLib.Audio.WWise
-{
+﻿namespace DragonLib.Audio.WWise {
     // Environments
-    public class ENVS
-    {
+    public class ENVS {
         // TODO
     }
 }

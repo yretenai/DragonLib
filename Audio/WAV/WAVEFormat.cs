@@ -1,7 +1,5 @@
-namespace DragonLib.Audio.WAV
-{
-    public struct WAVEFormat
-    {
+namespace DragonLib.Audio.WAV {
+    public struct WAVEFormat {
         public int Magic { get; set; }
         public int Size { get; set; }
         public short Format { get; set; }

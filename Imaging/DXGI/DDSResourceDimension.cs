@@ -1,15 +1,11 @@
-
-
 // ReSharper disable InconsistentNaming
 
-namespace DragonLib.Imaging.DXGI
-{
-    public enum DDSResourceDimension : uint
-    {
+namespace DragonLib.Imaging.DXGI {
+    public enum DDSResourceDimension : uint {
         UNKNOWN = 0,
         BUFFER = 1,
         TEXTURE1D = 2,
         TEXTURE2D = 3,
-        TEXTURE3D = 4,
+        TEXTURE3D = 4
     }
 }

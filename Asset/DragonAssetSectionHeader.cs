@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace DragonLib.Asset
-{
+namespace DragonLib.Asset {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct DragonAssetSectionHeader
-    {
+    public struct DragonAssetSectionHeader {
         public DragonAssetSectionId Magic { get; set; }
         public uint Version { get; set; }
         public Guid Guid { get; set; }

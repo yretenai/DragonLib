@@ -1,7 +1,5 @@
-namespace DragonLib.Imaging.DXGI
-{
-    public unsafe struct DDSImageHeader
-    {
+namespace DragonLib.Imaging.DXGI {
+    public unsafe struct DDSImageHeader {
         public int Magic { get; set; }
         public int Size { get; set; }
         public int Flags { get; set; }

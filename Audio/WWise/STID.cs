@@ -1,8 +1,6 @@
-﻿namespace DragonLib.Audio.WWise
-{
+﻿namespace DragonLib.Audio.WWise {
     // Sound Type IDs
-    public class STID
-    {
+    public class STID {
         // TODO
     }
 }

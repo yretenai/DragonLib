@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace DragonLib
-{
+namespace DragonLib {
     [AttributeUsage(AttributeTargets.Field)]
-    public class FileExtensionAttribute : Attribute
-    {
-        public FileExtensionAttribute(string extension) => Extension = extension;
+    public class FileExtensionAttribute : Attribute {
+        public FileExtensionAttribute(string extension) {
+            Extension = extension;
+        }
+
         public string Extension { get; set; }
     }
 }

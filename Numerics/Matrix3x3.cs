@@ -1,9 +1,7 @@
 ﻿using System.Linq;
 
-namespace DragonLib.Numerics
-{
-    public struct Matrix3x3
-    {
+namespace DragonLib.Numerics {
+    public struct Matrix3x3 {
         public float M11 { get; }
         public float M12 { get; }
         public float M13 { get; }
@@ -14,8 +12,7 @@ namespace DragonLib.Numerics
         public float M32 { get; }
         public float M33 { get; }
 
-        public Matrix3x3(params float[] values)
-        {
+        public Matrix3x3(params float[] values) {
             M11 = values.ElementAtOrDefault(0);
             M12 = values.ElementAtOrDefault(1);
             M13 = values.ElementAtOrDefault(2);
@@ -27,6 +24,8 @@ namespace DragonLib.Numerics
             M33 = values.ElementAtOrDefault(8);
         }
 
-        public float[] ToArray() => new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33 };
+        public float[] ToArray() {
+            return new[] { M11, M12, M13, M21, M22, M23, M31, M32, M33 };
+        }
     }
 }

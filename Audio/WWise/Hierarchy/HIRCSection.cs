@@ -2,12 +2,9 @@
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 
-namespace DragonLib.Audio.WWise.Hierarchy
-{
-    public abstract class HIRCSection
-    {
-        protected HIRCSection(Span<byte> data)
-        {
+namespace DragonLib.Audio.WWise.Hierarchy {
+    public abstract class HIRCSection {
+        protected HIRCSection(Span<byte> data) {
             Type = MemoryMarshal.Read<HIRCSectionEnum>(data);
             Length = BinaryPrimitives.ReadInt32LittleEndian(data[1..]);
             Id = BinaryPrimitives.ReadUInt32LittleEndian(data[5..]);
@@ -18,15 +15,15 @@ namespace DragonLib.Audio.WWise.Hierarchy
         public uint Id { get; }
     }
 
-    public class BlankHIRC : HIRCSection
-    {
-        public BlankHIRC(Span<byte> data) : base(data) => Buffer = data.Slice(9, Length - 4).ToArray();
+    public class BlankHIRC : HIRCSection {
+        public BlankHIRC(Span<byte> data) : base(data) {
+            Buffer = data.Slice(9, Length - 4).ToArray();
+        }
 
         public byte[] Buffer { get; }
     }
 
-    public enum HIRCSectionEnum : byte
-    {
+    public enum HIRCSectionEnum : byte {
         Settings = 1,
         SoundEffect = 2,
         EventAction = 3,
@@ -45,6 +42,6 @@ namespace DragonLib.Audio.WWise.Hierarchy
         MotionBus = 16,
         MotionEffect = 17,
         Effect = 18,
-        AuxiliaryBus = 19,
+        AuxiliaryBus = 19
     }
 }

@@ -2,12 +2,9 @@
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 
-namespace DragonLib.Audio.WWise.Hierarchy
-{
-    public class MusicTrack : HIRCSection
-    {
-        public MusicTrack(Span<byte> data) : base(data)
-        {
+namespace DragonLib.Audio.WWise.Hierarchy {
+    public class MusicTrack : HIRCSection {
+        public MusicTrack(Span<byte> data) : base(data) {
             var cursor = 9;
             Unknown = data[cursor++];
             var count = BinaryPrimitives.ReadInt32LittleEndian(data[cursor..]);
@@ -22,9 +19,9 @@ namespace DragonLib.Audio.WWise.Hierarchy
         public byte Unknown { get; }
         public byte[] Leftover { get; }
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MusicTrackEntry
-    {
+    public struct MusicTrackEntry {
         public ushort Unknown1 { get; set; }
         public ushort Unknown2 { get; set; }
         public byte Unknown3 { get; set; }

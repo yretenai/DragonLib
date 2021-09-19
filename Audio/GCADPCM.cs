@@ -1,14 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace DragonLib.Audio
-{
+namespace DragonLib.Audio {
     // Based off VGAudio
     // https://github.com/Thealexbarney/VGAudio/blob/d66b7b7b9fde1ed3b01683e0e66fff747bbd816f/src/VGAudio/Codecs/GcAdpcm/GcAdpcmDecoder.cs
-    public static class GCADPCM
-    {
-        public static Span<byte> Decode(Span<byte> adpcm, short[] coefficients, int sampleCount)
-        {
+    public static class GCADPCM {
+        public static Span<byte> Decode(Span<byte> adpcm, short[] coefficients, int sampleCount) {
             var pcm = new short[sampleCount];
 
             if (sampleCount == 0) return Span<byte>.Empty;
@@ -20,8 +17,7 @@ namespace DragonLib.Audio
             short hist1 = 0;
             short hist2 = 0;
 
-            for (var i = 0; i < frameCount; i++)
-            {
+            for (var i = 0; i < frameCount; i++) {
                 if (inIndex >= adpcm.Length) break;
 
                 var predictorScale = adpcm[inIndex++];
@@ -32,15 +28,14 @@ namespace DragonLib.Audio
 
                 var samplesToRead = Math.Min(14, sampleCount - currentSample);
 
-                for (var s = 0; s < samplesToRead; s++)
-                {
+                for (var s = 0; s < samplesToRead; s++) {
                     if (inIndex >= adpcm.Length) break;
 
                     int adpcmSample = s % 2 == 0 ? adpcm[inIndex].GetHighNibbleSigned() : adpcm[inIndex++].GetLowNibbleSigned();
                     var distance = scale * adpcmSample;
                     var predictedSample = coef1 * hist1 + coef2 * hist2;
                     var correctedSample = predictedSample + distance;
-                    var scaledSample = correctedSample + 1024 >> 11;
+                    var scaledSample = (correctedSample + 1024) >> 11;
                     var clampedSample = scaledSample.ShortClamp();
 
                     hist2 = hist1;

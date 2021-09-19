@@ -3,14 +3,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using DragonLib.Audio.WAV;
 
-namespace DragonLib.Audio
-{
-    public static class PCM
-    {
-        public static Memory<short> Merge(params Memory<short>[] channels)
-        {
-            switch (channels.Length)
-            {
+namespace DragonLib.Audio {
+    public static class PCM {
+        public static Memory<short> Merge(params Memory<short>[] channels) {
+            switch (channels.Length) {
                 case 0:
                     return Memory<short>.Empty;
                 case 1:
@@ -19,6 +15,7 @@ namespace DragonLib.Audio
 
             var samples = channels[0].Length;
             if (channels.Any(x => x.Length != samples)) return Memory<short>.Empty;
+
             var channelCount = channels.Length;
             var stream = new Memory<short>(new short[samples * channelCount]);
             for (var i = 0; i < samples; ++i)
@@ -28,10 +25,8 @@ namespace DragonLib.Audio
             return stream;
         }
 
-        public static Memory<short>[] Separate(Memory<short> stream, int channelCount)
-        {
-            switch (channelCount)
-            {
+        public static Memory<short>[] Separate(Memory<short> stream, int channelCount) {
+            switch (channelCount) {
                 case 0:
                     return new[] { Memory<short>.Empty };
                 case 1:
@@ -49,31 +44,27 @@ namespace DragonLib.Audio
             return channels;
         }
 
-        public static Memory<byte> ConstructWAVE(short codec, short channels, int sampleRate, short blockAlign, int bps, Span<byte> stream)
-        {
+        public static Memory<byte> ConstructWAVE(short codec, short channels, int sampleRate, short blockAlign, int bps, Span<byte> stream) {
             var buffer = new Memory<byte>(new byte[44 + stream.Length]);
-            var header = new WAVEHeader
-            {
+            var header = new WAVEHeader {
                 Magic = 0x46464952,
                 Size = buffer.Length,
-                Format = 0x45564157,
+                Format = 0x45564157
             };
 
-            var fmt = new WAVEFormat
-            {
+            var fmt = new WAVEFormat {
                 Magic = 0x20746D66,
                 Size = 16,
                 Format = codec,
                 Channels = channels,
                 SampleRate = sampleRate,
                 BlockAlign = blockAlign,
-                BitsPerSample = (short) bps,
+                BitsPerSample = (short)bps
             };
             fmt.ByteRate = fmt.SampleRate * fmt.Channels * fmt.BitsPerSample / 8;
-            var dat = new WAVEData
-            {
+            var dat = new WAVEData {
                 Magic = 0x61746164,
-                Size = buffer.Length - 44,
+                Size = buffer.Length - 44
             };
 
             MemoryMarshal.Write(buffer.Span, ref header);

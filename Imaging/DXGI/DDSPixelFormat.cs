@@ -1,7 +1,5 @@
-namespace DragonLib.Imaging.DXGI
-{
-    public struct DDSPixelFormat
-    {
+namespace DragonLib.Imaging.DXGI {
+    public struct DDSPixelFormat {
         public int Size { get; set; }
         public int Flags { get; set; }
         public int FourCC { get; set; }

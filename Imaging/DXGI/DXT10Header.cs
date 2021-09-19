@@ -1,7 +1,5 @@
-﻿namespace DragonLib.Imaging.DXGI
-{
-    public struct DXT10Header
-    {
+﻿namespace DragonLib.Imaging.DXGI {
+    public struct DXT10Header {
         public int Format { get; set; }
         public DXT10ResourceDimension Dimension { get; set; }
         public int Misc { get; set; } // cubemap = 0x4

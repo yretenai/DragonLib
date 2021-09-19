@@ -1,13 +1,11 @@
-namespace DragonLib.Indent
-{
-    public class SpaceIndentHelper : IndentHelperBase
-    {
+namespace DragonLib.Indent {
+    public class SpaceIndentHelper : IndentHelperBase {
         protected override string TabCharacter => "  ";
 
-        protected override IndentHelperBase Clone() =>
-            new SpaceIndentHelper
-            {
-                TabSize = TabSize,
+        protected override IndentHelperBase Clone() {
+            return new SpaceIndentHelper {
+                TabSize = TabSize
             };
+        }
     }
 }

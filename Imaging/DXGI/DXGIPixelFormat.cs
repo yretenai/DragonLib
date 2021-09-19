@@ -1,9 +1,7 @@
 // ReSharper disable InconsistentNaming
 
-namespace DragonLib.Imaging.DXGI
-{
-    public enum DXGIPixelFormat : uint
-    {
+namespace DragonLib.Imaging.DXGI {
+    public enum DXGIPixelFormat : uint {
         UNKNOWN = 0x00,
         R32G32B32A32_TYPELESS = 0x01,
         R32G32B32A32_FLOAT = 0x02,
@@ -123,6 +121,6 @@ namespace DragonLib.Imaging.DXGI
         V208 = 0x83,
         V408 = 0x84,
         SAMPLER_FEEDBACK_MIN_MIP_OPAQUE = 0xBD,
-        SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE = 0xBE,
+        SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE = 0xBE
     }
 }

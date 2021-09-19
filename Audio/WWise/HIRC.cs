@@ -3,20 +3,15 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using DragonLib.Audio.WWise.Hierarchy;
 
-namespace DragonLib.Audio.WWise
-{
+namespace DragonLib.Audio.WWise {
     // Hierarchy
-    public class HIRC : BNKSection
-    {
-        public HIRC(Span<byte> data) : base(data)
-        {
+    public class HIRC : BNKSection {
+        public HIRC(Span<byte> data) : base(data) {
             Count = BinaryPrimitives.ReadInt32LittleEndian(data[8..]);
             var cursor = 12;
-            for (var i = 0; i < Count; ++i)
-            {
-                var kind = (HIRCSectionEnum) data[cursor];
-                HIRCSection section = kind switch
-                {
+            for (var i = 0; i < Count; ++i) {
+                var kind = (HIRCSectionEnum)data[cursor];
+                HIRCSection section = kind switch {
                     HIRCSectionEnum.Settings => new Settings(data[cursor..]),
                     //HIRCSectionEnum.SoundEffect => ,
                     //HIRCSectionEnum.EventAction => ,
@@ -36,7 +31,7 @@ namespace DragonLib.Audio.WWise
                     //HIRCSectionEnum.MotionEffect => ,
                     //HIRCSectionEnum.Effect => ,
                     //HIRCSectionEnum.AuxiliaryBus => ,
-                    _ => new BlankHIRC(data[cursor..]),
+                    _ => new BlankHIRC(data[cursor..])
                 };
                 cursor += 5 + section.Length;
                 Sections.Add(section);

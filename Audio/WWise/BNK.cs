@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DragonLib.Audio.WWise
-{
-    public class BNK
-    {
-        public BNK(Span<byte> buffer)
-        {
+namespace DragonLib.Audio.WWise {
+    public class BNK {
+        public BNK(Span<byte> buffer) {
             var cursor = 0;
-            while (cursor < buffer.Length)
-            {
+            while (cursor < buffer.Length) {
                 var magic = Encoding.ASCII.GetString(buffer.Slice(cursor, 4));
-                BNKSection instance = magic switch
-                {
+                BNKSection instance = magic switch {
                     "BKHD" => new BKHD(buffer[cursor..]),
                     "DATA" => new DATA(buffer[cursor..]),
                     "DIDX" => new DIDX(buffer[cursor..]),
@@ -21,7 +16,7 @@ namespace DragonLib.Audio.WWise
                     // "FXPR" => new FXPR(buffer.Slice(cursor)),
                     "HIRC" => new HIRC(buffer[cursor..]),
                     // "STID" => new STID(buffer.Slice(cursor)),
-                    _ => new DATA(buffer[cursor..]),
+                    _ => new DATA(buffer[cursor..])
                 };
                 cursor += 8 + instance.Length;
                 Sections.Add(instance);

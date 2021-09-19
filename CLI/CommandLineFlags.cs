@@ -6,12 +6,9 @@ using System.Linq;
 using System.Reflection;
 using DragonLib.IO;
 
-namespace DragonLib.CLI
-{
-    public static class CommandLineFlags
-    {
-        public static void PrintHelp(List<(CLIFlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked)
-        {
+namespace DragonLib.CLI {
+    public static class CommandLineFlags {
+        public static void PrintHelp(List<(CLIFlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked) {
             flags = flags.Where(x => x.Flag?.Hidden == false).ToList();
             var grouped = flags.GroupBy(x => x.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
 
@@ -29,65 +26,58 @@ namespace DragonLib.CLI
             var usageSlimMultiCh = string.Empty;
             var usageSlimPositional = string.Empty;
 
-            foreach (var (flag, originalType) in flags)
-            {
+            foreach (var (flag, originalType) in flags) {
                 if (flag == null) continue;
+
                 var type = originalType;
-                if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    type = type.GetGenericArguments()[0];
+                if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) type = type.GetGenericArguments()[0];
+
                 var tn = type.Name;
-                if (type.IsConstructedGenericType)
-                {
+                if (type.IsConstructedGenericType) {
                     var parameters = type.GetGenericArguments().Select(x => x.Name);
                     tn = type.Name[..type.Name.IndexOf('`')] + $"<{string.Join(", ", parameters)}>";
                 }
 
                 if (flag.Positional > -1) sizes[2] = Math.Max(sizes[2], $"Positional {flag.Positional + 1}".Length);
+
                 sizes[1] = Math.Max(sizes[1], tn.Length);
 
                 var hasValue = type.FullName != "System.Boolean";
                 var flagStr = flag.Flag;
                 if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
+
                 sizes[0] = Math.Max(sizes[0], flagStr.Length);
 
-                if (flag.Positional == -1)
-                {
+                if (flag.Positional == -1) {
                     var flagOne = flag.Flags.FirstOrDefault(x => x.Length == 1);
                     var flagTwo = flag.Flags.FirstOrDefault(x => x.Length > 1);
 
-                    if (type.FullName == "System.Boolean")
-                    {
-                        if (flag.IsRequired)
-                        {
+                    if (type.FullName == "System.Boolean") {
+                        if (flag.IsRequired) {
                             if (flagOne != null) usageSlimOneCh += flagOne;
 
                             if (flagTwo != null) usageSlimMultiCh += $"--{flagTwo} ";
                         }
-                        else
-                        {
+                        else {
                             if (flagOne != null) usageSlimOneChOptional += flagOne;
 
                             if (flagTwo != null) usageSlimMultiCh += $"[--{flagTwo}] ";
                         }
                     }
-                    else
-                    {
-                        if (flag.IsRequired)
-                        {
+                    else {
+                        if (flag.IsRequired) {
                             if (flagOne != null) usageSlimOneChValue += $"-{flagOne} value ";
 
                             if (flagTwo != null) usageSlimMultiCh += $"--{flagTwo} value ";
                         }
-                        else
-                        {
+                        else {
                             if (flagOne != null) usageSlimOneChValueOptional += $"[-{flagOne} value] ";
 
                             if (flagTwo != null) usageSlimMultiCh += $"[--{flagTwo} value] ";
                         }
                     }
                 }
-                else
-                {
+                else {
                     var positional = flag.Flag;
                     if (type.IsEquivalentTo(typeof(List<string>)) || type.IsEquivalentTo(typeof(HashSet<string>))) positional += "...";
 
@@ -113,27 +103,26 @@ namespace DragonLib.CLI
             Logger.Info("FLAG", usageSlim.TrimEnd());
             Logger.Info("FLAG", string.Empty);
 
-            foreach (var (group, attributes) in grouped)
-            {
+            foreach (var (group, attributes) in grouped) {
                 Logger.Info("FLAG", $"{group}:");
 
-                foreach (var (flag, originalType) in attributes)
-                {
+                foreach (var (flag, originalType) in attributes) {
                     if (flag == null) continue;
+
                     var type = originalType;
-                    if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                        type = type.GetGenericArguments()[0];
+                    if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) type = type.GetGenericArguments()[0];
+
                     var hasValue = type.FullName != "System.Boolean";
 
                     var tn = type.Name;
-                    if (type.IsConstructedGenericType)
-                    {
+                    if (type.IsConstructedGenericType) {
                         var parameters = type.GetGenericArguments().Select(x => x.Name);
                         tn = type.Name[..type.Name.IndexOf('`')] + $"<{string.Join(", ", parameters)}>";
                     }
 
                     var tp = string.Empty;
                     if (flag.Positional > -1) tp += $"Positional {flag.Positional + 1}";
+
                     tn = tn.PadRight(sizes[1]);
                     tp = tp.PadLeft(sizes[2]);
 
@@ -142,13 +131,13 @@ namespace DragonLib.CLI
                     if (type.IsValueType) def = Activator.CreateInstance(type);
 
                     if (flag.Default != null && !flag.Default.Equals(def) || type.IsEnum) requiredParts.Add($"Default: {flag.Default}");
+
                     if (flag.IsRequired) requiredParts.Add("Required");
-                    if (flag.ValidValues?.Length > 0)
-                    {
+
+                    if (flag.ValidValues?.Length > 0) {
                         requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
                     }
-                    else if (type.IsEnum)
-                    {
+                    else if (type.IsEnum) {
                         var names = Enum.GetNames(type);
                         requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
                         if (!helpInvoked && names.Length > 3) requiredParts[^1] += $", and {names.Length - 3} more";
@@ -159,6 +148,7 @@ namespace DragonLib.CLI
 
                     var flagStr = flag.Flag;
                     if (flag.Positional == -1) flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
+
                     Logger.Info("FLAG", flagStr.PadRight(sizes[0]) + "\t" + tn + "\t" + tp + "\t" + flag.Help + required);
                 }
 
@@ -166,29 +156,25 @@ namespace DragonLib.CLI
             }
         }
 
-        public static T? ParseFlags<T>() where T : ICLIFlags
-        {
+        public static T? ParseFlags<T>() where T : ICLIFlags {
             return ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
         }
 
-        public static T? ParseFlags<T>(params string[] arguments) where T : ICLIFlags
-        {
+        public static T? ParseFlags<T>(params string[] arguments) where T : ICLIFlags {
             return ParseFlags<T>(PrintHelp, arguments);
         }
 
-        public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, params string[] arguments) where T : ICLIFlags
-        {
+        public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, params string[] arguments) where T : ICLIFlags {
             var shouldExit = false;
             var instance = Activator.CreateInstance<T>();
             var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
             var typeMap = properties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
             var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
-            foreach (var @interface in typeof(T).GetInterfaces())
-            {
+            foreach (var @interface in typeof(T).GetInterfaces()) {
                 var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
-                foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).Where(x => x.Item2 != null))
-                {
+                foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).Where(x => x.Item2 != null)) {
                     if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1?.Equals(default) == false) continue;
+
                     propertySet.Item1 = info;
                     typeMap[propertyImplementation] = propertySet;
                 }
@@ -198,27 +184,20 @@ namespace DragonLib.CLI
 
             var argMap = new Dictionary<string, HashSet<int>>();
             var positionalMap = new HashSet<int>();
-            for (var index = 0; index < arguments.Length; index++)
-            {
+            for (var index = 0; index < arguments.Length; index++) {
                 var argument = arguments[index];
-                if (argument.StartsWith("-"))
-                {
-                    if (argument.StartsWith("--"))
-                    {
-                        if (!argMap.TryGetValue(argument[2..], out var argIndex))
-                        {
+                if (argument.StartsWith("-")) {
+                    if (argument.StartsWith("--")) {
+                        if (!argMap.TryGetValue(argument[2..], out var argIndex)) {
                             argIndex = new HashSet<int>();
                             argMap[argument[2..]] = argIndex;
                         }
 
                         argIndex.Add(index);
                     }
-                    else
-                    {
-                        foreach (var argc in argument[1..])
-                        {
-                            if (!argMap.TryGetValue(argc.ToString(), out var argIndex))
-                            {
+                    else {
+                        foreach (var argc in argument[1..]) {
+                            if (!argMap.TryGetValue(argc.ToString(), out var argIndex)) {
                                 argIndex = new HashSet<int>();
                                 argMap[argc.ToString()] = argIndex;
                             }
@@ -227,36 +206,31 @@ namespace DragonLib.CLI
                         }
                     }
                 }
-                else
-                {
+                else {
                     positionalMap.Add(index);
                 }
             }
 
             if (propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry))
-                if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag)))
-                {
+                if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag))) {
                     printHelp(typeMap.Values.ToList(), true);
                     Environment.Exit(0);
                     return null;
                 }
 
-            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional == -1))
-            {
+            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional == -1)) {
                 if (flag == null) continue;
+
                 var type = originalType;
                 var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-                if (isNullable)
-                    type = type.GetGenericArguments()[0];
+                if (isNullable) type = type.GetGenericArguments()[0];
+
                 var indexList = default(HashSet<int>);
                 foreach (var sw in flag.Flags)
-                {
                     if (argMap.TryGetValue(sw, out indexList))
                         break;
-                }
 
-                if (indexList == null && flag.IsRequired)
-                {
+                if (indexList == null && flag.IsRequired) {
                     Logger.Info("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                     shouldExit = true;
                 }
@@ -265,31 +239,24 @@ namespace DragonLib.CLI
 
                 if (indexList != null)
                     foreach (var index in indexList)
-                    {
-                        if (type.FullName == "System.Boolean")
-                        {
+                        if (type.FullName == "System.Boolean") {
                             if (value is not bool b) b = false;
 
                             value = !b;
                         }
-                        else
-                        {
+                        else {
                             var argument = arguments[index];
                             var hasInnateValue = argument.Contains('=');
                             string textValue;
-                            if (hasInnateValue)
-                            {
+                            if (hasInnateValue) {
                                 textValue = argument[(argument.IndexOf('=') + 1)..];
-                                if (string.IsNullOrWhiteSpace(textValue))
-                                {
+                                if (string.IsNullOrWhiteSpace(textValue)) {
                                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                                     shouldExit = true;
                                 }
                             }
-                            else
-                            {
-                                if (!positionalMap.Contains(index + 1))
-                                {
+                            else {
+                                if (!positionalMap.Contains(index + 1)) {
                                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                                     shouldExit = true;
                                 }
@@ -298,61 +265,53 @@ namespace DragonLib.CLI
                                 positionalMap.Remove(index + 1);
                             }
 
-                            if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
-                            {
+                            if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                                 var temp = default(object?);
                                 if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) return null;
+
                                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                                 type.GetMethod("Add")?.Invoke(value, new[] { temp });
                             }
-                            else if (VisitFlagValue<T>(type, textValue, flag, ref value))
-                            {
+                            else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
                                 return null;
                             }
                         }
-                    }
 
-                if (isNullable)
-                    value = Activator.CreateInstance(originalType, value);
-                
+                if (isNullable) value = Activator.CreateInstance(originalType, value);
+
                 property.SetValue(instance, value);
             }
 
             var positionals = positionalMap.Select(x => arguments[x]).ToList();
 
-            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional > -1))
-            {
+            foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional > -1)) {
                 if (flag == null) continue;
+
                 var type = originalType;
                 var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-                if (isNullable)
-                    type = type.GetGenericArguments()[0];
-                if (flag.IsRequired && flag.Positional >= positionalMap.Count)
-                {
+                if (isNullable) type = type.GetGenericArguments()[0];
+
+                if (flag.IsRequired && flag.Positional >= positionalMap.Count) {
                     Logger.Error("FLAG", $"Positional {flag.Flag} needs a value!");
                     shouldExit = true;
                 }
 
                 var value = flag.Default;
 
-
-                if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>))))
-                {
+                if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                     var temp = default(object?);
                     value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
-                    foreach (var textValue in positionals.Skip(flag.Positional))
-                    {
+                    foreach (var textValue in positionals.Skip(flag.Positional)) {
                         if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) return null;
+
                         type.GetMethod("Add")?.Invoke(value, new[] { temp });
                     }
                 }
-                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value))
-                {
+                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
                     shouldExit = true;
                 }
 
-                if (isNullable)
-                    value = Activator.CreateInstance(originalType, value);
+                if (isNullable) value = Activator.CreateInstance(originalType, value);
 
                 property.SetValue(instance, value);
             }
@@ -364,24 +323,18 @@ namespace DragonLib.CLI
             return null;
         }
 
-        private static bool VisitFlagValue<T>(Type type, string textValue, CLIFlagAttribute flag, ref object? value) where T : ICLIFlags
-        {
-            if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue))
-            {
+        private static bool VisitFlagValue<T>(Type type, string textValue, CLIFlagAttribute flag, ref object? value) where T : ICLIFlags {
+            if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(textValue)) {
                 Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
                 return true;
             }
 
-            if (type.IsEnum)
-            {
+            if (type.IsEnum) {
                 if (!Enum.TryParse(type, textValue, true, out value)) Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
             }
-            else
-            {
-                try
-                {
-                    value = type.FullName switch
-                    {
+            else {
+                try {
+                    value = type.FullName switch {
                         "System.Int64" => long.Parse(textValue, NumberStyles.Any),
                         "System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
                         "System.Int32" => int.Parse(textValue, NumberStyles.Any),
@@ -395,11 +348,10 @@ namespace DragonLib.CLI
                         "System.Half" => Half.Parse(textValue),
                         "System.String" => textValue,
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
-                        _ => InvokeVisitor<T>(flag, type, textValue),
+                        _ => InvokeVisitor<T>(flag, type, textValue)
                     };
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
                     return true;
                 }
@@ -408,19 +360,21 @@ namespace DragonLib.CLI
             return false;
         }
 
-        private static object? InvokeVisitor<T>(CLIFlagAttribute flag, Type type, string textValue) where T : ICLIFlags
-        {
+        private static object? InvokeVisitor<T>(CLIFlagAttribute flag, Type type, string textValue) where T : ICLIFlags {
             if (flag.Visitor == null) throw new InvalidCastException($"Cannot process {type.FullName}");
+
             var visitorClassName = flag.Visitor[..flag.Visitor.LastIndexOf(".", StringComparison.Ordinal)];
             var visitorMethodName = flag.Visitor[flag.Visitor.LastIndexOf(".", StringComparison.Ordinal)..];
             var visitorAssembly = flag.VisitorAssembly ?? typeof(T).Assembly;
             var visitorClass = visitorAssembly.GetType(visitorClassName);
             if (visitorClass == null) throw new InvalidDataException($"Cannot find visitor class {visitorClassName}");
+
             var visitorMethod = visitorClass.GetMethod(visitorMethodName, BindingFlags.Static);
             if (visitorMethod == null) throw new InvalidDataException($"Cannot find visitor method {visitorMethodName}");
+
             var parameters = visitorMethod.GetParameters();
-            if (visitorMethod.ReturnType.FullName != "System.Void" || parameters.Length != 1 || parameters[0].ParameterType.FullName != "System.String")
-                throw new InvalidDataException($"Visitor method {visitorClassName}.{visitorMethodName} does not match delegate template Func<in string, out object>");
+            if (visitorMethod.ReturnType.FullName != "System.Void" || parameters.Length != 1 || parameters[0].ParameterType.FullName != "System.String") throw new InvalidDataException($"Visitor method {visitorClassName}.{visitorMethodName} does not match delegate template Func<in string, out object>");
+
             return visitorMethod.Invoke(null, new object?[] { textValue });
         }
     }
