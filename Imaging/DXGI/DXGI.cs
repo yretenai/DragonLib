@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib.Imaging.DXGI
 {
-    [PublicAPI]
     public static class DXGI
     {
         public static Span<byte> BuildDDS(DXGIPixelFormat pixel, int mipCount, int width, int height, int frameCount, Span<byte> blob)
@@ -29,13 +27,13 @@ namespace DragonLib.Imaging.DXGI
                     RedMask = 0x0000_FF00,
                     GreenMask = 0x00FF_0000,
                     BlueMask = 0xFF00_0000,
-                    AlphaMask = 0x0000_00FF
+                    AlphaMask = 0x0000_00FF,
                 },
                 Caps1 = 0x1008,
                 Caps2 = 0,
                 Caps3 = 0,
                 Caps4 = 0,
-                Reserved2 = 0
+                Reserved2 = 0,
             };
             MemoryMarshal.Write(result, ref header);
             var dx10 = new DXT10Header
@@ -43,10 +41,10 @@ namespace DragonLib.Imaging.DXGI
                 Format = (int) pixel,
                 Dimension = DXT10ResourceDimension.TEXTURE2D,
                 Misc = 0,
-                Size = Math.Max(1, frameCount)
+                Size = Math.Max(1, frameCount),
             };
-            MemoryMarshal.Write(result.Slice(0x80), ref dx10);
-            blob.CopyTo(result.Slice(0x94));
+            MemoryMarshal.Write(result[0x80..], ref dx10);
+            blob.CopyTo(result[0x94..]);
             return result;
         }
 
@@ -78,7 +76,6 @@ namespace DragonLib.Imaging.DXGI
 
         public static Span<byte> DecompressDXGIFormat(Span<byte> data, int width, int height, DXGIPixelFormat format)
         {
-            var req = width * height * 4;
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (format)
             {

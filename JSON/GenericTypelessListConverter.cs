@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
-    [PublicAPI]
     public class GenericTypelessListConverter<T> : JsonConverter<List<T>>
     {
         public override List<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => throw new NotImplementedException();

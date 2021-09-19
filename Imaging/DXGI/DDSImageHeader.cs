@@ -1,8 +1,5 @@
-using JetBrains.Annotations;
-
 namespace DragonLib.Imaging.DXGI
 {
-    [PublicAPI]
     public unsafe struct DDSImageHeader
     {
         public int Magic { get; set; }

@@ -23,7 +23,7 @@ namespace DragonLib.OWM
                 ptr = 2;
             }
 
-            text.CopyTo(buffer.Slice(ptr));
+            text.CopyTo(buffer[ptr..]);
             return buffer;
         }
     }

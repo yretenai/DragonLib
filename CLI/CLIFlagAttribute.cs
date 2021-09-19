@@ -2,11 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
 
 namespace DragonLib.CLI
 {
-    [PublicAPI]
     [AttributeUsage(AttributeTargets.Property)]
     public class CLIFlagAttribute : Attribute
     {
@@ -21,8 +19,8 @@ namespace DragonLib.CLI
         public bool IsRequired { get; set; }
         public int Positional { get; set; } = -1;
         public object? Default { get; set; }
-        public string[]? ValidValues { get; set; } = new string[0];
-        public string[]? Aliases { get; set; } = new string[0];
+        public string[]? ValidValues { get; set; } = Array.Empty<string>();
+        public string[]? Aliases { get; set; } = Array.Empty<string>();
 
         public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };
 
@@ -41,7 +39,7 @@ namespace DragonLib.CLI
 
         public override bool Match(object? obj)
         {
-            if (!(obj is CLIFlagAttribute attribute)) return false;
+            if (obj is not CLIFlagAttribute attribute) return false;
 
             var otherFlags = attribute.Flags;
             return Flags.Any(flag => otherFlags.Contains(flag));

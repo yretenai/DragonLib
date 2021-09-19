@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
-    [PublicAPI]
     public class GenericTypelessDictionaryConverter<TKey, TValue> : JsonConverter<Dictionary<TKey, TValue>> where TKey : notnull
     {
-        public GenericTypelessDictionaryConverter(bool overrideIsStringKey, Type[] additonalTypes)
+        public GenericTypelessDictionaryConverter(bool overrideIsStringKey, IEnumerable<Type> additonalTypes)
         {
             if((!IsStringKey && additonalTypes.Any(x => x.IsAssignableFrom(typeof(TKey)))) || overrideIsStringKey) IsStringKey = true;
         }
@@ -31,13 +29,13 @@ namespace DragonLib.JSON
             {
                 if (IsStringKey)
                 {
-                    writer.WritePropertyName(key?.ToString() ?? "");
+                    writer.WritePropertyName(key.ToString() ?? "");
                 }
                 else
                 {
                     writer.WriteStartObject();
                     writer.WritePropertyName("Key");
-                    JsonSerializer.Serialize(writer, key, key?.GetType() ?? typeof(TKey), options);
+                    JsonSerializer.Serialize(writer, key, key.GetType(), options);
                     writer.WritePropertyName("Value");
                 }
 

@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using DragonLib.Indent;
-using JetBrains.Annotations;
 
 namespace DragonLib.XML
 {
-    [PublicAPI]
     public interface IDragonMLSerializer
     {
         DragonMLType OverrideTarget { get; }

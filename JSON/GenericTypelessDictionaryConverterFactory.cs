@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
-    [PublicAPI]
     public class GenericTypelessDictionaryConverterFactory : JsonConverterFactory
     {
         private bool OverrideIsStringKey { get; }

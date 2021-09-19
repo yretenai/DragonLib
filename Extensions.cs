@@ -2,23 +2,17 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using DragonLib.Numerics;
-using JetBrains.Annotations;
-#if NET5_0
-using Half = DragonLib.Numerics.Half;
-#endif
 
 namespace DragonLib
 {
-    [PublicAPI]
     public static class Extensions
     {
         private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
 
-        private static string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
-        
+        private static readonly string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+
         public static string SanitizeFilename(this string path)
         {
             var illegal = Path.GetInvalidFileNameChars();
@@ -35,11 +29,14 @@ namespace DragonLib
 
         public static string? ReadString(this Span<byte> data, Encoding? encoding = null)
         {
-            if (data.Length == 0 || data[0] == 0) return null;
+            if (data.Length == 0 ||
+                data[0] == 0)
+                return null;
+
             var index = data.IndexOf<byte>(0);
             if (index <= -1) index = data.Length;
 
-            return (encoding ?? Encoding.UTF8).GetString(data.Slice(0, index));
+            return (encoding ?? Encoding.UTF8).GetString(data[..index]);
         }
 
         public static string ReadStringNonNull(this Span<byte> data, Encoding? encoding = null) => ReadString(data, encoding) ?? string.Empty;
@@ -121,6 +118,7 @@ namespace DragonLib
         public static Span<byte> ToSpan(this Stream stream)
         {
             if (stream.Length - stream.Position == 0) return Span<byte>.Empty;
+
             var buffer = new Span<byte>(new byte[stream.Length - stream.Position]);
             stream.Read(buffer);
             return buffer;
@@ -135,7 +133,9 @@ namespace DragonLib
         public static string[] ToHexOctetsA(this string? input)
         {
             var cleaned = input?.Replace(" ", string.Empty).Trim();
-            if (cleaned == null || cleaned.Length % 2 != 0) return new string[] { };
+            if (cleaned == null ||
+                cleaned.Length % 2 != 0)
+                return Array.Empty<string>();
 
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => cleaned.Substring(x, 2)).ToArray();
         }
@@ -145,7 +145,9 @@ namespace DragonLib
         public static byte[] ToHexOctetsB(this string? input)
         {
             var cleaned = input?.Replace(" ", string.Empty).Trim();
-            if (cleaned == null || cleaned.Length % 2 != 0) return new byte[] { };
+            if (cleaned == null ||
+                cleaned.Length % 2 != 0)
+                return Array.Empty<byte>();
 
             return Enumerable.Range(0, cleaned.Length).Where(x => x % 2 == 0).Select(x => byte.Parse(cleaned.Substring(x, 2), NumberStyles.HexNumber)).ToArray();
         }
@@ -154,6 +156,7 @@ namespace DragonLib
         {
             var signatureOctets = signatureTemplate.ToHexOctetsA();
             if (signatureOctets.Length < 1) return -1;
+
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
             for (var ptr = 0; ptr < buffer.Length - signature.Length; ++ptr)
             {
@@ -162,7 +165,9 @@ namespace DragonLib
                 for (var i = 0; i < signature.Length; ++i)
                 {
                     var b = signature[i];
-                    if (b != null && b != slice[i]) found = false;
+                    if (b != null &&
+                        b != slice[i])
+                        found = false;
                 }
 
                 if (found) return ptr;
@@ -175,8 +180,11 @@ namespace DragonLib
         {
             var signatureOctets = signatureTemplate.ToHexOctetsA();
             if (signatureOctets.Length < 1) return -1;
+
             var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
-            if (start == -1 || start + signature.Length > buffer.Length) start = buffer.Length - signature.Length;
+            if (start == -1 ||
+                start + signature.Length > buffer.Length)
+                start = buffer.Length - signature.Length;
             for (var ptr = start; ptr > 0; --ptr)
             {
                 var slice = buffer.Slice(ptr, signature.Length);
@@ -184,7 +192,9 @@ namespace DragonLib
                 for (var i = 0; i < signature.Length; ++i)
                 {
                     var b = signature[i];
-                    if (b != null && b != slice[i]) found = false;
+                    if (b != null &&
+                        b != slice[i])
+                        found = false;
                 }
 
                 if (found) return ptr;
@@ -198,7 +208,7 @@ namespace DragonLib
             for (var ptr = 0; ptr < buffer.Length - length; ++ptr)
             {
                 var slice = buffer.Slice(ptr, length);
-                if (slice.ToArray().All(x => x >= 0x30 && x <= 0x7F)) return ptr;
+                if (slice.ToArray().All(x => x is >= 0x30 and <= 0x7F)) return ptr;
             }
 
             return -1;
@@ -207,16 +217,21 @@ namespace DragonLib
         // https://stackoverflow.com/questions/15743192/check-if-number-is-prime-number
         public static bool IsPrime(this int number)
         {
-            if (number <= 1) return false;
-            if (number == 2) return true;
+            switch (number)
+            {
+                case <= 1:
+                    return false;
+                case 2:
+                    return true;
+            }
+
             if (number % 2 == 0) return false;
 
             var boundary = (int) Math.Floor(Math.Sqrt(number));
 
             for (var i = 3; i <= boundary; i += 2)
             {
-                if (number % i == 0)
-                    return false;
+                if (number % i == 0) return false;
             }
 
             return true;
@@ -237,11 +252,12 @@ namespace DragonLib
         /// <returns></returns>
         public static short ShortClamp(this int value)
         {
-            if (value > short.MaxValue)
-                return short.MaxValue;
-            if (value < short.MinValue)
-                return short.MinValue;
-            return (short) value;
+            return value switch
+            {
+                > short.MaxValue => short.MaxValue,
+                < short.MinValue => short.MinValue,
+                _ => (short) value,
+            };
         }
 
         /// <summary>
@@ -283,7 +299,10 @@ namespace DragonLib
             {
                 var divisor = Math.Pow(0x400, i);
                 var nextDivisor = Math.Pow(0x400, i + 1);
-                if (!(bytes < nextDivisor) && i != BytePoints.Length - 1) continue;
+                if (!(bytes < nextDivisor) &&
+                    i != BytePoints.Length - 1)
+                    continue;
+
                 var normalized = Math.Floor(bytes / (divisor / 10)) / 10;
                 return $"{normalized} {BytePoints[i]}";
             }
@@ -299,21 +318,16 @@ namespace DragonLib
 
         #region System.Numerics
 
-        public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix) => new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
+        public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix) => new(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
 
-        public static Vector2 ToDragon(this System.Numerics.Vector2 vector) => new Vector2(vector.X, vector.Y);
+        public static Vector2 ToDragon(this System.Numerics.Vector2 vector) => new(vector.X, vector.Y);
 
-        public static Vector3 ToDragon(this System.Numerics.Vector3 vector) => new Vector3(vector.X, vector.Y, vector.Z);
+        public static Vector3 ToDragon(this System.Numerics.Vector3 vector) => new(vector.X, vector.Y, vector.Z);
 
+        public static Vector4 ToDragon(this System.Numerics.Vector4 vector) => new(vector.X, vector.Y, vector.Z);
 
-        public static Vector4 ToDragon(this System.Numerics.Vector4 vector) => new Vector4(vector.X, vector.Y, vector.Z);
+        public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 
-        public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) => new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-
-        #if NET5_0
-        public static Half ToDragon(this System.Half half) => new Half((float)half);
-        #endif
-        
         #endregion
     }
 }

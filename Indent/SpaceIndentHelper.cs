@@ -1,16 +1,13 @@
-using JetBrains.Annotations;
-
 namespace DragonLib.Indent
 {
-    [PublicAPI]
     public class SpaceIndentHelper : IndentHelperBase
     {
-        protected override string TabCharacter { get; } = "  ";
+        protected override string TabCharacter => "  ";
 
         protected override IndentHelperBase Clone() =>
             new SpaceIndentHelper
             {
-                TabSize = TabSize
+                TabSize = TabSize,
             };
     }
 }

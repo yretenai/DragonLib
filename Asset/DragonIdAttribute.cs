@@ -1,9 +1,8 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset
 {
-    [PublicAPI]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class DragonIdAttribute : Attribute
     {
         public DragonIdAttribute() { }
@@ -19,7 +18,7 @@ namespace DragonLib.Asset
                 DragonIdAttribute attr => attr.Id.Equals(Id),
                 DragonAssetSectionId id => id.Equals(Id),
                 ulong number => number.Equals((ulong) Id),
-                _ => base.Equals(obj)
+                _ => base.Equals(obj),
             };
 
         public override int GetHashCode() => Id.GetHashCode();

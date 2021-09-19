@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset
 {
-    [PublicAPI]
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct DragonAssetSectionHeader
     {
@@ -14,6 +12,6 @@ namespace DragonLib.Asset
         public int Size { get; set; }
         public int Count { get; set; }
 
-        internal static int SectionHeaderSize = SizeHelper.SizeOf<DragonAssetSectionHeader>();
+        internal static readonly int SectionHeaderSize = SizeHelper.SizeOf<DragonAssetSectionHeader>();
     }
 }

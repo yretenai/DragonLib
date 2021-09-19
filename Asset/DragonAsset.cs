@@ -6,11 +6,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using DragonLib.Asset.Sections;
 using DragonLib.IO;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset
 {
-    [PublicAPI]
     public class DragonAsset
     {
         public static Dictionary<DragonAssetSectionId, Type> SectionTypes = BaseSection.Type.Assembly.GetTypes().Where(x => BaseSection.Type.IsAssignableFrom(x)).Select(x => (Id: x.GetCustomAttribute<DragonIdAttribute>()?.Id ?? 0, Type: x)).Where(x => x.Id != 0).ToDictionary(x => x.Id, x => x.Type);
@@ -35,7 +33,7 @@ namespace DragonLib.Asset
 
         private BaseSection ReadSection(Memory<byte> buffer, ref int ptr)
         {
-            var header = MemoryMarshal.Read<DragonAssetSectionHeader>(buffer.Span.Slice(ptr));
+            var header = MemoryMarshal.Read<DragonAssetSectionHeader>(buffer.Span[ptr..]);
             var sz = DragonAssetSectionHeader.SectionHeaderSize;
             if (header.Size < sz) throw new InvalidDataException($"Section size is under minimum of {sz} bytes");
             var chunk = header.Size == DragonAssetSectionHeader.SectionHeaderSize ? Memory<byte>.Empty : buffer.Slice(ptr + sz, header.Size - sz);

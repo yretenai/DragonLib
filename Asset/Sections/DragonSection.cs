@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset.Sections
 {
-    [PublicAPI]
     [DragonId(DragonAssetSectionId.Dragon)]
     public class DragonSection : BaseSection
     {
-        public static readonly Guid StandardGuid = new Guid(new byte[] { 0xAB, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A, 0xAB, 0xAB, 0xBB, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A, 0xAB, 0xBB });
+        public static readonly Guid StandardGuid = new(new byte[] { 0xAB, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A, 0xAB, 0xAB, 0xBB, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A, 0xAB, 0xBB });
 
         public DragonSection() : base(DragonAssetSectionId.Dragon, StandardGuid) { }
 

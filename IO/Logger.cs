@@ -7,28 +7,25 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using JetBrains.Annotations;
 using static DragonLib.IO.ConsoleSwatch;
 
 namespace DragonLib.IO
 {
-    [PublicAPI]
     public static class Logger
     {
-        public static bool ShowTime = true;
-        public static bool ShowThread;
-        public static bool ShowLevel;
-        public static bool ShowCategory = true;
+        public static bool ShowTime { get; set; } = true;
+        public static bool ShowThread { get; set; }
+        public static bool ShowLevel { get; set; }
+        public static bool ShowCategory { get; set; } = true;
 
 #if DEBUG
-        public static bool ShowDebug = true;
+        public static bool ShowDebug { get; set; } = true;
 #else
-        public static bool ShowDebug;
+        public static bool ShowDebug { get; set; }
 #endif
 
-        public static bool Enabled = true;
-        public static bool UseColor = true;
+        public static bool Enabled { get; set; } = true;
+        public static bool UseColor { get; set; } = true;
 
         public static void Log4Bit(ConsoleColor color, bool newLine, TextWriter writer, string? category, string? level, string? message)
         {
@@ -50,7 +47,7 @@ namespace DragonLib.IO
             if (!string.IsNullOrWhiteSpace(category) && ShowTime) parts.Add(DateTimeOffset.UtcNow.ToString("s"));
             if (!string.IsNullOrWhiteSpace(category) && ShowCategory) parts.Add(category);
             if (!string.IsNullOrWhiteSpace(level) && ShowLevel) parts.Add(level);
-            if (ShowThread) parts.Add(Thread.CurrentThread.ManagedThreadId.ToString("D"));
+            if (ShowThread) parts.Add(Environment.CurrentManagedThreadId.ToString("D"));
             var content = message ?? string.Empty;
             var prefix = default(string);
             if (parts.Count > 0) prefix = string.Join(string.Empty, parts.Select(x => $"[{x}]"));
@@ -81,11 +78,13 @@ namespace DragonLib.IO
             }
 
             var (prefix, content) = FormatMessage(category, level, message);
-            if (!string.IsNullOrWhiteSpace(category) && UseColor && Console.CursorLeft == 0)
+            if (!string.IsNullOrWhiteSpace(category) &&
+                UseColor &&
+                Console.CursorLeft == 0)
             {
                 writer.Write(XTermColor.Grey24.ToForeground());
                 writer.Write((prefix ?? string.Empty) + " ");
-                writer.Write(COLOR_RESET);
+                writer.Write(ColorReset);
                 prefix = string.Empty;
             }
 
@@ -97,24 +96,23 @@ namespace DragonLib.IO
             if (!string.IsNullOrWhiteSpace(prefix)) output = $"{prefix} {content}";
             writer.Write(output);
 
-            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background))) writer.Write(COLOR_RESET);
+            if (UseColor && (!string.IsNullOrWhiteSpace(foreground) || !string.IsNullOrWhiteSpace(background))) writer.Write(ColorReset);
 
             if (newLine) writer.WriteLine();
         }
 
-        public static void Success(string? category, string message) =>
-            Log(XTermColor.Green, true, Console.Out, category, "OK", message);
+        public static void Success(string? category, string message) => Log(XTermColor.Green, true, Console.Out, category, "OK", message);
 
         public static void PrintVersion(string? category, string template = "{0} v{1}", Assembly? asm = null, string argsTemplate = "Arguments: {0}")
         {
             asm ??= Assembly.GetEntryAssembly();
             if (asm == null) return;
+
             Log(XTermColor.White, true, Console.Error, category, default, string.Format(template, asm.GetName().Name, asm.GetName().Version));
             Log(XTermColor.White, true, Console.Error, category, default, string.Format(argsTemplate, JsonSerializer.Serialize(Environment.GetCommandLineArgs().Skip(1))));
         }
 
-        public static void Info(string? category, string message) =>
-            Log(XTermColor.White, true, Console.Out, category, "INFO", message);
+        public static void Info(string? category, string message) => Log(XTermColor.White, true, Console.Out, category, "INFO", message);
 
         public static void Debug(string? category, string message)
         {
@@ -123,12 +121,9 @@ namespace DragonLib.IO
             Log(XTermColor.Grey, true, Console.Out, category, "DEBUG", message);
         }
 
-        public static void Warn(string? category, string message) =>
-            Log(XTermColor.LightYellow, true, Console.Error, category, "WARN", message);
+        public static void Warn(string? category, string message) => Log(XTermColor.LightYellow, true, Console.Error, category, "WARN", message);
 
-        public static void Error(string? category, string message) =>
-            Log(XTermColor.Red, true, Console.Out, category, "ERROR", message);
-
+        public static void Error(string? category, string message) => Log(XTermColor.Red, true, Console.Out, category, "ERROR", message);
 
         public static void Error(string? category, string message, Exception e)
         {
@@ -138,8 +133,7 @@ namespace DragonLib.IO
 
         public static void Error(string? category, Exception e) => Error(category, e.ToString());
 
-        public static void Fatal(string? category, string message) =>
-            Log(XTermColor.Red, true, Console.Out, category, "FATAL", message);
+        public static void Fatal(string? category, string message) => Log(XTermColor.Red, true, Console.Out, category, "FATAL", message);
 
         public static void Fatal(string? category, Exception e) => Error(category, e.ToString());
 
@@ -148,7 +142,7 @@ namespace DragonLib.IO
             if (!EnableVT())
                 Console.ResetColor();
             else
-                writer.Write(COLOR_RESET);
+                writer.Write(ColorReset);
         }
 
         public static string ReadLine(TextWriter writer, bool @private)
@@ -243,15 +237,16 @@ namespace DragonLib.IO
         public static bool Assert(bool condition, string? message = null, params string[] detail)
         {
             if (condition) return false;
+
             var trace = new StackTrace(1, true);
             var frame = trace.GetFrame(0);
 
             Log(XTermColor.Purple, true, Console.Error, default, "ASSERT", $"Assertion failed at {frame?.ToString().Trim() ?? "unknown location"}");
 
-            if (message != null)
-                Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + message);
+            if (message != null) Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + message);
 
             if (!(detail.Length > 0)) return true;
+
             foreach (var line in detail) Log(XTermColor.Purple, true, Console.Error, default, default, "\t -> " + line);
 
             return true;
@@ -263,6 +258,7 @@ namespace DragonLib.IO
         public static void Trace()
         {
             if (!ShowDebug) return;
+
             var trace = new StackTrace(1, true);
 
             Log(XTermColor.HotPink3, true, Console.Error, default, "TRACE", trace.ToString().Trim());

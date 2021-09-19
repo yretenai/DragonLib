@@ -1,8 +1,5 @@
-﻿using JetBrains.Annotations;
-
-namespace DragonLib.Asset
+﻿namespace DragonLib.Asset
 {
-    [PublicAPI]
     public enum DragonAssetSectionId : ulong
     {
         Dragon = 0x0A1A4E4F47415244,
@@ -25,6 +22,6 @@ namespace DragonLib.Asset
         VoxelMaterial = 0x54414D4C45584F56,
         Animation = 0x5F4554414D494E41,
         AnimationTrack = 0x4B43415254494E41,
-        Asset = 0x5F5F5F5445535341
+        Asset = 0x5F5F5F5445535341,
     }
 }

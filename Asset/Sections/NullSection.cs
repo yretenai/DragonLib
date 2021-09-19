@@ -1,9 +1,7 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset.Sections
 {
-    [PublicAPI]
     [DragonId(DragonAssetSectionId.Null)]
     public class NullSection : BaseSection
     {

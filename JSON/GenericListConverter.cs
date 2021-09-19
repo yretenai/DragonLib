@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
-    [PublicAPI]
     public class GenericListConverter<T> : JsonConverter<List<T>>
     {
         public static bool TryReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options, out T value)
@@ -24,7 +22,7 @@ namespace DragonLib.JSON
             var type = Type.GetType(typeName);
             if (type == null) return false;
 
-            value = (reader.TokenType == JsonTokenType.Null ? default : (T) JsonSerializer.Deserialize(ref reader, type, options))!;
+            value = (reader.TokenType == JsonTokenType.Null ? default : (T) JsonSerializer.Deserialize(ref reader, type, options)!)!;
             reader.Read();
             return reader.TokenType == JsonTokenType.EndArray;
         }

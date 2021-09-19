@@ -1,10 +1,7 @@
-using JetBrains.Annotations;
-
 // ReSharper disable InconsistentNaming
 
 namespace DragonLib.Imaging.DXGI
 {
-    [PublicAPI]
     public enum DXGIPixelFormat : uint
     {
         UNKNOWN = 0x00,
@@ -106,11 +103,26 @@ namespace DragonLib.Imaging.DXGI
         BC7_TYPELESS = 0x61,
         BC7_UNORM = 0x62,
         BC7_UNORM_SRGB = 0x63,
+        AYUV = 0x64,
+        Y410 = 0x65,
+        Y416 = 0x66,
+        NV12 = 0x67,
+        P010 = 0x68,
+        P016 = 0x69,
+        OPAQUE_420 = 0x6A,
+        YUY2 = 0x6B,
+        Y210 = 0x6C,
+        Y216 = 0x6D,
+        NV11 = 0x6E,
+        AI44 = 0x6F,
+        IA44 = 0x70,
+        P8 = 0x71,
+        A8P8 = 0x72,
         B4G4R4A4_UNORM = 0x73,
         P208 = 0x82,
         V208 = 0x83,
         V408 = 0x84,
-        DXGI_END,
-        FORCE_UINT = 0xFFFF_FFFF
+        SAMPLER_FEEDBACK_MIN_MIP_OPAQUE = 0xBD,
+        SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE = 0xBE,
     }
 }

@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib
 {
-    [PublicAPI]
     public static class DataTypeHelper
     {
-        public static Dictionary<Type, Dictionary<string, string>> Cache { get; } = new Dictionary<Type, Dictionary<string, string>>();
+        public static Dictionary<Type, Dictionary<string, string>> Cache { get; } = new();
 
         public static void Preload<T>() where T : struct
         {

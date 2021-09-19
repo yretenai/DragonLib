@@ -1,17 +1,15 @@
 using System;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace DragonLib.Indent
 {
-    [PublicAPI]
     public class IndentHelperBase
     {
         internal string? CachedTabs;
         protected int TabSize { get; set; }
 
-        protected virtual string TabCharacter { get; } = "";
-        
+        protected virtual string TabCharacter => "";
+
         protected bool Equals(IndentHelperBase other) => TabSize == other.TabSize && TabCharacter == other.TabCharacter;
 
         public override bool Equals(object? obj)
@@ -48,9 +46,9 @@ namespace DragonLib.Indent
         public static bool operator !=(IndentHelperBase a, int c) => a.TabSize != c;
 
         protected virtual IndentHelperBase Clone() =>
-            new IndentHelperBase
+            new()
             {
-                TabSize = TabSize
+                TabSize = TabSize,
             };
 
         public string Compile() => string.Join(string.Empty, Enumerable.Repeat(TabCharacter, TabSize));

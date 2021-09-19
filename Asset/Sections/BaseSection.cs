@@ -1,12 +1,10 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace DragonLib.Asset.Sections
 {
-    [PublicAPI]
-    public class BaseSection
+    public abstract class BaseSection
     {
-        internal static Type Type = typeof(BaseSection);
+        internal static readonly Type Type = typeof(BaseSection);
 
         public BaseSection(DragonAssetSectionId id, Guid guid) =>
             Header = new DragonAssetSectionHeader
@@ -14,7 +12,7 @@ namespace DragonLib.Asset.Sections
                 Magic = id,
                 Size = DragonAssetSectionHeader.SectionHeaderSize,
                 Count = 0,
-                Guid = guid
+                Guid = guid,
             };
 
         public BaseSection(DragonAssetSectionHeader header, Memory<byte> buffer) => Header = header;

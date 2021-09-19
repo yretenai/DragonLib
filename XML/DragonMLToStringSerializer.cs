@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using DragonLib.Indent;
-using JetBrains.Annotations;
 
 namespace DragonLib.XML
 {
-    [PublicAPI]
     public class DragonMLToStringSerializer : IDragonMLSerializer
     {
         public static readonly IDragonMLSerializer Default = new DragonMLToStringSerializer();

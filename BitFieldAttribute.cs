@@ -1,9 +1,7 @@
 using System;
-using JetBrains.Annotations;
 
 namespace DragonLib
 {
-    [PublicAPI]
     [AttributeUsage(AttributeTargets.Property)]
     public class BitFieldAttribute : Attribute
     {

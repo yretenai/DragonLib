@@ -1,9 +1,7 @@
 ﻿using System.Linq;
-using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
-    [PublicAPI]
     public struct Matrix4x3
     {
         public float M11 { get; }

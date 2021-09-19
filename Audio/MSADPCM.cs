@@ -1,28 +1,28 @@
 using System;
-using JetBrains.Annotations;
 
 namespace DragonLib.Audio
 {
     // Based off MonoGame
     // https://github.com/MonoGame/MonoGame/blob/8d46b78c7003ae273825daa3a5aad30bd3c576f0/MonoGame.Framework/Platform/Audio/AudioLoader.cs
-    [PublicAPI]
     public static class MSADPCM
     {
-        private static int[] StepTable = { 230, 230, 230, 230, 307, 409, 512, 614, 768, 614, 512, 409, 307, 230, 230, 230 };
+        private static readonly int[] StepTable = { 230, 230, 230, 230, 307, 409, 512, 614, 768, 614, 512, 409, 307, 230, 230, 230 };
 
-        private static int[] CoefficientTable1 = { 256, 512, 0, 192, 240, 460, 392 };
+        private static readonly int[] CoefficientTable1 = { 256, 512, 0, 192, 240, 460, 392 };
 
-        private static int[] CoefficientTable2 = { 0, -256, 0, 64, 0, -208, -232 };
+        private static readonly int[] CoefficientTable2 = { 0, -256, 0, 64, 0, -208, -232 };
 
         private static int MSADPCMExpandNibble(ref MSADPCMState channel, int nibble)
         {
             var nibbleSign = nibble - ((nibble & 0x08) != 0 ? 0x10 : 0);
             var predictor = (channel.Sample1 * channel.Coefficient1 + channel.Sample2 * channel.Coefficient2) / 256 + nibbleSign * channel.Delta;
 
-            if (predictor < -32768)
-                predictor = -32768;
-            else if (predictor > 32767)
-                predictor = 32767;
+            predictor = predictor switch
+            {
+                < -32768 => -32768,
+                > 32767 => 32767,
+                _ => predictor,
+            };
 
             channel.Sample2 = channel.Sample1;
             channel.Sample1 = predictor;

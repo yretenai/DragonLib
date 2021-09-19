@@ -1,12 +1,10 @@
-using JetBrains.Annotations;
 using System;
 
 namespace DragonLib
 {
-    [PublicAPI]
     public interface ISingleton<T> where T : class, new()
     {
-        private static Lazy<T> SingletonInstance { get; } = new Lazy<T>(() => new T());
+        private static Lazy<T> SingletonInstance { get; } = new(() => new T());
 
         public static T Instance => SingletonInstance.Value;
         public static bool IsCreated => SingletonInstance.IsValueCreated;

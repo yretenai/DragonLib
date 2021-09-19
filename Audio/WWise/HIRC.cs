@@ -2,24 +2,22 @@
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using DragonLib.Audio.WWise.Hierarchy;
-using JetBrains.Annotations;
 
 namespace DragonLib.Audio.WWise
 {
     // Hierarchy
-    [PublicAPI]
     public class HIRC : BNKSection
     {
         public HIRC(Span<byte> data) : base(data)
         {
-            Count = BinaryPrimitives.ReadInt32LittleEndian(data.Slice(8));
+            Count = BinaryPrimitives.ReadInt32LittleEndian(data[8..]);
             var cursor = 12;
             for (var i = 0; i < Count; ++i)
             {
                 var kind = (HIRCSectionEnum) data[cursor];
                 HIRCSection section = kind switch
                 {
-                    HIRCSectionEnum.Settings => new Settings(data.Slice(cursor)),
+                    HIRCSectionEnum.Settings => new Settings(data[cursor..]),
                     //HIRCSectionEnum.SoundEffect => ,
                     //HIRCSectionEnum.EventAction => ,
                     //HIRCSectionEnum.Event => ,
@@ -29,7 +27,7 @@ namespace DragonLib.Audio.WWise
                     //HIRCSectionEnum.AudioBus => ,
                     //HIRCSectionEnum.BlendContainer => ,
                     //HIRCSectionEnum.MusicSegment => ,
-                    HIRCSectionEnum.MusicTrack => new MusicTrack(data.Slice(cursor)),
+                    HIRCSectionEnum.MusicTrack => new MusicTrack(data[cursor..]),
                     //HIRCSectionEnum.MusicSwitch => ,
                     //HIRCSectionEnum.MusicPlaylist => ,
                     //HIRCSectionEnum.Attenuation => ,
@@ -38,7 +36,7 @@ namespace DragonLib.Audio.WWise
                     //HIRCSectionEnum.MotionEffect => ,
                     //HIRCSectionEnum.Effect => ,
                     //HIRCSectionEnum.AuxiliaryBus => ,
-                    _ => new BlankHIRC(data.Slice(cursor))
+                    _ => new BlankHIRC(data[cursor..]),
                 };
                 cursor += 5 + section.Length;
                 Sections.Add(section);
@@ -47,6 +45,6 @@ namespace DragonLib.Audio.WWise
 
         public int Count { get; }
 
-        public List<HIRCSection> Sections { get; } = new List<HIRCSection>();
+        public List<HIRCSection> Sections { get; } = new();
     }
 }

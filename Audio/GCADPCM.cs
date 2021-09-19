@@ -1,12 +1,10 @@
 using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib.Audio
 {
     // Based off VGAudio
     // https://github.com/Thealexbarney/VGAudio/blob/d66b7b7b9fde1ed3b01683e0e66fff747bbd816f/src/VGAudio/Codecs/GcAdpcm/GcAdpcmDecoder.cs
-    [PublicAPI]
     public static class GCADPCM
     {
         public static Span<byte> Decode(Span<byte> adpcm, short[] coefficients, int sampleCount)

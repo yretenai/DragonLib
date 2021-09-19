@@ -5,15 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using DragonLib.Indent;
-using JetBrains.Annotations;
 
 namespace DragonLib.XML
 {
-    [PublicAPI]
     public static class DragonML
     {
-        private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new Dictionary<Type, MemberInfo[]>();
-        private static readonly Dictionary<Type, DragonMLType> TargetCache = new Dictionary<Type, DragonMLType>();
+        private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new();
+        private static readonly Dictionary<Type, DragonMLType> TargetCache = new();
         public static string CreateNamespacedTag(string? tag, string? ns)
         {
             if (tag == null) return "";
@@ -56,7 +54,7 @@ namespace DragonLib.XML
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
                         if (target == DragonMLType.Enumerable && instance is IEnumerable enumerable) instance = enumerable.Cast<object>().ToArray();
-                        if (!(instance is Array array))
+                        if (instance is not Array array)
                             tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)} />\n";
                         else
                             for (long i = 0; i < array.LongLength; ++i)
@@ -148,7 +146,7 @@ namespace DragonLib.XML
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         var tag = $"{indents}<{CreateNamespacedTag("map", settings.Namespace)}{hmlIdTag}{hmlNameTag}{hmlKeyTag}{hmlValueTag}";
 
-                        if (!(instance is IDictionary dictionary)) return null;
+                        if (instance is not IDictionary dictionary) return null;
 
                         if (dictionary.Count == 0)
                         {
@@ -183,9 +181,14 @@ namespace DragonLib.XML
                                 // ReSharper disable once PossibleNullReferenceException
                                 tag += $"{innerIndent}<{FormatName(valueType?.Name)}";
 
-                            if (keyTarget == DragonMLType.Null)
-                                tag += " />";
-                            else if (keyTarget < DragonMLType.Complex) tag += $" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
+                            switch (keyTarget) {
+                                case DragonMLType.Null:
+                                    tag += " />";
+                                    break;
+                                case < DragonMLType.Complex:
+                                    tag += $" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
+                                    break;
+                            }
 
                             if (valueTarget != DragonMLType.Null && valueTarget < DragonMLType.Complex) tag += $" {CreateNamespacedTag("value", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMLToStringSerializer.Default).Print(value, visited, innerIndent, valueName, settings))}\"";
 
@@ -227,7 +230,7 @@ namespace DragonLib.XML
                 customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type)).Value;
                 target = customSerializer.OverrideTarget;
             }
-            else if (type != null && type.IsConstructedGenericType && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition())))
+            else if (type is { IsConstructedGenericType: true } && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition())))
             {
                 customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition())).Value;
                 target = customSerializer.OverrideTarget;
@@ -252,7 +255,7 @@ namespace DragonLib.XML
             {
                 FieldInfo field => field.GetValue(instance),
                 PropertyInfo property => property.GetValue(instance),
-                _ => null
+                _ => null,
             };
         private static IEnumerable<MemberInfo> GetMembers(Type? type)
         {

@@ -2,12 +2,9 @@
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using JetBrains.Annotations;
-using K4os.Compression.LZ4;
 
 namespace DragonLib
 {
-    [PublicAPI]
     public static class CompressionEncryption
     {
         public static unsafe Span<byte> DecompressDEFLATE(Span<byte> data, int size)
@@ -35,32 +32,23 @@ namespace DragonLib
             return compressed;
         }
 
-        public static Span<byte> DecompressLZ4(Span<byte> data, int size)
-        {
-            var target = new byte[size];
-            LZ4Codec.Decode(data, target);
-            return target;
-        }
-
         public static unsafe Span<byte> CryptAESCBC(Span<byte> data, Span<byte> key, Span<byte> iv)
         {
             if (iv.Length != 16 && iv.Length > 0)
             {
                 var tmp = new Span<byte>(new byte[16]);
-                iv.Slice(0, Math.Min(16, iv.Length)).CopyTo(tmp);
+                iv[..Math.Min(16, iv.Length)].CopyTo(tmp);
             }
             else if (iv.Length == 0)
             {
                 iv = new byte[16];
             }
 
-            using var aes = new AesManaged
-            {
-                Key = key.ToArray(),
-                IV = iv.ToArray(),
-                Padding = PaddingMode.Zeros,
-                Mode = CipherMode.CBC
-            };
+            using var aes = Aes.Create();
+            aes.Key = key.ToArray();
+            aes.IV = iv.ToArray();
+            aes.Padding = PaddingMode.Zeros;
+            aes.Mode = CipherMode.CBC;
 
             fixed (byte* pinData = &data.GetPinnableReference())
             {
@@ -69,8 +57,8 @@ namespace DragonLib
                 using var crypto = new CryptoStream(stream, decrypt, CryptoStreamMode.Read);
                 var block = new Span<byte>(new byte[data.Length]);
                 var aligned = data.Length.AlignReverse(16);
-                crypto.Read(block.Slice(0, aligned));
-                if (aligned < block.Length) data.Slice(aligned).CopyTo(block.Slice(aligned));
+                crypto.Read(block[..aligned]);
+                if (aligned < block.Length) data[aligned..].CopyTo(block[aligned..]);
 
                 return block;
             }

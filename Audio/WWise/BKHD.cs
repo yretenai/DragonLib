@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib.Audio.WWise
 {
     // Bank Header
-    [PublicAPI]
     public class BKHD : BNKSection
     {
-        public BKHD(Span<byte> data) : base(data) => Data = MemoryMarshal.Read<BKHDStruct>(data.Slice(8));
+        public BKHD(Span<byte> data) : base(data) => Data = MemoryMarshal.Read<BKHDStruct>(data[8..]);
 
         public BKHDStruct Data { get; }
     }
-
-    [PublicAPI]
     public struct BKHDStruct
     {
         public uint Version { get; }

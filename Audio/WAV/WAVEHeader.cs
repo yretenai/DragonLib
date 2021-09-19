@@ -1,8 +1,5 @@
-using JetBrains.Annotations;
-
 namespace DragonLib.Audio.WAV
 {
-    [PublicAPI]
     public struct WAVEHeader
     {
         public int Magic { get; set; }

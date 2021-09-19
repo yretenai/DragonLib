@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace DragonLib.IO
 {
-    [PublicAPI]
     public static class ConsoleSwatch
     {
-        [PublicAPI]
         public enum XTermColor : byte
         {
             Black = 0,
@@ -265,14 +262,14 @@ namespace DragonLib.IO
             Grey28,
             Grey29,
             Grey30,
-            Grey31
+            Grey31,
         }
 
-        public const string COLOR_RESET = "\x1b[0m";
-        private const int STD_OUTPUT_HANDLE = -11;
-        private const int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
+        public const string ColorReset = "\x1b[0m";
+        private const int StdOutputHandle = -11;
+        private const int EnableVirtualTerminalProcessing = 4;
 
-        private static readonly IntPtr InvalidHandleValue = new IntPtr(-1);
+        private static readonly IntPtr InvalidHandleValue = new(-1);
 
         public static bool IsVTEnabled { get; private set; }
         public static bool IsVTCapable { get; private set; } = Environment.OSVersion.Version.Major >= 6;
@@ -291,7 +288,7 @@ namespace DragonLib.IO
 
             unsafe
             {
-                var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                var hOut = GetStdHandle(StdOutputHandle);
                 if (hOut == InvalidHandleValue)
                 {
                     IsVTCapable = false;
@@ -305,7 +302,7 @@ namespace DragonLib.IO
                     return false;
                 }
 
-                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                dwMode |= EnableVirtualTerminalProcessing;
                 if (!SetConsoleMode(hOut, dwMode))
                 {
                     IsVTCapable = false;

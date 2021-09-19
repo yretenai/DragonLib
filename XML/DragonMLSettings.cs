@@ -19,7 +19,7 @@ namespace DragonLib.XML
         /// <summary>
         /// Custom Type Serializers
         /// </summary>
-        public Dictionary<Type, IDragonMLSerializer> TypeSerializers = new Dictionary<Type, IDragonMLSerializer>();
+        public Dictionary<Type, IDragonMLSerializer> TypeSerializers = new();
 
         /// <summary>
         /// Prefix namespace for system tags
@@ -29,18 +29,18 @@ namespace DragonLib.XML
         /// <summary>
         /// Dictionary of XML namespaces
         /// </summary>
-        public Dictionary<string, string> Namespaces { get; set; } = new Dictionary<string, string>
+        public Dictionary<string, string> Namespaces { get; set; } = new()
         {
             {
                 "dragon", "https://yretenai.com/dragonml/v1"
-            }
+            },
         };
         
-        public static DragonMLSettings Default => new DragonMLSettings();
+        public static DragonMLSettings Default => new();
 
-        public static DragonMLSettings Slim => new DragonMLSettings
+        public static DragonMLSettings Slim => new()
         {
-            UseRefId = false
+            UseRefId = false,
         };
     }
 }

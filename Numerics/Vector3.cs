@@ -1,9 +1,7 @@
 ﻿using System.Linq;
-using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
-    [PublicAPI]
     public struct Vector3
     {
         public float X { get; set; }
@@ -17,7 +15,7 @@ namespace DragonLib.Numerics
             Z = values.ElementAtOrDefault(2);
         }
 
-        public System.Numerics.Vector3 ToNumerics() => new System.Numerics.Vector3(X, Y, Z);
+        public System.Numerics.Vector3 ToNumerics() => new(X, Y, Z);
         public float[] ToArray() => new[] { X, Y, Z };
     }
 }

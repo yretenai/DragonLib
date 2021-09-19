@@ -1,26 +1,24 @@
 using System.Collections.Generic;
 using System.IO;
 using DragonLib.Numerics;
-using JetBrains.Annotations;
 using static DragonLib.OWM.OWMHelper;
 
 namespace DragonLib.OWM
 {
-    [PublicAPI]
     public class OWMDL
     {
-        private const short VERSION_MAJOR = 0x1;
-        private const short VERSION_MINOR = 0x6;
+        private const short VersionMajor = 0x1;
+        private const short VersionMinor = 0x6;
 
         public OWMDL(string name = "") => Name = name;
 
         public string Name { get; set; }
         public string? MaterialLib { get; set; }
-        public List<OWMDLBone> Bones { get; set; } = new List<OWMDLBone>();
-        public List<OWMDLMesh> Meshes { get; set; } = new List<OWMDLMesh>();
-        public List<OWMDLSocket> Sockets { get; set; } = new List<OWMDLSocket>();
-        public List<OWMDLRefBone> RestPose { get; set; } = new List<OWMDLRefBone>();
-        public uint GUID { get; set; }
+        public List<OWMDLBone> Bones { get; set; } = new();
+        public List<OWMDLMesh> Meshes { get; set; } = new();
+        public List<OWMDLSocket> Sockets { get; set; } = new();
+        public List<OWMDLRefBone> RestPose { get; set; } = new();
+        public uint Guid { get; set; }
 
         public Stream Write()
         {
@@ -28,7 +26,7 @@ namespace DragonLib.OWM
 
             // Version 1.6
 
-            stream.Write(GetBytes(VERSION_MAJOR, VERSION_MINOR));
+            stream.Write(GetBytes(VersionMajor, VersionMinor));
             stream.Write(GetString(Name));
             stream.Write(GetString(MaterialLib));
             stream.Write(GetBytes((short) Bones.Count));
@@ -89,13 +87,11 @@ namespace DragonLib.OWM
                 stream.Write(GetBytes(bone.Rotation));
             }
 
-            stream.Write(GetBytes(GUID));
+            stream.Write(GetBytes(Guid));
             stream.Position = 0;
             return stream;
         }
     }
-
-    [PublicAPI]
     public struct OWMDLSocket
     {
         public string Name { get; set; }
@@ -103,8 +99,6 @@ namespace DragonLib.OWM
         public Quaternion Rotation { get; set; }
         public string Bone { get; set; }
     }
-
-    [PublicAPI]
     public struct OWMDLMesh
     {
         public string Name { get; set; }
@@ -113,8 +107,6 @@ namespace DragonLib.OWM
         public List<OWMDLMeshVertex> Vertices { get; set; }
         public List<int[]> Faces { get; set; }
     }
-
-    [PublicAPI]
     public struct OWMDLMeshVertex
     {
         public Vector3 Position { get; set; }
@@ -125,8 +117,6 @@ namespace DragonLib.OWM
         public Vector4 Color1 { get; set; }
         public Vector4 Color2 { get; set; }
     }
-
-    [PublicAPI]
     public struct OWMDLBone
     {
         public string Name { get; set; }
@@ -135,8 +125,6 @@ namespace DragonLib.OWM
         public Vector3 Scale { get; set; }
         public Quaternion Rotation { get; set; }
     }
-
-    [PublicAPI]
     public struct OWMDLRefBone
     {
         public string Name { get; set; }

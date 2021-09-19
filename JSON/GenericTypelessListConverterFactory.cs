@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using JetBrains.Annotations;
 
 namespace DragonLib.JSON
 {
-    [PublicAPI]
     public class GenericTypelessListConverterFactory : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert)

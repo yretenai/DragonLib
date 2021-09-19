@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace DragonLib.Numerics
 {
-    [PublicAPI]
     public struct Quaternion
     {
         public float X { get; set; }
@@ -20,7 +18,7 @@ namespace DragonLib.Numerics
             W = values.ElementAtOrDefault(3);
         }
 
-        public System.Numerics.Quaternion ToNumerics() => new System.Numerics.Quaternion(X, Y, Z, W);
+        public System.Numerics.Quaternion ToNumerics() => new(X, Y, Z, W);
         public float[] ToArray() => new[] { X, Y, Z, W };
 
         // https://github.com/erich666/GraphicsGems/blob/master/gemsiv/euler_angle/EulerAngles.c
@@ -52,14 +50,14 @@ namespace DragonLib.Numerics
                 {
                     X = (float) Math.Atan2(m[2, 1], m[2, 2]),
                     Y = (float) Math.Atan2(0.0 - m[2, 0], cy),
-                    Z = (float) Math.Atan2(m[1, 0], m[0, 0])
+                    Z = (float) Math.Atan2(m[1, 0], m[0, 0]),
                 };
 
             return new Vector3
             {
                 X = (float) Math.Atan2(0.0 - m[1, 2], m[1, 1]),
                 Y = (float) Math.Atan2(0.0 - m[2, 0], cy),
-                Z = 0f
+                Z = 0f,
             };
         }
     }

@@ -2,11 +2,9 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using DragonLib.Audio.WAV;
-using JetBrains.Annotations;
 
 namespace DragonLib.Audio
 {
-    [PublicAPI]
     public static class PCM
     {
         public static Memory<short> Merge(params Memory<short>[] channels)
@@ -58,7 +56,7 @@ namespace DragonLib.Audio
             {
                 Magic = 0x46464952,
                 Size = buffer.Length,
-                Format = 0x45564157
+                Format = 0x45564157,
             };
 
             var fmt = new WAVEFormat
@@ -69,20 +67,20 @@ namespace DragonLib.Audio
                 Channels = channels,
                 SampleRate = sampleRate,
                 BlockAlign = blockAlign,
-                BitsPerSample = (short) bps
+                BitsPerSample = (short) bps,
             };
             fmt.ByteRate = fmt.SampleRate * fmt.Channels * fmt.BitsPerSample / 8;
             var dat = new WAVEData
             {
                 Magic = 0x61746164,
-                Size = buffer.Length - 44
+                Size = buffer.Length - 44,
             };
 
             MemoryMarshal.Write(buffer.Span, ref header);
-            MemoryMarshal.Write(buffer.Span.Slice(12), ref fmt);
-            MemoryMarshal.Write(buffer.Span.Slice(36), ref dat);
+            MemoryMarshal.Write(buffer.Span[12..], ref fmt);
+            MemoryMarshal.Write(buffer.Span[36..], ref dat);
 
-            stream.CopyTo(buffer.Span.Slice(44));
+            stream.CopyTo(buffer.Span[44..]);
             return buffer;
         }
     }

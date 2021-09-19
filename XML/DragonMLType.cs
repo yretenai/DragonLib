@@ -8,6 +8,6 @@ namespace DragonLib.XML
         Enumerable,
         Object,
         Dictionary,
-        Complex = Array
+        Complex = Array,
     }
 }
