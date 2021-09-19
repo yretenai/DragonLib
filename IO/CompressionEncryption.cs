@@ -57,7 +57,7 @@ namespace DragonLib.IO {
 
         // https://github.com/Ryujinx/Ryujinx/blob/b2b736abc2569ab5d8199da666aef8d8394844a0/Ryujinx.HLE/Loaders/Compression/Lz4.cs
         // Adapted for Span<T>
-        public static int DecompressLZ4(Span<byte> cmp, Span<byte> dec) {
+        public static int DecompressLZ4(Span<byte> cmp, Span<byte> dec, bool swap = false) {
             var cmpPos = 0;
             var decPos = 0;
 
@@ -66,6 +66,9 @@ namespace DragonLib.IO {
 
                 var encCount = (token >> 0) & 0xf;
                 var litCount = (token >> 4) & 0xf;
+                if (swap) {
+                    (encCount, litCount) = (litCount, encCount);
+                }
 
                 // Copy literal chunk
                 if (litCount == 0xF) {
