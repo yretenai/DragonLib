@@ -31,8 +31,7 @@ namespace DragonLib.IO {
             if (iv.Length != 16 && iv.Length > 0) {
                 var tmp = new Span<byte>(new byte[16]);
                 iv[..Math.Min(16, iv.Length)].CopyTo(tmp);
-            }
-            else if (iv.Length == 0) {
+            } else if (iv.Length == 0) {
                 iv = new byte[16];
             }
 
@@ -66,9 +65,7 @@ namespace DragonLib.IO {
 
                 var encCount = (token >> 0) & 0xf;
                 var litCount = (token >> 4) & 0xf;
-                if (swap) {
-                    (encCount, litCount) = (litCount, encCount);
-                }
+                if (swap) (encCount, litCount) = (litCount, encCount);
 
                 // Copy literal chunk
                 if (litCount == 0xF) {
@@ -103,13 +100,45 @@ namespace DragonLib.IO {
                     dec.Slice(encPos, encCount).CopyTo(dec.Slice(decPos, encCount));
 
                     decPos += encCount;
-                }
-                else {
+                } else {
                     while (encCount-- > 0) dec[decPos++] = dec[encPos++];
                 }
             } while (cmpPos < cmp.Length && decPos < dec.Length);
 
             return decPos;
+        }
+
+        // Taken from Evolution Engine Cache Extractor, updated to use System.Buffer
+        public static int DecompressLZF(ReadOnlySpan<byte> compressedData, Span<byte> decompressedData) {
+            var compPos = 0;
+            var decompPos = 0;
+
+            while (compPos < compressedData.Length) {
+                var codeWord = compressedData[compPos++];
+                if (codeWord <= 0x1F) {
+                    // Encode literal
+                    for (int i = codeWord; i >= 0; --i) {
+                        decompressedData[decompPos] = compressedData[compPos];
+                        ++decompPos;
+                        ++compPos;
+                    }
+                } else {
+                    // Encode dictionary
+                    var copyLen = codeWord >> 5; // High 3 bits are copy length
+                    if (copyLen == 7) // If those three make 7, then there are more bytes to copy (maybe)
+                        copyLen += compressedData[compPos++]; // Grab next byte and add 7 to it
+
+                    var dictDist = ((codeWord & 0x1f) << 8) | compressedData[compPos]; // 13 bits code lookback offset
+                    ++compPos;
+                    copyLen += 2; // Add 2 to copy length
+
+                    var decompDistBeginPos = decompPos - 1 - dictDist;
+
+                    for (var i = 0; i < copyLen; ++i, ++decompPos) decompressedData[decompPos] = decompressedData[decompDistBeginPos + i];
+                }
+            }
+
+            return decompPos;
         }
     }
 }

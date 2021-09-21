@@ -5,13 +5,13 @@ using System.Text;
 
 namespace DragonLib.IO {
     public class CursoredMemoryMarshal {
+        public Memory<byte> Buffer;
+        public int Cursor;
+
         public CursoredMemoryMarshal(Memory<byte> buffer, int cursor = 0) {
             Buffer = buffer;
             Cursor = cursor;
         }
-
-        public Memory<byte> Buffer;
-        public int Cursor;
 
         private void Align(int n) {
             if (Cursor < n) {
@@ -54,6 +54,12 @@ namespace DragonLib.IO {
             Cursor += buffer.Length;
         }
 
+        public void Paste(Span<byte> buffer) {
+            SpanHelper.EnsureSpace(ref Buffer, Cursor + buffer.Length);
+            buffer.CopyTo(Buffer[Cursor..].Span);
+            Cursor += buffer.Length;
+        }
+
         public Memory<byte> Copy(int size) {
             var slice = Buffer.Slice(Cursor, size);
             Cursor += size;
@@ -75,7 +81,7 @@ namespace DragonLib.IO {
         public string ReadString() {
             return ReadString(Read<int>());
         }
-        
+
         // TODO: Map SpanHelper methods to CursoredMemoryMarshal.
     }
 }

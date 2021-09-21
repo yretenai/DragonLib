@@ -166,12 +166,10 @@ namespace DragonLib.IO {
                         }
 
                         builder.Remove(builder.Length - 1, 1);
-                    }
-                    else {
+                    } else {
                         Console.Beep();
                     }
-                }
-                else {
+                } else {
                     builder.Append(ch.KeyChar);
 
                     if (!@private) writer.Write(ch.KeyChar);

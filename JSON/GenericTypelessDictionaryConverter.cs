@@ -25,8 +25,7 @@ namespace DragonLib.JSON {
             foreach (var (key, value) in dict) {
                 if (IsStringKey) {
                     writer.WritePropertyName(key.ToString() ?? "");
-                }
-                else {
+                } else {
                     writer.WriteStartObject();
                     writer.WritePropertyName("Key");
                     JsonSerializer.Serialize(writer, key, key.GetType(), options);

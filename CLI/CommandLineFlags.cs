@@ -57,27 +57,23 @@ namespace DragonLib.CLI {
                             if (flagOne != null) usageSlimOneCh += flagOne;
 
                             if (flagTwo != null) usageSlimMultiCh += $"--{flagTwo} ";
-                        }
-                        else {
+                        } else {
                             if (flagOne != null) usageSlimOneChOptional += flagOne;
 
                             if (flagTwo != null) usageSlimMultiCh += $"[--{flagTwo}] ";
                         }
-                    }
-                    else {
+                    } else {
                         if (flag.IsRequired) {
                             if (flagOne != null) usageSlimOneChValue += $"-{flagOne} value ";
 
                             if (flagTwo != null) usageSlimMultiCh += $"--{flagTwo} value ";
-                        }
-                        else {
+                        } else {
                             if (flagOne != null) usageSlimOneChValueOptional += $"[-{flagOne} value] ";
 
                             if (flagTwo != null) usageSlimMultiCh += $"[--{flagTwo} value] ";
                         }
                     }
-                }
-                else {
+                } else {
                     var positional = flag.Flag;
                     if (type.IsEquivalentTo(typeof(List<string>)) || type.IsEquivalentTo(typeof(HashSet<string>))) positional += "...";
 
@@ -136,8 +132,7 @@ namespace DragonLib.CLI {
 
                     if (flag.ValidValues?.Length > 0) {
                         requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
-                    }
-                    else if (type.IsEnum) {
+                    } else if (type.IsEnum) {
                         var names = Enum.GetNames(type);
                         requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
                         if (!helpInvoked && names.Length > 3) requiredParts[^1] += $", and {names.Length - 3} more";
@@ -194,8 +189,7 @@ namespace DragonLib.CLI {
                         }
 
                         argIndex.Add(index);
-                    }
-                    else {
+                    } else {
                         foreach (var argc in argument[1..]) {
                             if (!argMap.TryGetValue(argc.ToString(), out var argIndex)) {
                                 argIndex = new HashSet<int>();
@@ -205,8 +199,7 @@ namespace DragonLib.CLI {
                             argIndex.Add(index);
                         }
                     }
-                }
-                else {
+                } else {
                     positionalMap.Add(index);
                 }
             }
@@ -243,8 +236,7 @@ namespace DragonLib.CLI {
                             if (value is not bool b) b = false;
 
                             value = !b;
-                        }
-                        else {
+                        } else {
                             var argument = arguments[index];
                             var hasInnateValue = argument.Contains('=');
                             string textValue;
@@ -254,8 +246,7 @@ namespace DragonLib.CLI {
                                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                                     shouldExit = true;
                                 }
-                            }
-                            else {
+                            } else {
                                 if (!positionalMap.Contains(index + 1)) {
                                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} needs a value!");
                                     shouldExit = true;
@@ -271,8 +262,7 @@ namespace DragonLib.CLI {
 
                                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                                 type.GetMethod("Add")?.Invoke(value, new[] { temp });
-                            }
-                            else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
+                            } else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
                                 return null;
                             }
                         }
@@ -306,8 +296,7 @@ namespace DragonLib.CLI {
 
                         type.GetMethod("Add")?.Invoke(value, new[] { temp });
                     }
-                }
-                else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
+                } else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
                     shouldExit = true;
                 }
 
@@ -331,8 +320,7 @@ namespace DragonLib.CLI {
 
             if (type.IsEnum) {
                 if (!Enum.TryParse(type, textValue, true, out value)) Logger.Error("FLAG", $"Unrecognized value {textValue} for -{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
-            }
-            else {
+            } else {
                 try {
                     value = type.FullName switch {
                         "System.Int64" => long.Parse(textValue, NumberStyles.Any),
@@ -350,8 +338,7 @@ namespace DragonLib.CLI {
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
                         _ => InvokeVisitor<T>(flag, type, textValue)
                     };
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Logger.Error("FLAG", $"-{(flag.Flag.Length > 1 ? "-" : string.Empty)}{flag.Flag} failed to parse {textValue} as a {type.Name}!", e);
                     return true;
                 }

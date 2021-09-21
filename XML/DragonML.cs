@@ -57,8 +57,7 @@ namespace DragonLib.XML {
 
                         tag += $"{indents}</{CreateNamespacedTag("array", settings.Namespace)}>\n";
                         return tag;
-                    }
-                    else {
+                    } else {
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
@@ -89,8 +88,7 @@ namespace DragonLib.XML {
 
                         if (complexMembers.Count == 0) {
                             tag += " />\n";
-                        }
-                        else {
+                        } else {
                             tag += ">\n";
                             foreach (var (value, name, custom) in complexMembers) tag += custom != null ? custom.Print(value, visited, innerIndent, name, settings) : Print(value, visited, innerIndent, name, settings);
 
@@ -98,8 +96,7 @@ namespace DragonLib.XML {
                         }
 
                         return tag;
-                    }
-                    else {
+                    } else {
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
@@ -173,8 +170,7 @@ namespace DragonLib.XML {
 
                             if (valueTarget < DragonMLType.Complex && keyTarget < DragonMLType.Complex) {
                                 tag += " />\n";
-                            }
-                            else {
+                            } else {
                                 tag += ">\n";
                                 if (keyTarget >= DragonMLType.Complex) tag += Print(key, visited, innerInnerIndent, CreateNamespacedTag("key", settings.Namespace), settings);
 
@@ -190,8 +186,7 @@ namespace DragonLib.XML {
 
                         tag += $"{indents}</{CreateNamespacedTag("map", settings.Namespace)}>\n";
                         return tag;
-                    }
-                    else {
+                    } else {
                         var hmlIdTag = settings.UseRefId ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\"" : "";
                         return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                     }
@@ -205,12 +200,10 @@ namespace DragonLib.XML {
             if (type != null && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type))) {
                 customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type)).Value;
                 target = customSerializer.OverrideTarget;
-            }
-            else if (type is { IsConstructedGenericType: true } && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition()))) {
+            } else if (type is { IsConstructedGenericType: true } && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition()))) {
                 customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition())).Value;
                 target = customSerializer.OverrideTarget;
-            }
-            else {
+            } else {
                 target = GetSerializationType(type);
             }
 
