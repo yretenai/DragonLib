@@ -7,6 +7,7 @@ namespace DragonLib.IO {
     public class CursoredMemoryMarshal {
         public Memory<byte> Buffer;
         public int Cursor;
+        public int Left => Buffer.Length - Cursor;
 
         public CursoredMemoryMarshal(Memory<byte> buffer, int cursor = 0) {
             Buffer = buffer;
