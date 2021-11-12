@@ -23,6 +23,14 @@ namespace DragonLib {
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
 
+        public static void EnsureDirectoryExists(this string path) {
+            var fullPath = Path.GetFullPath(path);
+            var directory = Path.GetDirectoryName(fullPath)!;
+            if (!Directory.Exists(directory)) {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
         public static string? ReadString(this Span<byte> data, Encoding? encoding = null) {
             if (data.Length == 0 || data[0] == 0) return null;
 

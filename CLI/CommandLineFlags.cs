@@ -269,6 +269,12 @@ namespace DragonLib.CLI {
 
                 if (isNullable) value = Activator.CreateInstance(originalType, value);
 
+                try {
+                    if (value == null) value = Activator.CreateInstance(type);
+                } catch {
+                    // nothing!
+                }
+
                 property.SetValue(instance, value);
             }
 
@@ -300,7 +306,17 @@ namespace DragonLib.CLI {
                     shouldExit = true;
                 }
 
-                if (isNullable) value = Activator.CreateInstance(originalType, value);
+                if (isNullable) {
+                    value = Activator.CreateInstance(originalType, value);
+                }
+
+                try {
+                    if (value == null) {
+                        value = Activator.CreateInstance(type);
+                    }
+                } catch {
+                    // nothing!
+                }
 
                 property.SetValue(instance, value);
             }

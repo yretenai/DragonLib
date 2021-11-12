@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 namespace DragonLib.CLI {
-    public abstract class ICLIFlags {
+    public record ICLIFlags {
         [CLIFlag("positionals", Positional = 0, Hidden = true)]
         public List<string> Positionals { get; set; } = new();
 
