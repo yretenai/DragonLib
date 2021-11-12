@@ -21,6 +21,7 @@ namespace DragonLib.CLI {
         public object? Default { get; set; }
         public string[]? ValidValues { get; set; } = Array.Empty<string>();
         public string[]? Aliases { get; set; } = Array.Empty<string>();
+        public object? Extra { get; set; }
 
         public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };
 

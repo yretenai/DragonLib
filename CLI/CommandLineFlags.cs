@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DragonLib.IO;
 
 namespace DragonLib.CLI {
@@ -351,6 +352,7 @@ namespace DragonLib.CLI {
                         "System.Single" => float.Parse(textValue),
                         "System.Half" => Half.Parse(textValue),
                         "System.String" => textValue,
+                        "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
                         "DragonLib.Numerics.Half" => Half.Parse(textValue),
                         _ => InvokeVisitor<T>(flag, type, textValue)
                     };
