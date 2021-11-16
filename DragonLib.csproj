@@ -5,14 +5,13 @@
     <PropertyGroup>
         <Platform>AnyCPU</Platform>
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <RuntimeIdentifiers>win10;osx;linux</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>NU1701</NoWarn>
         <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
+        <LangVersion>preview</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.6.0</Version>
+        <Version>1.2.0.0</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
