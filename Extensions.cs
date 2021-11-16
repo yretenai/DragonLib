@@ -18,7 +18,7 @@ namespace DragonLib {
         }
 
         public static string SanitizeDirname(this string path) {
-            var illegal = Path.GetInvalidPathChars().Concat(Path.GetInvalidFileNameChars()).Distinct();
+            var illegal = Path.GetInvalidPathChars();
 
             return illegal.Aggregate(path, (current, ch) => current.Replace(ch, '_'));
         }
