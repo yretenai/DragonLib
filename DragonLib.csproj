@@ -34,7 +34,7 @@
 
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-        <PackageReference Include="K4os.Compression.LZ4" Version="1.2.6" />
+        <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
