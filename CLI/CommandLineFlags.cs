@@ -9,6 +9,30 @@ using DragonLib.IO;
 
 namespace DragonLib.CLI {
     public static class CommandLineFlags {
+        public delegate void PrintHelpDelegate(List<(CLIFlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked);
+        
+        public static void PrintHelp<T>(PrintHelpDelegate printHelp, bool helpInvoked) {
+            PrintHelp(typeof(T), printHelp, helpInvoked);
+        }
+
+        public static void PrintHelp(Type t, PrintHelpDelegate printHelp, bool helpInvoked) {
+            var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+            var typeMap = properties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
+            var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
+            foreach (var @interface in t.GetInterfaces()) {
+                var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+                foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<CLIFlagAttribute>(true))).Where(x => x.Item2 != null)) {
+                    if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1?.Equals(default) == false) continue;
+
+                    propertySet.Item1 = info;
+                    typeMap[propertyImplementation] = propertySet;
+                }
+            }
+
+            typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
+            printHelp(typeMap.Values.ToList(), helpInvoked);
+        }
+
         public static void PrintHelp(List<(CLIFlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked) {
             flags = flags.Where(x => x.Flag?.Hidden == false).ToList();
             var grouped = flags.GroupBy(x => x.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
@@ -160,7 +184,35 @@ namespace DragonLib.CLI {
             return ParseFlags<T>(PrintHelp, arguments);
         }
 
-        public static T? ParseFlags<T>(Action<List<(CLIFlagAttribute?, Type)>, bool> printHelp, params string[] arguments) where T : ICLIFlags {
+        public static ICLIFlags? ParseFlags(Type t) {
+            return typeof(CommandLineFlags).GetMethod(nameof(ParseFlags), Array.Empty<Type>())
+                ?.MakeGenericMethod(t)
+                .Invoke(null, null) as ICLIFlags;
+        }
+
+        public static ICLIFlags? ParseFlags(Type t, params string[] arguments) {
+            return typeof(CommandLineFlags).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })
+                ?.MakeGenericMethod(t)
+                .Invoke(null, new object?[] { arguments }) as ICLIFlags;
+        }
+
+        public static ICLIFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) {
+            return typeof(CommandLineFlags).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })
+                ?.MakeGenericMethod(t)
+                .Invoke(null, new object?[] { printHelp, arguments }) as ICLIFlags;
+        }
+
+        public static ICLIFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) {
+            return typeof(CommandLineFlags).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })
+                ?.MakeGenericMethod(t)
+                .Invoke(null, new object?[] { printHelp }) as ICLIFlags;
+        }
+
+        public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : ICLIFlags {
+            return ParseFlags<T>(printHelp, Environment.GetCommandLineArgs().Skip(1).ToArray());
+        }
+
+        public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : ICLIFlags {
             var shouldExit = false;
             var instance = Activator.CreateInstance<T>();
             var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
