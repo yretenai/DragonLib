@@ -2,8 +2,8 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
-using DragonLib.Numerics;
 
 namespace DragonLib {
     public static class Extensions {
@@ -44,85 +44,28 @@ namespace DragonLib {
             return ReadString(data, encoding) ?? string.Empty;
         }
 
+        public static string? ReadString(this Span<char> data, Encoding? encoding = null) {
+            return MemoryMarshal.AsBytes(data).ReadString(encoding);
+        }
+
+        public static string ReadStringNonNull(this Span<char> data, Encoding? encoding = null) {
+            return MemoryMarshal.AsBytes(data).ReadStringNonNull(encoding);
+        }
+
         public static int Align(this int value, int n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value + (n - value % n);
+            return value - (n-1) & ~(n-1);
         }
 
         public static uint Align(this uint value, uint n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value + (n - value % n);
+            return value - (n-1) & ~(n-1);
         }
 
         public static long Align(this long value, long n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value + (n - value % n);
+            return value - (n-1) & ~(n-1);
         }
 
         public static ulong Align(this ulong value, ulong n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value + (n - value % n);
-        }
-
-        public static int AlignReverse(this int value, int n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value - value % n;
-        }
-
-        public static uint AlignReverse(this uint value, uint n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value - value % n;
-        }
-
-        public static long AlignReverse(this long value, long n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value - value % n;
-        }
-
-        public static ulong AlignReverse(this ulong value, ulong n) {
-            if (value < n) return n;
-
-            if (value % n == 0) return value;
-
-            return value - value % n;
-        }
-
-        public static Span<byte> ToSpan(this string str, Encoding? encoding = null, bool endNull = false) {
-            var bytes = (encoding ?? Encoding.UTF8).GetBytes(str);
-            if (!endNull) return bytes;
-
-            var span = new Span<byte>(new byte[bytes.Length + 1]);
-            bytes.CopyTo(span);
-            return span;
-        }
-
-        public static Span<byte> ToSpan(this Stream stream) {
-            if (stream.Length - stream.Position == 0) return Span<byte>.Empty;
-
-            var buffer = new Span<byte>(new byte[stream.Length - stream.Position]);
-            stream.Read(buffer);
-            return buffer;
+            return value - (n-1) & ~(n-1);
         }
 
         public static string UnixPath(this string path, bool isDir) {
@@ -195,26 +138,6 @@ namespace DragonLib {
             }
 
             return -1;
-        }
-
-        // https://stackoverflow.com/questions/15743192/check-if-number-is-prime-number
-        public static bool IsPrime(this int number) {
-            switch (number) {
-                case <= 1:
-                    return false;
-                case 2:
-                    return true;
-            }
-
-            if (number % 2 == 0) return false;
-
-            var boundary = (int)Math.Floor(Math.Sqrt(number));
-
-            for (var i = 3; i <= boundary; i += 2)
-                if (number % i == 0)
-                    return false;
-
-            return true;
         }
 
         /// <summary>
@@ -305,29 +228,5 @@ namespace DragonLib {
         public static string GetHumanReadableBytes(this uint bytes) {
             return GetHumanReadableBytes((ulong)bytes);
         }
-
-        #region System.Numerics
-
-        public static Matrix4x4 ToDragon(this System.Numerics.Matrix4x4 matrix) {
-            return new Matrix4x4(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
-        }
-
-        public static Vector2 ToDragon(this System.Numerics.Vector2 vector) {
-            return new Vector2(vector.X, vector.Y);
-        }
-
-        public static Vector3 ToDragon(this System.Numerics.Vector3 vector) {
-            return new Vector3(vector.X, vector.Y, vector.Z);
-        }
-
-        public static Vector4 ToDragon(this System.Numerics.Vector4 vector) {
-            return new Vector4(vector.X, vector.Y, vector.Z);
-        }
-
-        public static Quaternion ToDragon(this System.Numerics.Quaternion quaternion) {
-            return new Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-        }
-
-        #endregion
     }
 }
