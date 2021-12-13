@@ -18,7 +18,7 @@
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <RepositoryBranch>develop</RepositoryBranch>
-        <RepositoryCommit>069923e326ea37eb4ad125fd4539e66159adcd36</RepositoryCommit>
+        <RepositoryCommit>15023ca8eb0ba3ac3aff6d7543035404293b2fe1</RepositoryCommit>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <DebugType>portable</DebugType>
         <IncludeSymbols>true</IncludeSymbols>
