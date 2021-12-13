@@ -3,17 +3,15 @@
     <!-- dotnet pack -c Release -->
     <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
     <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
         <Platform>AnyCPU</Platform>
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <RuntimeIdentifiers>win10;osx;linux</RuntimeIdentifiers>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>NU1701</NoWarn>
         <DefineConstants>ENABLE_SPAN_T;UNSAFE_BYTEBUFFER</DefineConstants>
         <Nullable>enable</Nullable>
-        <LangVersion>9.0</LangVersion>
+        <LangVersion>preview</LangVersion>
         <PackageId>DragonLib</PackageId>
-        <Version>1.1.6.0</Version>
+        <Version>2.0.0.0</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
@@ -30,13 +28,11 @@
         <DeterministicSourcePaths>true</DeterministicSourcePaths>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <TargetFrameworks>net5;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-        <PackageReference Include="K4os.Compression.LZ4" Version="1.2.6" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     </ItemGroup>
-    
+
 </Project>

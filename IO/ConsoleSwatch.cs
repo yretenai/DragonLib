@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
-namespace DragonLib.IO
-{
-    [PublicAPI]
-    public static class ConsoleSwatch
-    {
-        [PublicAPI]
-        public enum XTermColor : byte
-        {
+namespace DragonLib.IO {
+    public static class ConsoleSwatch {
+        public enum XTermColor : byte {
             Black = 0,
             Maroon,
             Green,
@@ -268,46 +262,45 @@ namespace DragonLib.IO
             Grey31
         }
 
-        public const string COLOR_RESET = "\x1b[0m";
-        private const int STD_OUTPUT_HANDLE = -11;
-        private const int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
+        public const string ColorReset = "\x1b[0m";
+        private const int StdOutputHandle = -11;
+        private const int EnableVirtualTerminalProcessing = 4;
 
-        private static readonly IntPtr InvalidHandleValue = new IntPtr(-1);
+        private static readonly IntPtr InvalidHandleValue = new(-1);
 
         public static bool IsVTEnabled { get; private set; }
         public static bool IsVTCapable { get; private set; } = Environment.OSVersion.Version.Major >= 6;
 
-        public static string ToForeground(this XTermColor color) => $"\x1b[38;5;{(byte) color}m";
+        public static string ToForeground(this XTermColor color) {
+            return $"\x1b[38;5;{(byte)color}m";
+        }
 
-        public static string ToBackground(this XTermColor color) => $"\x1b[48;5;{(byte) color}m";
+        public static string ToBackground(this XTermColor color) {
+            return $"\x1b[48;5;{(byte)color}m";
+        }
 
-        public static bool EnableVT()
-        {
+        public static bool EnableVT() {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return true; // always on with unix.
 
             if (IsVTEnabled) return true;
 
             if (!IsVTCapable) return false;
 
-            unsafe
-            {
-                var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-                if (hOut == InvalidHandleValue)
-                {
+            unsafe {
+                var hOut = GetStdHandle(StdOutputHandle);
+                if (hOut == InvalidHandleValue) {
                     IsVTCapable = false;
                     return false;
                 }
 
                 var dwMode = 0;
-                if (!GetConsoleMode(hOut, &dwMode))
-                {
+                if (!GetConsoleMode(hOut, &dwMode)) {
                     IsVTCapable = false;
                     return false;
                 }
 
-                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                if (!SetConsoleMode(hOut, dwMode))
-                {
+                dwMode |= EnableVirtualTerminalProcessing;
+                if (!SetConsoleMode(hOut, dwMode)) {
                     IsVTCapable = false;
                     return false;
                 }

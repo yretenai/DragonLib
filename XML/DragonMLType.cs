@@ -1,7 +1,5 @@
-namespace DragonLib.XML
-{
-    public enum DragonMLType
-    {
+namespace DragonLib.XML {
+    public enum DragonMLType {
         Null,
         Value,
         Array,

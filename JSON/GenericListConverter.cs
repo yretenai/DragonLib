@@ -3,15 +3,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
-
-namespace DragonLib.JSON
-{
-    [PublicAPI]
-    public class GenericListConverter<T> : JsonConverter<List<T>>
-    {
-        public static bool TryReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options, out T value)
-        {
+namespace DragonLib.JSON {
+    public class GenericListConverter<T> : JsonConverter<List<T>> {
+        public static bool TryReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options, out T value) {
             value = default!;
             reader.Read();
             if (reader.TokenType != JsonTokenType.StartArray) return false;
@@ -24,15 +18,14 @@ namespace DragonLib.JSON
             var type = Type.GetType(typeName);
             if (type == null) return false;
 
-            value = (reader.TokenType == JsonTokenType.Null ? default : (T) JsonSerializer.Deserialize(ref reader, type, options))!;
+            value = (reader.TokenType == JsonTokenType.Null ? default : (T)JsonSerializer.Deserialize(ref reader, type, options)!)!;
             reader.Read();
             return reader.TokenType == JsonTokenType.EndArray;
         }
 
-        public static void WriteValue(Utf8JsonWriter writer, object? value, Type? valueType, JsonSerializerOptions options)
-        {
+        public static void WriteValue(Utf8JsonWriter writer, object? value, Type? valueType, JsonSerializerOptions options) {
             writer.WriteStartArray();
-            
+
             writer.WriteStringValue(valueType?.AssemblyQualifiedName);
 
             if (value == null)
@@ -43,14 +36,12 @@ namespace DragonLib.JSON
             writer.WriteEndArray();
         }
 
-        public override List<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
+        public override List<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
             if (reader.TokenType != JsonTokenType.StartArray) throw new JsonException();
 
             var list = new List<T>();
 
-            while (reader.Read())
-            {
+            while (reader.Read()) {
                 if (reader.TokenType == JsonTokenType.EndArray) return list;
 
                 if (!TryReadValue(ref reader, options, out var value)) throw new JsonException();
@@ -61,14 +52,10 @@ namespace DragonLib.JSON
             return list;
         }
 
-        public override void Write(Utf8JsonWriter writer, List<T> list, JsonSerializerOptions options)
-        {
+        public override void Write(Utf8JsonWriter writer, List<T> list, JsonSerializerOptions options) {
             writer.WriteStartArray();
 
-            foreach (var value in list)
-            {
-                WriteValue(writer, value, value?.GetType(), options);
-            }
+            foreach (var value in list) WriteValue(writer, value, value?.GetType(), options);
 
             writer.WriteEndArray();
         }
