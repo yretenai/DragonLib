@@ -1,8 +1,43 @@
 DRAGON Asset Version 1
 
-Includes common.txt
 Magic is written in LITTLE ENDIAN.
 In the case of the file being Big Endian, DRAGON.meta.magic will be 0x445241474F4E1A0A
+
+<...> = struct
+enum ... : <type> = enum (iota 0)
+...[...] = array reference; see <array>
+
+<cstring>
+    char* text;
+    uint8 null; // 0x00
+
+<vec3>
+    float32 x;
+    float32 y;
+    float32 w;
+
+<vec4>
+    float32 x;
+    float32 y;
+    float32 z;
+    float32 w;
+
+<mat3>
+    float32[9] matrix;
+
+<mat4>
+    float32[16] matrix;
+
+<guid>
+    uint8[16] guid;
+
+<array> = <T>[count]
+    uint32 offset;
+    [seek to offset relative to <array> start]
+    read <T> count times
+
+<bool>
+    uint8 truth; // if non zero, assume true.
 
 FILE
     <DRAGON> header;
@@ -46,7 +81,7 @@ Section <DRAGON> Version 1
     uint32 total_size;
     UpDirection up_direction;
     
-    enum UpDirection : uint8
+    enum UpDirection : <uint8>
         PositiveY
         PositiveZ
         PositiveX
@@ -73,7 +108,7 @@ Section <SKELETON> Version 1
     RotationType rotation_type;
     <bone>[meta.count] bones;
 
-    enum RotationType : uint8
+    enum RotationType : <uint8>
         <vec3> = 1
         <vec4> = 2
         <mat3> = 3
@@ -104,12 +139,12 @@ Section <VERTEX> Version 1
         uint8 count; // to get size of attribute: width * count. 
         uint32 layer;
         
-        enum AttributeType : uint8
+        enum AttributeType : <uint8>
            Float = 1
            Signed = 2
            Unsigned = 3
         
-        enum D3DDECLUSAGE : uint32 // see https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3ddeclusage
+        enum D3DDECLUSAGE : <uint32> // see https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3ddeclusage
         
 Section <MORPH> Version 1
     <section> meta; // meta.magic = 0x4D4F5250485F5F5F // "MORPH___"
@@ -147,7 +182,7 @@ Section <GEOMETRY> Version 1
         uint32 face_offset;
         uint32 face_count;
 
-        enum DrawType : uint8
+        enum DrawType : <uint8>
             Triangle
             TriangleStrip
             TriangleFan
@@ -180,19 +215,19 @@ Section <TEXTURE> Version 1
     WrapType wrap_y;
     <guid> image;
     
-    enum ImageSamplingType : uint8
+    enum ImageSamplingType : <uint8>
         Linear
         Step
         Cubic
         
-    enum ProjectionType : uint8
+    enum ProjectionType : <uint8>
         Flat
         Box
         Sphere
         Cube
         Cylinder
         
-    enum WrapType : uint8
+    enum WrapType : <uint8>
         Repeat
         Stretch
         Clip
@@ -215,7 +250,7 @@ Section <LIGHT> Version 1
     <vec3> position;
     <T> rotation; // T = RotationType
 
-    enum LightType : uint8
+    enum LightType : <uint8>
         Spot
         Point
         Ambient
@@ -291,11 +326,11 @@ Section <ANITRACK> Version 1
     uint8 width; // frame count of one frame. 3 = vec3, 4 = vec4, 9 = matrix3, 16 = matrix4...
     float32[meta.count] data;
 
-    enum AnimationType : uint8
+    enum AnimationType : <uint8>
         Absolute
         Relative
         
-    enum AnimationSamplingType : uint16
+    enum AnimationSamplingType : <uint16>
         Linear
         Constant
         Sin
@@ -305,10 +340,10 @@ Section <ANITRACK> Version 1
         Quint
         Bezier
         
-    enum AnimationSmoothingType : uint8
-        EaseIn
-        EaseOut
-        EaseInOut
+    enum AnimationSmoothingType : <uint8>
+        EaseIn = 1
+        EaseOut = 2
+        EaseInOut = 3 // EaseIn | EaseOut
         
 
 Section <ASSET> Version 1
