@@ -12,8 +12,9 @@ FILE
     uint64 magic;
     uint32 version;
     <guid> guid;
-    int32 size; // inclusive of section header size (36 bytes as of version 1)
-    int32 count;
+    uint32 size; // inclusive of section header size (44 bytes as of version 1)
+    uint32 count;
+    <guid> settings; // settings specific to this section
 
 Section descriptions
     Dragon (DRAGON<+Z><NEWLINE>) - Header structure, general metadata for the file.
@@ -22,9 +23,11 @@ Section descriptions
     Skeleton (SKELETON) - Skeleton and bone hierarchy
     Vertex Buffer (VERTEX__) - Vertex buffer and attribute information
     Index Buffer (INDICE__) - Index buffer information
+    Morph Buffer (MORPH___) - Blend shape information
     Geometry (GEOMETRY) - Mesh groups and submesh data
     Materials (MATERIAL) - Material setup
     Texture (TEXTURE_) - Texture references
+    Image (IMAGE___) - Image reference
     Socket (SOCKET__) - Model hardpoint assignment
     Reference (ASSETREF) - Asset import/reference
     Lights (LIGHT___) - Light location and properties
@@ -41,7 +44,15 @@ Section <DRAGON> Version 1
     <section> meta; // meta.magic = 0xA1A4E4F47415244 / "DRAGON<+Z><NEWLINE>"
                     // meta.guid = 0xABBB0D0A1A0AABABBBBB0D0A1A0AABBB
     uint32 total_size;
-    <bool> z_up; 
+    UpDirection up_direction;
+    
+    enum UpDirection : uint8
+        PositiveY
+        PositiveZ
+        PositiveX
+        NegativeY
+        NegativeZ
+        NegativeX
 
 Section <NULL> Version 1
     <section> meta; // meta.magic = 0x5F5F5F5F5F5F5F5F / "________"
@@ -62,7 +73,7 @@ Section <SKELETON> Version 1
     RotationType rotation_type;
     <bone>[meta.count] bones;
 
-    enum RotationType
+    enum RotationType : uint8
         <vec3> = 1
         <vec4> = 2
         <mat3> = 3
@@ -93,12 +104,24 @@ Section <VERTEX> Version 1
         uint8 count; // to get size of attribute: width * count. 
         uint32 layer;
         
-        enum AttributeType
-           float = 1
-           signed = 2
-           unsigned = 3
+        enum AttributeType : uint8
+           Float = 1
+           Signed = 2
+           Unsigned = 3
         
-        enum D3DDECLUSAGE // see https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3ddeclusage
+        enum D3DDECLUSAGE : uint32 // see https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3ddeclusage
+        
+Section <MORPH> Version 1
+    <section> meta; // meta.magic = 0x4D4F5250485F5F5F // "MORPH___"
+    <morph>[meta.count] morphs;
+    
+    <morph>
+        <cstring> name;
+        uint32 index_offset;
+        <guid> vertex_buffer;
+        float32 min;
+        float32 max;
+        float32 default;
 
 Section <INDICE> Version 1
     <section> meta; // meta.magic = 0x5F5F454349444E49 / "INDICE__"
@@ -110,6 +133,7 @@ Section <GEOMETRY> Version 1
     <cstring> name;
     <guid> vertex_buffer;
     <guid> indice_buffer;
+    <guid> morph_buffers;
     <guid> skeleton;
     <guid> socket;
     <mesh>[meta.count] meshes;
@@ -123,11 +147,11 @@ Section <GEOMETRY> Version 1
         uint32 face_offset;
         uint32 face_count;
 
-        enum DrawType
-            triangle
-            triangle_strip
-            triangle_fan
-            quads
+        enum DrawType : uint8
+            Triangle
+            TriangleStrip
+            TriangleFan
+            Quads
 
 Section <MATERIAL> Version 1
     <section> meta; // meta.magic = 0x4C4149524554414D / "MATERIAL"
@@ -150,6 +174,31 @@ Section <SOCKET> Version 1
 
 Section <TEXTURE> Version 1
     <section> meta; // meta.magic = 0x5F45525554584554 / "TEXTURE_"
+    ImageSamplingType sampling;
+    ProjectionType projection;
+    WrapType wrap_x;
+    WrapType wrap_y;
+    <guid> image;
+    
+    enum ImageSamplingType : uint8
+        Linear
+        Step
+        Cubic
+        
+    enum ProjectionType : uint8
+        Flat
+        Box
+        Sphere
+        Cube
+        Cylinder
+        
+    enum WrapType : uint8
+        Repeat
+        Stretch
+        Clip
+
+Section <IMAGE> Version 1
+    <section> meta; // meta.magic = 0x494D4147455F5F5F / "IMAGE___"
     <cstring> path;
 
 Section <ASSETREF> Version 1
@@ -166,11 +215,11 @@ Section <LIGHT> Version 1
     <vec3> position;
     <T> rotation; // T = RotationType
 
-    enum LightType
-        spot
-        point
-        sun
-        area
+    enum LightType : uint8
+        Spot
+        Point
+        Ambient
+        Area
 
 Section <OBJECT> Version 1
     <section> meta; // meta.magic = 0x5F5F5443454A424F / "OBJECT__"
@@ -235,14 +284,32 @@ Section <ANITRACK> Version 1
     <section> meta; // meta.magic = 0x4B43415254494E41 / "ANITRACK"
     <cstring> target; // POSITION, ROTATION, SCALE, etc.
     AnimationType animation_type;
+    AnimationSamplingType sampling_type;
+    AnimationSmoothingType smoothing_type;
+    vec2 d1; // if sampling_type is bezier
+    vec2 d2; // if sampling type is bezier
     uint8 width; // frame count of one frame. 3 = vec3, 4 = vec4, 9 = matrix3, 16 = matrix4...
     float32[meta.count] data;
 
-    enum AnimationType
+    enum AnimationType : uint8
         Absolute
-        Additive
         Relative
-        Delta
+        
+    enum AnimationSamplingType : uint16
+        Linear
+        Constant
+        Sin
+        Quad
+        Cubic
+        Quat
+        Quint
+        Bezier
+        
+    enum AnimationSmoothingType : uint8
+        EaseIn
+        EaseOut
+        EaseInOut
+        
 
 Section <ASSET> Version 1
     <section> meta; // meta.magic = 0x5F5F5F5445535341 / "ASSET___"
