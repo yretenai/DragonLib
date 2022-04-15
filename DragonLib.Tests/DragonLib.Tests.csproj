@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -14,6 +14,7 @@
         <PackageReference Include="NUnit3TestAdapter" Version="4.2.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.2.0"/>
         <PackageReference Include="coverlet.collector" Version="3.1.0"/>
+        <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" PrivateAssets="All"/>
     </ItemGroup>
 
     <ItemGroup>

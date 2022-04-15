@@ -4,8 +4,8 @@ using DragonLib.Hash.Generic;
 namespace DragonLib.Hash;
 
 public static class CyclicRedundancyCheck {
-    public static CRCAlgorithm<ulong> Create(CRC64Polynomial polynomial = CRC64Polynomial.Default, ulong seed = ulong.MaxValue) => new((ulong) polynomial, seed);
-    public static CRCAlgorithm<uint> Create(CRC32Polynomial polynomial = CRC32Polynomial.Default, uint seed = uint.MaxValue) => new((uint) polynomial, seed);
-    public static CRCAlgorithm<ushort> Create(CRC16Polynomial polynomial, ushort seed = ushort.MaxValue) => new((ushort) polynomial, seed);
-    public static CRCAlgorithm<byte> Create(CRC8Polynomial polynomial, byte seed = byte.MaxValue) => new((byte) polynomial, seed);
+    public static CRCAlgorithm<ulong> Create(CRCVariant<ulong> variant) => new(variant.Polynomial, variant.Init, variant.Xor, variant.ReflectIn, variant.ReflectOut);
+    public static CRCAlgorithm<uint> Create(CRCVariant<uint> variant) => new(variant.Polynomial, variant.Init, variant.Xor, variant.ReflectIn, variant.ReflectOut);
+    public static CRCAlgorithm<ushort> Create(CRCVariant<ushort> variant) => new(variant.Polynomial, variant.Init, variant.Xor, variant.ReflectIn, variant.ReflectOut);
+    public static CRCAlgorithm<byte> Create(CRCVariant<byte> variant) => new(variant.Polynomial, variant.Init, variant.Xor, variant.ReflectIn, variant.ReflectOut);
 }

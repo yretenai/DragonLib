@@ -12,6 +12,7 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged
         Basis = basis;
         Prime = prime;
         HashSizeValue = sizeof(T) * 8;
+        Reset();
     }
 
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
@@ -28,5 +29,7 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 
-    public override void Initialize() => Value = Basis;
+    public void Reset() => Value = Basis;
+    public override void Initialize() => Reset();
+    protected override T GetValueFinal() => Value;
 }

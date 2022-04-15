@@ -1,37 +1,35 @@
-﻿using System.Runtime.Intrinsics.X86;
-#if NET6_0
+﻿using System.Buffers.Binary;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
-#else
-using DragonLib.Hash.Generic;
-#endif
 
 namespace DragonLib.Hash;
 
-#if NET6_0
-public sealed class CRC32Algorithm : HashAlgorithm {
-    public uint Value { get; private set; }
-#else
-public sealed class CRC32Algorithm : SpanHashAlgorithm<uint> {
-#endif
+public sealed class CRC32CAlgorithm : HashAlgorithm {
     private readonly bool X64 = Sse42.X64.IsSupported;
 
-    public CRC32Algorithm() {
-        if (!Sse42.IsSupported) {
+    public CRC32CAlgorithm() {
+        if (!IsSupported) {
             throw new NotSupportedException("SSE4.2 instructions are not supported on this processor.");
         }
 
         HashSizeValue = 32;
+        Reset();
     }
+
+    public uint Value { get; private set; }
+
+    public static bool IsSupported => Sse42.IsSupported;
 
     public override int InputBlockSize => 32;
     public override int OutputBlockSize => 32;
 
-    public new static CRC32Algorithm Create() => new();
+    public new static CRC32CAlgorithm Create() => new();
 
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         if (X64) {
+            var span = array.AsSpan();
             while (cbSize >= 8) {
-                Value = (uint) Sse42.X64.Crc32(Value, BitConverter.ToUInt64(array, ibStart));
+                Value = (uint) Sse42.X64.Crc32(Value, BinaryPrimitives.ReadUInt64LittleEndian(span[ibStart..]));
                 ibStart += 8;
                 cbSize -= 8;
             }
@@ -43,9 +41,13 @@ public sealed class CRC32Algorithm : SpanHashAlgorithm<uint> {
         }
     }
 
+    public uint ComputeHashValue(Span<byte> bytes) {
+        HashCore(bytes.ToArray(), 0, bytes.Length);
+        return ~Value;
+    }
+
     protected override byte[] HashFinal() => BitConverter.GetBytes(~Value);
 
-    public override void Initialize() {
-        Value = 0xFFFFFFFF;
-    }
+    public void Reset() => Value = uint.MaxValue;
+    public override void Initialize() => Reset();
 }

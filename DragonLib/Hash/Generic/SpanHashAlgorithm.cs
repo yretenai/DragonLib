@@ -14,12 +14,14 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm where T : unmanaged, 
 
     protected override byte[] HashFinal() {
         Span<T> tmp = stackalloc T[1];
-        tmp[0] = Value;
+        tmp[0] = GetValueFinal();
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 
     public T ComputeHashValue(Span<byte> bytes) {
         HashCore(bytes.ToArray(), 0, bytes.Length);
-        return Value;
+        return GetValueFinal();
     }
+
+    protected abstract T GetValueFinal();
 }
