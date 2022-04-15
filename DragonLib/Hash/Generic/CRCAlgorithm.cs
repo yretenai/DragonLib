@@ -35,8 +35,9 @@ public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
     }
 
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
+        var mask = T.Create(0xFF);
         while (cbSize > 0) {
-            Value = Table[((Value ^ T.Create(array[ibStart++])) & T.Create(0xFF)).ToByte(null)] ^ (Value >> 8);
+            Value = Table[((Value ^ T.Create(array[ibStart++])) & mask).ToByte(null)] ^ (Value >> 8);
             cbSize--;
         }
     }

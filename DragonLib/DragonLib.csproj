@@ -6,15 +6,11 @@
         <Platform>AnyCPU</Platform>
         <PlatformTarget>AnyCPU</PlatformTarget>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <NoWarn>NU1701</NoWarn>
-        <DefineConstants>FEATURE_GENERIC_MATH</DefineConstants>
         <DebugType>portable</DebugType>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <EnablePreviewFeatures>true</EnablePreviewFeatures>
-
         <PackageId>DragonLib</PackageId>
-        <Version>2.0.0.0</Version>
+        <Version>3.0.0.0</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
@@ -30,12 +26,26 @@
         <DeterministicSourcePaths>true</DeterministicSourcePaths>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-        <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+        <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" PrivateAssets="All" />
+    </ItemGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    </PropertyGroup>
+
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+        <!-- requires certain preview features -->
+        <Compile Remove="Hash\Generic\*"/>
+        <Compile Remove="Hash\CyclicRedundancyCheck.cs"/>
+        <Compile Remove="Hash\FowlerNollVo.cs"/>
     </ItemGroup>
 
 </Project>

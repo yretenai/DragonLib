@@ -1,9 +1,18 @@
 ﻿using System.Runtime.Intrinsics.X86;
+#if NET6_0
+using System.Security.Cryptography;
+#else
 using DragonLib.Hash.Generic;
+#endif
 
 namespace DragonLib.Hash;
 
-public class CRC32Algorithm : SpanHashAlgorithm<uint> {
+#if NET6_0
+public sealed class CRC32Algorithm : HashAlgorithm {
+    public uint Value { get; private set; }
+#else
+public sealed class CRC32Algorithm : SpanHashAlgorithm<uint> {
+#endif
     private readonly bool X64 = Sse42.X64.IsSupported;
 
     public CRC32Algorithm() {
