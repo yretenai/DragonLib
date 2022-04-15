@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <!-- commit -> update RepositoryCommit -->
+    <!-- dotnet pack -c Release -->
+    <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
+    <PropertyGroup>
+        <Platform>AnyCPU</Platform>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>NU1701</NoWarn>
+        <DefineConstants>FEATURE_GENERIC_MATH</DefineConstants>
+        <DebugType>portable</DebugType>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+        <PackageId>DragonLib</PackageId>
+        <Version>2.0.0.0</Version>
+        <Authors>yretenai</Authors>
+        <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
+        <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryBranch>develop</RepositoryBranch>
+        <RepositoryCommit>15023ca8eb0ba3ac3aff6d7543035404293b2fe1</RepositoryCommit>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSource>true</IncludeSource>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+        <DeterministicSourcePaths>true</DeterministicSourcePaths>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <TargetFramework>net7.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+        <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" />
+    </ItemGroup>
+
+</Project>
