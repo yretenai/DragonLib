@@ -18,6 +18,9 @@ public class FlagAttribute : Attribute {
     public object? Default { get; set; }
     public string[]? ValidValues { get; set; } = Array.Empty<string>();
     public string[]? Aliases { get; set; } = Array.Empty<string>();
+    public string? EnumPrefix { get; set; }
+    public char ReplaceDashes { get; set; } 
+    public char ReplaceDots { get; set; } 
     public object? Extra { get; set; }
 
     public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };
@@ -37,7 +40,8 @@ public class FlagAttribute : Attribute {
         Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly &&
         IsRequired == other.IsRequired && Positional == other.Positional &&
         Default?.Equals(other.Default) == true && ValidValues?.Equals(other.ValidValues) == true &&
-        Aliases?.Equals(other.Aliases) == true;
+        Aliases?.Equals(other.Aliases) == true && EnumPrefix?.Equals(other.EnumPrefix) == true &&
+        ReplaceDashes.Equals(other.ReplaceDashes);
 
     public override string ToString() => $"-{(Flag.Length > 1 ? "-" : string.Empty)}{Flag}: {Help}";
 
@@ -61,7 +65,5 @@ public class FlagAttribute : Attribute {
             HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
             IsRequired,
             Positional,
-            Default,
-            ValidValues,
-            Aliases);
+            HashCode.Combine(Default, ValidValues, Aliases, EnumPrefix, ReplaceDashes));
 }
