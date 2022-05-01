@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using DragonLib.Indent;
 
@@ -8,7 +7,7 @@ namespace DragonLib.Xml;
 public static class DragonMarkup {
     private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new();
     private static readonly Dictionary<Type, DragonMarkupType> TargetCache = new();
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 #endif

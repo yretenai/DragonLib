@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace DragonLib.IO;
 
@@ -35,7 +34,7 @@ public static class BitPacked {
 
         return cached;
     }
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
 #endif

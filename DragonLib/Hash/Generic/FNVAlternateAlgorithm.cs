@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Generic;
 
@@ -15,7 +14,7 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged
         HashSizeValue = sizeof(T) * 8;
         Reset();
     }
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 #endif

@@ -46,13 +46,13 @@ public static class Extensions {
 
     public static string ReadStringNonNull(this Span<char> data, Encoding? encoding = null) => MemoryMarshal.AsBytes(data).ReadStringNonNull(encoding);
 
-    public static int Align(this int value, int n) => unchecked (value + (n - 1)) & ~(n - 1);
+    public static int Align(this int value, int n) => unchecked(value + (n - 1)) & ~(n - 1);
 
-    public static uint Align(this uint value, uint n) => unchecked (value + (n - 1)) & ~(n - 1);
+    public static uint Align(this uint value, uint n) => unchecked(value + (n - 1)) & ~(n - 1);
 
-    public static long Align(this long value, long n) => unchecked (value + (n - 1)) & ~(n - 1);
+    public static long Align(this long value, long n) => unchecked(value + (n - 1)) & ~(n - 1);
 
-    public static ulong Align(this ulong value, ulong n) => unchecked (value + (n - 1)) & ~(n - 1);
+    public static ulong Align(this ulong value, ulong n) => unchecked(value + (n - 1)) & ~(n - 1);
 
     public static string UnixPath(this string path, bool isDir) {
         var p = path.Replace('\\', '/');

@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Generic;
 
@@ -83,7 +82,7 @@ public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
     }
 
     protected override T GetValueFinal() => Value ^ Xor;
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif

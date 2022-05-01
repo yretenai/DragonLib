@@ -19,8 +19,8 @@ public class FlagAttribute : Attribute {
     public string[]? ValidValues { get; set; } = Array.Empty<string>();
     public string[]? Aliases { get; set; } = Array.Empty<string>();
     public string? EnumPrefix { get; set; }
-    public char ReplaceDashes { get; set; } 
-    public char ReplaceDots { get; set; } 
+    public char ReplaceDashes { get; set; }
+    public char ReplaceDots { get; set; }
     public object? Extra { get; set; }
 
     public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };

@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using DragonLib.IO;
 
@@ -227,17 +226,17 @@ public static class CommandLineFlagsParser {
             Logger.Info("FLAG", string.Empty);
         }
     }
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, arguments);
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
@@ -249,7 +248,7 @@ public static class CommandLineFlagsParser {
     public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) {
         return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { arguments }) as CommandLineFlags;
     }
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
@@ -513,7 +512,7 @@ public static class CommandLineFlagsParser {
 
         return false;
     }
-    
+
 #if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
