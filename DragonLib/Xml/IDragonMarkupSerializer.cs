@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using DragonLib.Indent;
 
 namespace DragonLib.Xml;
@@ -5,6 +6,7 @@ namespace DragonLib.Xml;
 public interface IDragonMarkupSerializer {
     DragonMarkupType OverrideTarget { get; }
 
+    [SuppressMessage("ReSharper", "UnusedParameter.Global")]
     object? Print(object? instance,
         Dictionary<object, int> visited,
         IndentHelperBase indents,

@@ -397,9 +397,7 @@ public static class CommandLineFlagsParser {
             }
 
             try {
-                if (value == null) {
-                    value = Activator.CreateInstance(type);
-                }
+                value ??= Activator.CreateInstance(type);
             } catch {
                 // ignored
             }
@@ -444,9 +442,7 @@ public static class CommandLineFlagsParser {
             }
 
             try {
-                if (value == null) {
-                    value = Activator.CreateInstance(type);
-                }
+                value ??= Activator.CreateInstance(type);
             } catch {
                 // ignored
             }

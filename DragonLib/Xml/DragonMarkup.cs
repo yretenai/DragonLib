@@ -269,7 +269,7 @@ public static class DragonMarkup {
                     return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                 }
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new IndexOutOfRangeException();
         }
     }
 

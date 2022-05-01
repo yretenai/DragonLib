@@ -11,22 +11,22 @@ public class DragonMarkupSettings {
     /// <summary>
     ///     Use ids in dragon:ref tags.
     /// </summary>
-    public bool UseRefId { get; set; } = true;
+    public bool UseRefId { get; init; } = true;
 
     /// <summary>
     ///     Writes the ?xml header
     /// </summary>
-    public bool WriteXmlHeader { get; set; } = true;
+    public bool WriteXmlHeader { get; init; } = true;
 
     /// <summary>
     ///     Prefix namespace for system tags
     /// </summary>
-    public string Namespace { get; set; } = "dragon";
+    public string Namespace { get; init; } = "dragon";
 
     /// <summary>
     ///     Dictionary of XML namespaces
     /// </summary>
-    public Dictionary<string, string> Namespaces { get; set; } = new() {
+    public Dictionary<string, string> Namespaces { get; init; } = new() {
         { "dragon", "https://legiayayana.com/dml/v1" },
     };
 
