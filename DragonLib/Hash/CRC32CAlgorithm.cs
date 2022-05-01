@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 
@@ -25,6 +26,9 @@ public sealed class CRC32CAlgorithm : HashAlgorithm {
 
     public new static CRC32CAlgorithm Create() => new();
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#endif
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         if (X64) {
             var span = array.AsSpan();

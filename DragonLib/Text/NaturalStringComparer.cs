@@ -1,4 +1,6 @@
-﻿namespace DragonLib.Text; 
+﻿using System.Runtime.CompilerServices;
+
+namespace DragonLib.Text; 
 
 // https://github.com/tompazourek/NaturalSort.Extension/blob/7e99f4e52b2e8e16e3de542f2fce547d4abe047a/src/NaturalSort.Extension/NaturalSortComparer.cs
 // additions: non-uniform descending number and string sorting
@@ -60,6 +62,9 @@ public class NaturalStringComparer : IComparer<string>
     }
 
     /// <inheritdoc />
+    #if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    #endif
     public int Compare(string? str1, string? str2)
     {
         if (str1 == str2) return 0;
@@ -193,7 +198,10 @@ public class NaturalStringComparer : IComparer<string>
             startIndex2 = endIndex2;
         }
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#endif
     private static byte GetTokenFromChar(char c)
         => c >= 'a'
             ? c <= 'z'

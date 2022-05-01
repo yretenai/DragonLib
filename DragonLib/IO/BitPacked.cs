@@ -1,10 +1,14 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace DragonLib.IO;
 
 public static class BitPacked {
     private static Dictionary<Type, List<(PropertyInfo, int, ulong)>> CachedBits { get; } = new();
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     private static List<(PropertyInfo Property, int Offset, ulong Mask)> Preload<T>() where T : struct {
         // ReSharper disable once InvertIf
         if (!CachedBits.TryGetValue(typeof(T), out var cached)) {
@@ -31,7 +35,10 @@ public static class BitPacked {
 
         return cached;
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     public static ulong Pack<T>(T instance) where T : struct {
         var packed = 0UL;
         var properties = Preload<T>();
@@ -49,6 +56,9 @@ public static class BitPacked {
         return packed;
     }
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     public static T Unpack<T>(ulong value) where T : struct {
         var instance = Activator.CreateInstance(typeof(T));
         if (instance == null) {

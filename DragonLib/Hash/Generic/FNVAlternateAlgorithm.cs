@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Generic;
 
@@ -14,7 +15,10 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged
         HashSizeValue = sizeof(T) * 8;
         Reset();
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#endif
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         while (cbSize > 0) {
             Value ^= T.Create(array[ibStart++]);
@@ -29,6 +33,9 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public void Reset() => Value = Basis;
     public override void Initialize() => Reset();
     protected override T GetValueFinal() => Value;

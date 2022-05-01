@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using DragonLib.IO;
 
@@ -226,25 +227,51 @@ public static class CommandLineFlagsParser {
             Logger.Info("FLAG", string.Empty);
         }
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, arguments);
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), Array.Empty<Type>())?.MakeGenericMethod(t).Invoke(null, null) as CommandLineFlags;
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) {
         return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { arguments }) as CommandLineFlags;
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) {
         return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, arguments }) as CommandLineFlags;
     }
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) {
         return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp }) as CommandLineFlags;
     }
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(printHelp, Environment.GetCommandLineArgs().Skip(1).ToArray());
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags {
         var shouldExit = false;
         var instance = Activator.CreateInstance<T>();
@@ -437,6 +464,9 @@ public static class CommandLineFlagsParser {
         return null;
     }
 
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static bool VisitFlagValue<T>(Type type, string textValue, FlagAttribute flag, ref object? value) where T : CommandLineFlags {
         var sterilizedValue = textValue;
         if (flag.ReplaceDashes > 0) {
@@ -483,7 +513,10 @@ public static class CommandLineFlagsParser {
 
         return false;
     }
-
+    
+#if RELEASE
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static object? InvokeVisitor<T>(FlagAttribute flag, Type type, string textValue) where T : CommandLineFlags {
         if (flag.Visitor == null) {
             throw new InvalidCastException($"Cannot process {type.FullName}");

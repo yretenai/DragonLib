@@ -18,7 +18,7 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm where T : unmanaged, 
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 
-    public T ComputeHashValue(Span<byte> bytes) {
+    protected T ComputeHashValue(Span<byte> bytes) {
         HashCore(bytes.ToArray(), 0, bytes.Length);
         return GetValueFinal();
     }
