@@ -1,4 +1,6 @@
-﻿namespace DragonLib.Hash.Generic;
+﻿using System.Runtime.CompilerServices;
+
+namespace DragonLib.Hash.Generic;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
