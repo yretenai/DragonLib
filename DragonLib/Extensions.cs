@@ -27,6 +27,14 @@ public static class Extensions {
         }
     }
 
+    public static Span<byte> AsBytes<T>(this Span<T> data) where T : unmanaged {
+        return MemoryMarshal.AsBytes(data);
+    } 
+
+    public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : unmanaged {
+        return MemoryMarshal.AsBytes(data);
+    }
+
     public static string? ReadString(this Span<byte> data, Encoding? encoding = null) {
         if (data.Length == 0 || data[0] == 0) {
             return null;

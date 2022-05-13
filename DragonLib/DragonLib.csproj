@@ -9,6 +9,8 @@
         <DebugType>portable</DebugType>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
+        <TargetFramework>net7.0</TargetFramework>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <PackageId>DragonLib</PackageId>
         <Version>3.0.1.0</Version>
         <Authors>yretenai</Authors>
@@ -26,7 +28,6 @@
         <DeterministicSourcePaths>true</DeterministicSourcePaths>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -35,21 +36,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-    </ItemGroup>
-
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
         <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" PrivateAssets="All"/>
-    </ItemGroup>
-
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-        <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    </PropertyGroup>
-
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-        <!-- requires certain preview features -->
-        <Compile Remove="Hash\Generic\*"/>
-        <Compile Remove="Hash\CyclicRedundancyCheck.cs"/>
-        <Compile Remove="Hash\FowlerNollVo.cs"/>
     </ItemGroup>
 
 </Project>
