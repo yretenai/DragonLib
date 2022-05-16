@@ -27,13 +27,9 @@ public static class Extensions {
         }
     }
 
-    public static Span<byte> AsBytes<T>(this Span<T> data) where T : unmanaged {
-        return MemoryMarshal.AsBytes(data);
-    } 
+    public static Span<byte> AsBytes<T>(this Span<T> data) where T : unmanaged => MemoryMarshal.AsBytes(data);
 
-    public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : unmanaged {
-        return MemoryMarshal.AsBytes(data);
-    }
+    public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : unmanaged => MemoryMarshal.AsBytes(data);
 
     public static string? ReadString(this Span<byte> data, Encoding? encoding = null) {
         if (data.Length == 0 || data[0] == 0) {
@@ -161,19 +157,8 @@ public static class Extensions {
         return -1;
     }
 
-    /// <summary>
-    ///     Divides value by divisor and rounds up
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="divisor"></param>
-    /// <returns></returns>
     public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
 
-    /// <summary>
-    ///     Constraints value by Minimum and Maximum short values
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static short ShortClamp(this int value) {
         return value switch {
             > short.MaxValue => short.MaxValue,
@@ -182,39 +167,14 @@ public static class Extensions {
         };
     }
 
-    /// <summary>
-    ///     Gets the higher 4 bits
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static byte GetHighNibble(this byte value) => (byte) ((value >> 4) & 0xF);
 
-    /// <summary>
-    ///     Gets the lower 4 bits
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static byte GetLowNibble(this byte value) => (byte) (value & 0xF);
 
-    /// <summary>
-    ///     Gets the higher 4 bits, signed
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static sbyte GetHighNibbleSigned(this byte value) => SignedNibbles[value.GetHighNibble()];
 
-    /// <summary>
-    ///     Gets the lower 4 bits, signed
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static sbyte GetLowNibbleSigned(this byte value) => SignedNibbles[value.GetLowNibble()];
 
-    /// <summary>
-    ///     Returns human readable (12.3 GiB) format of a string
-    /// </summary>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
     public static string GetHumanReadableBytes(this ulong bytes) {
         for (var i = 0; i < BytePoints.Length; ++i) {
             var divisor = Math.Pow(0x400, i);

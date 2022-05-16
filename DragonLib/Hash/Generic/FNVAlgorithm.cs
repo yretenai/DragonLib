@@ -16,9 +16,7 @@ public class FNVAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged, INumber
         Reset();
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         while (cbSize > 0) {
             Value *= Prime;
@@ -27,10 +25,9 @@ public class FNVAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged, INumber
         }
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public void Reset() => Value = Basis;
+
     public override void Initialize() => Reset();
 
     // there's some math behind the theory on selecting FNV primes, read more on it on either linked pages.

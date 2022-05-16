@@ -4,68 +4,33 @@ namespace DragonLib.Text;
 
 // https://github.com/tompazourek/NaturalSort.Extension/blob/7e99f4e52b2e8e16e3de542f2fce547d4abe047a/src/NaturalSort.Extension/NaturalSortComparer.cs
 // additions: non-uniform descending number and string sorting
-
-/// <summary>
-///     Creates a string comparer with natural sorting functionality
-///     which allows it to sort numbers inside the strings as numbers, not as letters.
-///     (e.g. "1", "2", "10" instead of "1", "10", "2").
-///     It uses either a <seealso cref="System.StringComparison"/> (preferred) or arbitrary
-///     <see cref="System.Collections.Generic.IComparer{T}"/> string comparer for the comparisons.
-/// </summary>
 public class NaturalStringComparer : IComparer<string> {
-    /// <summary>
-    ///     String comparison used for comparing strings.
-    ///     Used if <see cref="UnderlyingStringComparer"/> is null.
-    /// </summary>
-    private readonly StringComparison StringComparison;
-
-    /// <summary>
-    ///     String comparer used for comparing strings.
-    /// </summary>
-    private readonly IComparer<string>? UnderlyingStringComparer;
-
-    private readonly bool NumberDirectionDescending;
-
-    private readonly bool StringDirectionDescending;
-
     // Token values (not an enum as a performance micro-optimization)
     private const byte TokenNone = 0;
     private const byte TokenOther = 1;
     private const byte TokenDigits = 2;
     private const byte TokenLetters = 3;
 
-    /// <summary>
-    ///     Constructs comparer with a <seealso cref="System.StringComparison"/> as the inner mechanism.
-    ///     Prefer this to
-    ///     <see cref="NaturalStringComparer(System.Collections.Generic.IComparer{string}, System.Boolean, System.Boolean)"/>
-    ///     if possible.
-    /// </summary>
-    /// <param name="stringComparison">String comparison to use</param>
-    /// <param name="numberDescending">Whether or not to process digits in descending order</param>
-    /// <param name="stringDescending">Whether or not to process strings in descending order</param>
+    private readonly bool NumberDirectionDescending;
+    private readonly StringComparison StringComparison;
+
+    private readonly bool StringDirectionDescending;
+
+    private readonly IComparer<string>? UnderlyingStringComparer;
+
     public NaturalStringComparer(StringComparison stringComparison, bool numberDescending = false, bool stringDescending = false) {
         StringComparison = stringComparison;
         NumberDirectionDescending = numberDescending;
         StringDirectionDescending = stringDescending;
     }
 
-    /// <summary>
-    ///     Constructs comparer with a <seealso cref="IComparer{T}"/> string comparer as the inner mechanism.
-    ///     Prefer <see cref="NaturalStringComparer(System.StringComparison, System.Boolean, System.Boolean)"/> if possible.
-    /// </summary>
-    /// <param name="underlyingStringComparer">String comparer to wrap</param>
-    /// <param name="numberDescending">Whether or not to process digits in descending order</param>
-    /// <param name="stringDescending">Whether or not to process strings in descending order</param>
     public NaturalStringComparer(IComparer<string> underlyingStringComparer, bool numberDescending = false, bool stringDescending = false) {
         UnderlyingStringComparer = underlyingStringComparer;
         NumberDirectionDescending = numberDescending;
         StringDirectionDescending = stringDescending;
     }
 
-    /// <inheritdoc/>
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
     public int Compare(string? str1, string? str2) {
         if (str1 == str2) {
             return 0;
@@ -195,9 +160,7 @@ public class NaturalStringComparer : IComparer<string> {
         }
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static byte GetTokenFromChar(char c) =>
         c >= 'a'
             ? c <= 'z'

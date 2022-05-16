@@ -9,9 +9,7 @@ public static class DragonMarkup {
     private static readonly Dictionary<Type, MemberInfo[]> TypeCache = new();
     private static readonly Dictionary<Type, DragonMarkupType> TargetCache = new();
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     public static string CreateNamespacedTag(string? tag, string? ns) {
         if (tag == null) {
             return "";
@@ -20,9 +18,7 @@ public static class DragonMarkup {
         return ns == null ? tag : $"{ns}:{tag}";
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
     public static string? Print(object? instance, DragonMarkupSettings? settings = null) =>
         Print(instance,
             new Dictionary<object, int>(),
@@ -31,9 +27,7 @@ public static class DragonMarkup {
             settings ?? DragonMarkupSettings.Default,
             true);
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
     public static string? Print(object? instance,
         Dictionary<object, int> visited,
         IndentHelperBase indents,
@@ -274,9 +268,7 @@ public static class DragonMarkup {
         }
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static DragonMarkupType GetCustomSerializer(
         IReadOnlyDictionary<Type, IDragonMarkupSerializer> customTypeSerializers,
         Type? type,
@@ -297,9 +289,7 @@ public static class DragonMarkup {
         return target;
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static string? FormatTextValueType(object? instance) =>
         instance == null
             ? "{null}"
@@ -310,9 +300,7 @@ public static class DragonMarkup {
                 .Replace("<", "\\<")
                 .Replace(">", "\\>");
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static string? FormatValueType(object? instance) =>
         instance == null
             ? "{null}"
@@ -322,14 +310,10 @@ public static class DragonMarkup {
                 .Replace("\n", "\\n")
                 .Replace("\"", "\\\"");
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static string? FormatName(string? typeName) => typeName?.Replace('<', '_').Replace('>', '_').Replace('`', '_');
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static object? GetMemberValue(object? instance, MemberInfo member) {
         return member switch {
             FieldInfo field => field.GetValue(instance),
@@ -338,9 +322,7 @@ public static class DragonMarkup {
         };
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     private static IEnumerable<MemberInfo> GetMembers(Type? type) {
         if (type == null) {
             return ArraySegment<MemberInfo>.Empty;
@@ -359,9 +341,7 @@ public static class DragonMarkup {
         return members;
     }
 
-#if RELEASE
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-#endif
     public static DragonMarkupType GetSerializationType(Type? type) {
         if (type == null) {
             return DragonMarkupType.Null;
