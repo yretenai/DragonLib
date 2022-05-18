@@ -1,10 +1,15 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 
 namespace DragonLib.Hash.Generic;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVAlgorithm<T> : SpanHashAlgorithm<T> where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
+[RequiresPreviewFeatures]
+public class FNVAlgorithm<T> : SpanHashAlgorithm<T> 
+#pragma warning disable CA2252
+    where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> { 
+#pragma warning enable CA2252
     public const string FNV1_IV = "chongo <Landon Curt Noll> /\\../\\";
     public const string FNV1B_IV = "chongo (Landon Curt Noll) /\\oo/\\";
     private readonly T Basis;

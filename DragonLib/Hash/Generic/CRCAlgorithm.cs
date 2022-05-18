@@ -1,10 +1,14 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace DragonLib.Hash.Generic;
 
+[RequiresPreviewFeatures]
 public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
-    where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T>, IMinMaxValue<T> {
+#pragma warning disable CA2252
+    where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T>, IMinMaxValue<T> { 
+#pragma warning enable CA2252
     private readonly T Init;
     private readonly T Polynomial;
     private readonly bool ReflectIn;

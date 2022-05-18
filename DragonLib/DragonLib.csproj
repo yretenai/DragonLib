@@ -10,7 +10,6 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <TargetFramework>net7.0</TargetFramework>
-        <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <PackageId>DragonLib</PackageId>
         <Version>3.0.1.0</Version>
         <Authors>yretenai</Authors>
