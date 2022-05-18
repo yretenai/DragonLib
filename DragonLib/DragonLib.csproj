@@ -35,7 +35,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-        <PackageReference Include="System.Runtime.Experimental" Version="7.0.0-preview.2.22152.2" PrivateAssets="All"/>
     </ItemGroup>
 
 </Project>

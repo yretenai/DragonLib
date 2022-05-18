@@ -1,14 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
 namespace DragonLib.Hash.Generic;
 
-[RequiresPreviewFeatures]
 public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
-#pragma warning disable CA2252
     where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T>, IMinMaxValue<T> { 
-#pragma warning enable CA2252
     private readonly T Init;
     private readonly T Polynomial;
     private readonly bool ReflectIn;
@@ -58,14 +55,14 @@ public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
                 r = Reflect(r, width);
             }
 
-            Table[i] = T.Create(r & mask);
+            Table[i] = T.CreateTruncating(r & mask);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     protected override unsafe void HashCore(byte[] array, int ibStart, int cbSize) {
         while (cbSize > 0) {
-            var @byte = T.Create(array[ibStart++]);
+            var @byte = T.CreateTruncating(array[ibStart++]);
             if (ReflectOut) {
                 Value = Table[(Value ^ @byte).ToUInt64(null) & 0xFF] ^ (Value >> 8);
             } else {

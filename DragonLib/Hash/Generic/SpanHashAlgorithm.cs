@@ -1,14 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace DragonLib.Hash.Generic;
 
-[RequiresPreviewFeatures]
 public abstract class SpanHashAlgorithm<T> : HashAlgorithm 
-#pragma warning disable CA2252
     where T : unmanaged, INumber<T> {
-#pragma warning enable CA2252
     protected SpanHashAlgorithm() {
         unsafe {
             HashSizeValue = sizeof(T) * 8;
