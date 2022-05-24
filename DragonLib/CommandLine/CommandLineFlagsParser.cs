@@ -1,18 +1,17 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using DragonLib.IO;
 
 namespace DragonLib.CommandLine;
 
 public static class CommandLineFlagsParser {
-    public delegate void PrintHelpDelegate(List<(FlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked, ILogger logger);
+    public delegate void PrintHelpDelegate(List<(FlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked);
 
-    public static void PrintHelp<T>(PrintHelpDelegate printHelp, bool helpInvoked, ILogger logger) {
-        PrintHelp(typeof(T), printHelp, helpInvoked, logger);
+    public static void PrintHelp<T>(PrintHelpDelegate printHelp, bool helpInvoked) {
+        PrintHelp(typeof(T), printHelp, helpInvoked);
     }
 
-    public static void PrintHelp(Type t, PrintHelpDelegate printHelp, bool helpInvoked, ILogger logger) {
+    public static void PrintHelp(Type t, PrintHelpDelegate printHelp, bool helpInvoked) {
         var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
         var typeMap = properties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
         var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
@@ -29,10 +28,10 @@ public static class CommandLineFlagsParser {
         }
 
         typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
-        printHelp(typeMap.Values.ToList(), helpInvoked, logger);
+        printHelp(typeMap.Values.ToList(), helpInvoked);
     }
 
-    public static void PrintHelp(List<(FlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked, ILogger logger) {
+    public static void PrintHelp(List<(FlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked) {
         flags = flags.Where(x => x.Flag?.Hidden == false).ToList();
         var grouped = flags.GroupBy(x => x.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
         var entry = Assembly.GetEntryAssembly()?.GetName();
@@ -154,10 +153,10 @@ public static class CommandLineFlagsParser {
             usageSlim += usageSlimPositional;
         }
 
-        logger.Log(LogLevel.Information, usageSlim.TrimEnd());
-        logger.Log(LogLevel.Information, string.Empty);
+        Console.WriteLine(usageSlim.TrimEnd());
+        Console.WriteLine(string.Empty);
         foreach (var (group, attributes) in grouped) {
-            logger.Log(LogLevel.Information, "{Group}: ", group);
+            Console.WriteLine($"{group}: ");
             foreach (var (flag, originalType) in attributes) {
                 if (flag == null) {
                     continue;
@@ -221,42 +220,42 @@ public static class CommandLineFlagsParser {
                     flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
                 }
 
-                logger.Log(LogLevel.Information, "{Pad}\t{Name}\t{Pos}\t{Help}\t{Required}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help, required);
+                Console.WriteLine("{Pad}\t{Name}\t{Pos}\t{Help}\t{Required}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help, required);
             }
 
-            logger.Log(LogLevel.Information, string.Empty);
+            Console.WriteLine(string.Empty);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(ILogger logger) where T : CommandLineFlags => ParseFlags<T>(logger, Environment.GetCommandLineArgs().Skip(1).ToArray());
+    public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(ILogger logger, params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(logger, PrintHelp, arguments);
+    public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, arguments);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(ILogger logger, Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), Array.Empty<Type>())?.MakeGenericMethod(t).Invoke(null, new object?[] { logger }) as CommandLineFlags;
+    public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), Array.Empty<Type>())?.MakeGenericMethod(t).Invoke(null, Array.Empty<object?>()) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(ILogger logger, Type t, params string[] arguments) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { logger, arguments }) as CommandLineFlags;
+    public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) {
+        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { arguments }) as CommandLineFlags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(ILogger logger, Type t, PrintHelpDelegate printHelp, params string[] arguments) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { logger, printHelp, arguments }) as CommandLineFlags;
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) {
+        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, arguments }) as CommandLineFlags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(ILogger logger, Type t, PrintHelpDelegate printHelp) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { logger, printHelp }) as CommandLineFlags;
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) {
+        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp }) as CommandLineFlags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(ILogger logger, PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(logger, printHelp, Environment.GetCommandLineArgs().Skip(1).ToArray());
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(printHelp, Environment.GetCommandLineArgs().Skip(1).ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(ILogger logger, PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags {
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags {
         var shouldExit = false;
         var instance = Activator.CreateInstance<T>();
         var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
@@ -304,7 +303,7 @@ public static class CommandLineFlagsParser {
 
         if (propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
             if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag))) {
-                printHelp(typeMap.Values.ToList(), true, logger);
+                printHelp(typeMap.Values.ToList(), true);
                 Environment.Exit(0);
                 return null;
             }
@@ -329,7 +328,7 @@ public static class CommandLineFlagsParser {
             }
 
             if (indexList == null && flag.IsRequired) {
-                logger.Log(LogLevel.Error, "{Flag} needs a value", flag.Flag);
+                Console.WriteLine($"{flag.Flag} needs a value");
                 shouldExit = true;
             }
 
@@ -349,12 +348,12 @@ public static class CommandLineFlagsParser {
                         if (hasInnateValue) {
                             textValue = argument[(argument.IndexOf('=') + 1)..];
                             if (string.IsNullOrWhiteSpace(textValue)) {
-                                logger.Log(LogLevel.Error, "{Flag} needs a value", flag.Flag);
+                                Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
                                 shouldExit = true;
                             }
                         } else {
                             if (!positionalMap.Contains(index + 1)) {
-                                logger.Log(LogLevel.Error, "{Flag} needs a value", flag.Flag);
+                                Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
                                 shouldExit = true;
                             }
 
@@ -364,13 +363,13 @@ public static class CommandLineFlagsParser {
 
                         if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                             var temp = default(object?);
-                            if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp, logger)) {
+                            if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
                                 return null;
                             }
 
                             value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                             type.GetMethod("Add")?.Invoke(value, new[] { temp });
-                        } else if (VisitFlagValue<T>(type, textValue, flag, ref value, logger)) {
+                        } else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
                             return null;
                         }
                     }
@@ -403,7 +402,7 @@ public static class CommandLineFlagsParser {
             }
 
             if (flag.IsRequired && flag.Positional >= positionalMap.Count) {
-                logger.Log(LogLevel.Error, "Positional {Flag} needs a value", flag.Flag);
+                Console.WriteLine($"Positional {flag.Flag} needs a value");
                 shouldExit = true;
             }
 
@@ -412,13 +411,13 @@ public static class CommandLineFlagsParser {
                 var temp = default(object?);
                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                 foreach (var textValue in positionals.Skip(flag.Positional)) {
-                    if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp, logger)) {
+                    if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
                         return null;
                     }
 
                     type.GetMethod("Add")?.Invoke(value, new[] { temp });
                 }
-            } else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value, logger)) {
+            } else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
                 shouldExit = true;
             }
 
@@ -439,13 +438,13 @@ public static class CommandLineFlagsParser {
             return instance;
         }
 
-        printHelp(typeMap.Values.ToList(), instance.Help, logger);
+        printHelp(typeMap.Values.ToList(), instance.Help);
         Environment.Exit(0);
         return null;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool VisitFlagValue<T>(Type type, string textValue, FlagAttribute flag, ref object? value, ILogger logger) where T : CommandLineFlags {
+    private static bool VisitFlagValue<T>(Type type, string textValue, FlagAttribute flag, ref object? value) where T : CommandLineFlags {
         var sterilizedValue = textValue;
         if (flag.ReplaceDashes > 0) {
             sterilizedValue = sterilizedValue.Replace('-', flag.ReplaceDashes);
@@ -456,13 +455,13 @@ public static class CommandLineFlagsParser {
         }
 
         if (flag.ValidValues?.Length > 0 && !flag.ValidValues.Contains(sterilizedValue)) {
-            logger.Log(LogLevel.Error, "Unrecognized value {Value} for {Flag}! Valid values are {Valid}", sterilizedValue, flag.Flag, string.Join(", ", flag.ValidValues));
+            Console.WriteLine($"Unrecognized value {sterilizedValue} for {flag.Flag}! Valid values are {string.Join(", ", flag.ValidValues)}");
             return true;
         }
 
         if (type.IsEnum) {
             if (!Enum.TryParse(type, sterilizedValue, true, out value) && !Enum.TryParse(type, flag.EnumPrefix + sterilizedValue, out value)) {
-                logger.Log(LogLevel.Error, "Unrecognized value {Value} for {Flag}! Valid values are {Valid}", textValue, flag.Flag, string.Join(", ", Enum.GetNames(type)));
+                Console.WriteLine($"Unrecognized value {textValue} for {flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
             }
         } else {
             try {
@@ -484,7 +483,8 @@ public static class CommandLineFlagsParser {
                     _ => InvokeVisitor<T>(flag, type, textValue),
                 };
             } catch (Exception e) {
-                logger.Log(e, "{Flag} failed to parse {Value} as a {Type}", flag.Flag, textValue, type.Name);
+                Console.WriteLine(e.ToString());
+                Console.WriteLine($"{flag.Flag} failed to parse {textValue} as a {type.Name}");
                 return true;
             }
         }
