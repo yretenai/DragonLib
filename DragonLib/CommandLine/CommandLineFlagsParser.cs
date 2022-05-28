@@ -220,7 +220,7 @@ public static class CommandLineFlagsParser {
                     flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
                 }
 
-                Console.WriteLine("{Pad}\t{Name}\t{Pos}\t{Help}\t{Required}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help, required);
+                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help, required);
             }
 
             Console.WriteLine(string.Empty);
