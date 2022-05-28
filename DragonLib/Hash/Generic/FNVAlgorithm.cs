@@ -5,8 +5,8 @@ namespace DragonLib.Hash.Generic;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVAlgorithm<T> : SpanHashAlgorithm<T> 
-    where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> { 
+public class FNVAlgorithm<T> : SpanHashAlgorithm<T>
+    where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
     public const string FNV1_IV = "chongo <Landon Curt Noll> /\\../\\";
     public const string FNV1B_IV = "chongo (Landon Curt Noll) /\\oo/\\";
     private readonly T Basis;

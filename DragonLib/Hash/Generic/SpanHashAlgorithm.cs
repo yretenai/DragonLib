@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace DragonLib.Hash.Generic;
 
-public abstract class SpanHashAlgorithm<T> : HashAlgorithm 
+public abstract class SpanHashAlgorithm<T> : HashAlgorithm
     where T : unmanaged, INumber<T> {
     protected SpanHashAlgorithm() {
         unsafe {
