@@ -4,7 +4,7 @@ using System.Reflection;
 namespace DragonLib.CommandLine;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class FlagAttribute : Attribute {
+public sealed class FlagAttribute : Attribute {
     public FlagAttribute(string flag) => Flag = flag;
 
     public string Flag { get; set; }
@@ -35,7 +35,7 @@ public class FlagAttribute : Attribute {
         return base.Equals(obj);
     }
 
-    protected bool Equals(FlagAttribute other) =>
+    public bool Equals(FlagAttribute other) =>
         base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category &&
         Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly &&
         IsRequired == other.IsRequired && Positional == other.Positional &&

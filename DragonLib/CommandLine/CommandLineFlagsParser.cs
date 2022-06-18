@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -18,7 +19,7 @@ public static class CommandLineFlagsParser {
         foreach (var @interface in t.GetInterfaces()) {
             var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
             foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
-                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1?.Equals(default) == false) {
+                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
                     continue;
                 }
 
@@ -27,8 +28,8 @@ public static class CommandLineFlagsParser {
             }
         }
 
-        typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
-        printHelp(typeMap.Values.ToList(), helpInvoked);
+        typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
+        printHelp.Invoke(typeMap.Values.ToList(), helpInvoked);
     }
 
     public static void PrintHelp(List<(FlagAttribute? Flag, Type FlagType)> flags, bool helpInvoked) {
@@ -264,7 +265,7 @@ public static class CommandLineFlagsParser {
         foreach (var @interface in typeof(T).GetInterfaces()) {
             var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
             foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
-                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1?.Equals(default) == false) {
+                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
                     continue;
                 }
 
@@ -273,7 +274,7 @@ public static class CommandLineFlagsParser {
             }
         }
 
-        typeMap = typeMap.Where(x => x.Value.Item1?.Equals(default) == false).ToDictionary(x => x.Key, y => y.Value);
+        typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
         var argMap = new Dictionary<string, HashSet<int>>();
         var positionalMap = new HashSet<int>();
         for (var index = 0; index < arguments.Length; index++) {
@@ -361,7 +362,7 @@ public static class CommandLineFlagsParser {
                             positionalMap.Remove(index + 1);
                         }
 
-                        if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
+                        if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                             var temp = default(object?);
                             if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
                                 return null;
@@ -407,7 +408,7 @@ public static class CommandLineFlagsParser {
             }
 
             var value = flag.Default;
-            if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
+            if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                 var temp = default(object?);
                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                 foreach (var textValue in positionals.Skip(flag.Positional)) {
