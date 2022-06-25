@@ -200,9 +200,11 @@ public static class CommandLineFlagsParser {
                     requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
                 } else if (type.IsEnum) {
                     var names = Enum.GetNames(type);
-                    if (!string.IsNullOrEmpty(flag.EnumPrefix)) {
-                        var start = flag.EnumPrefix.Length;
-                        names = names.Select(x => x.StartsWith(flag.EnumPrefix) ? x[start..] : x).ToArray();
+                    if (flag.EnumPrefix?.Length > 0) {
+                        names = names.Select(x => {
+                            var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(x));
+                            return prefix != null ? x[prefix.Length..] : x;
+                        }).ToArray();
                     }
 
                     requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
@@ -461,9 +463,19 @@ public static class CommandLineFlagsParser {
         }
 
         if (type.IsEnum) {
-            if (!Enum.TryParse(type, sterilizedValue, true, out value) && !Enum.TryParse(type, flag.EnumPrefix + sterilizedValue, out value)) {
-                Console.WriteLine($"Unrecognized value {textValue} for {flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
+            if(Enum.TryParse(type, sterilizedValue, true, out value)) {
+                return false;
             }
+
+            if (flag.EnumPrefix is { Length: > 0 }) {
+                foreach (var prefix in flag.EnumPrefix) {
+                    if(Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
+                        return false;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Unrecognized value {textValue} for {flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
         } else {
             try {
                 value = type.FullName switch {

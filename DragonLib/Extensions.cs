@@ -75,8 +75,12 @@ public static class Extensions {
             .ToArray();
     }
 
+    public static string ToHexString(this byte[] input) {
+        return string.Join("", input.Select(x => x.ToString("x2")));
+    }
+
     public static string ToHexString(this Span<byte> input) {
-        return string.Join("", input.ToArray().Select(x => x.ToString("X2") + " "));
+        return string.Join("", input.ToArray().Select(x => x.ToString("x2")));
     }
 
     public static byte[] ToBytes(this string? input) {

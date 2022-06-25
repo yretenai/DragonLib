@@ -18,7 +18,7 @@ public sealed class FlagAttribute : Attribute {
     public object? Default { get; set; }
     public string[]? ValidValues { get; set; } = Array.Empty<string>();
     public string[]? Aliases { get; set; } = Array.Empty<string>();
-    public string? EnumPrefix { get; set; }
+    public string[]? EnumPrefix { get; set; }
     public char ReplaceDashes { get; set; }
     public char ReplaceDots { get; set; }
     public object? Extra { get; set; }
