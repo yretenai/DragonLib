@@ -7,6 +7,12 @@ public static class Extensions {
 
     private static readonly string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
 
+    public static Span<T> Clone<T>(this Span<T> span) {
+        var clone = new T[span.Length];
+        span.CopyTo(clone);
+        return new Span<T>(clone);
+    }
+
     public static string SanitizeFilename(this string path, char replaceChar = '_') {
         var illegal = Path.GetInvalidFileNameChars();
 
