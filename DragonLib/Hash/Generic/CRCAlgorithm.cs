@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace DragonLib.Hash.Generic;
 
 public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
-    where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T>, IMinMaxValue<T> {
+    where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IMinMaxValue<T> {
     private readonly T Init;
     private readonly T Polynomial;
     private readonly bool ReflectIn;
