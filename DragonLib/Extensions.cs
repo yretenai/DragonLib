@@ -81,23 +81,23 @@ public static class Extensions {
             .ToArray();
     }
 
-    public static string ToHexString(this byte[] input) {
-        return string.Join("", input.Select(x => x.ToString("x2")));
+    public static string ToHexString(this byte[] input, string separator = "", string prefix = "") {
+        return string.Join(separator, input.Select(x => prefix + x.ToString("x2")));
     }
 
-    public static string ToHexString(this Span<byte> input) {
-        return string.Join("", input.ToArray().Select(x => x.ToString("x2")));
+    public static string ToHexString(this Span<byte> input, string separator = "", string prefix = "") {
+        return string.Join(separator, input.ToArray().Select(x => prefix + x.ToString("x2")));
     }
 
-    public static byte[] ToBytes(this string? input) {
-        var cleaned = input?.Replace(" ", string.Empty).Trim();
-        if (cleaned == null || cleaned.Length % 2 != 0) {
+    public static byte[] ToBytes(this string? input, int hextetLength = 2) {
+        var cleaned = input?.Replace(" ", string.Empty).Replace(", ", string.Empty).Trim();
+        if (cleaned == null || cleaned.Length % hextetLength != 0) {
             return Array.Empty<byte>();
         }
 
         return Enumerable.Range(0, cleaned.Length)
-            .Where(x => x % 2 == 0)
-            .Select(x => byte.Parse(cleaned.Substring(x, 2), NumberStyles.HexNumber))
+            .Where(x => x % hextetLength == 0)
+            .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
             .ToArray();
     }
 
