@@ -95,6 +95,10 @@ public static class Extensions {
             return Array.Empty<byte>();
         }
 
+        if (cleaned.StartsWith("0x")) {
+            cleaned = cleaned[2..];
+        }
+
         return Enumerable.Range(0, cleaned.Length)
             .Where(x => x % hextetLength == 0)
             .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
