@@ -113,8 +113,9 @@ public static class Extensions {
             var found = true;
             for (var i = 0; i < signature.Length; ++i) {
                 var b = signature[i];
-                if (b != null && b != slice[i]) {
+                if (b.HasValue && b != slice[i]) {
                     found = false;
+                    break;
                 }
             }
 
@@ -143,8 +144,9 @@ public static class Extensions {
             var found = true;
             for (var i = 0; i < signature.Length; ++i) {
                 var b = signature[i];
-                if (b != null && b != slice[i]) {
+                if (b.HasValue && b != slice[i]) {
                     found = false;
+                    break;
                 }
             }
 
