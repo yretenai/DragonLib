@@ -6,9 +6,10 @@ namespace DragonLib.Unsafe;
 public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>> where T : unmanaged {
     public unsafe delegate void FreeDelegate(void* ptr);
 
+    private readonly FreeDelegate FreeInner;
+
     public int Length;
     public nint Pointer;
-    private readonly FreeDelegate FreeInner;
 
     private Array(nint pointer, int length, FreeDelegate free) {
         if (pointer == 0) {
@@ -21,15 +22,6 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
     }
 
     public unsafe Span<T> Span => new((T*)Pointer, Length);
-
-    public unsafe T[] ToManaged() {
-        var array = new T[Length];
-        fixed (T* ptr = array) {
-            NativeMemory.Copy((void*)Pointer, ptr, (uint)(Length * sizeof(T)));
-        }
-
-        return array;
-    }
 
     public unsafe ref T this[int index] {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,7 +39,24 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
         GC.SuppressFinalize(this);
     }
 
+    public IEnumerator<T> GetEnumerator() {
+        for (var i = 0; i < Length; ++i) {
+            yield return this[i];
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
     public bool Equals(Array<T>? other) => other?.Pointer == Pointer && other.Length == Length;
+
+    public unsafe T[] ToManaged() {
+        var array = new T[Length];
+        fixed (T* ptr = array) {
+            NativeMemory.Copy((void*)Pointer, ptr, (uint)(Length * sizeof(T)));
+        }
+
+        return array;
+    }
 
     ~Array() {
         Free();
@@ -66,12 +75,6 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
         }
     }
 
-    public IEnumerator<T> GetEnumerator() {
-        for (var i = 0; i < Length; ++i) {
-            yield return this[i];
-        }
-    }
-
     public override bool Equals(object? obj) {
         if (obj is Array<T> other) {
             return Equals(other);
@@ -81,7 +84,6 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
     }
 
     public override int GetHashCode() => (int)Pointer;
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public static bool operator ==(Array<T> left, Array<T> right) => left.Equals(right);
 
