@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace DragonLib.Unsafe;
 
 public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>> where T : unmanaged {
-    public delegate void FreeDelegate(nint ptr);
+    public unsafe delegate void FreeDelegate(void* ptr);
 
     public int Length;
     public nint Pointer;
@@ -25,7 +25,7 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
     public unsafe T[] ToManaged() {
         var array = new T[Length];
         fixed (T* ptr = array) {
-            System.Runtime.CompilerServices.Unsafe.CopyBlockUnaligned(ptr, (void*)Pointer, (uint)(Length * sizeof(T)));
+            NativeMemory.Copy((void*)Pointer, ptr, (uint)(Length * sizeof(T)));
         }
 
         return array;
@@ -53,13 +53,14 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
         Free();
     }
 
-    public static Array<T> Allocate(int length) => new(Marshal.AllocHGlobal(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, Marshal.FreeHGlobal);
-    public static Array<T> AllocateCTM(int length) => new(Marshal.AllocCoTaskMem(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, Marshal.FreeCoTaskMem);
-    // todo: public static NativeArray<T> PoolAllocate(int length) => new(TLSFPool.Shared.Allocate(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
+    public static unsafe Array<T> Alloc(int length) => new((nint)NativeMemory.Alloc((nuint)(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
+    public static unsafe Array<T> AllocZeroed(int length) => new((nint)NativeMemory.AllocZeroed((nuint)(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
+    public static unsafe Array<T> AllocAligned(int length, int alignment = 16) => new((nint)NativeMemory.AlignedAlloc((nuint)(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), (nuint)alignment), length, NativeMemory.AlignedFree);
+    // todo: public static NativeArray<T> AllocPool(int length, TLSFPool? pool = null) => new((pool ?? TLSFPool.Shared).Alloc((nuint)(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
 
-    public void Free() {
+    public unsafe void Free() {
         if (Pointer != 0) {
-            FreeInner(Pointer);
+            FreeInner((void*)Pointer);
             Pointer = 0;
             Length = 0;
         }
@@ -86,4 +87,3 @@ public sealed class Array<T> : IDisposable, IEnumerable<T>, IEquatable<Array<T>>
 
     public static bool operator !=(Array<T> left, Array<T> right) => !(left == right);
 }
-
