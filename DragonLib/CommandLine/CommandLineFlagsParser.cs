@@ -202,7 +202,7 @@ public static class CommandLineFlagsParser {
                     var names = Enum.GetNames(type);
                     if (flag.EnumPrefix?.Length > 0) {
                         names = names.Select(x => {
-                            var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(x));
+                            var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
                             return prefix != null ? x[prefix.Length..] : x;
                         }).ToArray();
                     }
@@ -234,31 +234,49 @@ public static class CommandLineFlagsParser {
     public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, arguments);
+    public static T? ParseFlags<T>(CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(options, Environment.GetCommandLineArgs().Skip(1).ToArray());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, CommandLineOptions.Empty, arguments);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(CommandLineOptions options, params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, options, arguments);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), Array.Empty<Type>())?.MakeGenericMethod(t).Invoke(null, new object?[] { options }) as CommandLineFlags;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { options, arguments }) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), Array.Empty<Type>())?.MakeGenericMethod(t).Invoke(null, Array.Empty<object?>()) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { arguments }) as CommandLineFlags;
-    }
+    public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { arguments }) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, arguments }) as CommandLineFlags;
-    }
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, options, arguments }) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) {
-        return typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp }) as CommandLineFlags;
-    }
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, options }) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(printHelp, Environment.GetCommandLineArgs().Skip(1).ToArray());
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate), typeof(string[]) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, CommandLineOptions.Empty, arguments }) as CommandLineFlags;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags {
+    public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), new[] { typeof(PrintHelpDelegate) })?.MakeGenericMethod(t).Invoke(null, new object?[] { printHelp, CommandLineOptions.Empty }) as CommandLineFlags;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp, CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(printHelp, options, Environment.GetCommandLineArgs().Skip(1).ToArray());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(printHelp, CommandLineOptions.Empty, Environment.GetCommandLineArgs().Skip(1).ToArray());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(printHelp, CommandLineOptions.Empty, arguments);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? ParseFlags<T>(PrintHelpDelegate printHelp, CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
         var shouldExit = false;
         var instance = Activator.CreateInstance<T>();
         var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
@@ -304,7 +322,7 @@ public static class CommandLineFlagsParser {
             }
         }
 
-        if (propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
+        if (options.UseHelp && propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
             if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag))) {
                 printHelp(typeMap.Values.ToList(), true);
                 Environment.Exit(0);
