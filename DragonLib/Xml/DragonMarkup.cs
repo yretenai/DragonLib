@@ -12,7 +12,7 @@ public static class DragonMarkup {
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static string CreateNamespacedTag(string? tag, string? ns) {
         if (tag == null) {
-            return "";
+            return string.Empty;
         }
 
         return ns == null ? tag : $"{ns}:{tag}";
@@ -65,7 +65,7 @@ public static class DragonMarkup {
                     visited[instance!] = visited.Count;
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
                     if (target == DragonMarkupType.Enumerable && instance is IEnumerable enumerable) {
                         instance = enumerable.Cast<object>().ToArray();
@@ -84,7 +84,7 @@ public static class DragonMarkup {
                 } else {
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                 }
             case DragonMarkupType.Object when type != null:
@@ -92,7 +92,7 @@ public static class DragonMarkup {
                     visited[instance!] = visited.Count;
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     var tag = $"{indents}<{FormatName(type.Name)}{hmlIdTag}{hmlNameTag}";
                     var members = GetMembers(type);
                     var complexMembers = new List<(object? value, string memberName, IDragonMarkupSerializer? custom)>();
@@ -139,7 +139,7 @@ public static class DragonMarkup {
                 } else {
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                 }
             case DragonMarkupType.Dictionary when type != null:
@@ -167,7 +167,7 @@ public static class DragonMarkup {
 
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     var tag =
                         $"{indents}<{CreateNamespacedTag("map", settings.Namespace)}{hmlIdTag}{hmlNameTag}{hmlKeyTag}{hmlValueTag}";
 
@@ -260,7 +260,7 @@ public static class DragonMarkup {
                 } else {
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
-                        : "";
+                        : string.Empty;
                     return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
                 }
             default:

@@ -5,7 +5,7 @@ namespace DragonLib.CommandLine;
 public static class Command {
     //                        group,             name
     private static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command)>> Commands { get; } = new() {
-        { "", new Dictionary<string, (string Description, Type Type, Type Command)>() },
+        { string.Empty, new Dictionary<string, (string Description, Type Type, Type Command)>() },
     };
 
     private static void LoadCommands() {
@@ -23,10 +23,11 @@ public static class Command {
         }
     }
 
-    public static void Run(CommandLineFlags? globalFlags = null, string[]? args = null) {
+    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null,  string[]? args = null) {
         LoadCommands();
 
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
+        printHelp ??= CommandLineFlagsParser.PrintHelp;
         var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions { UseHelp = false });
 
         if (positionalFlags == null) {
@@ -37,10 +38,14 @@ public static class Command {
 
         var commandGroupName = positionalFlags.Positionals.ElementAtOrDefault(0);
         if (string.IsNullOrEmpty(commandGroupName)) {
+            Console.WriteLine("No command specified, available commands:");
             foreach(var (group, commands) in Commands) {
-                Console.WriteLine(group);
+                if (!string.IsNullOrEmpty(group)) {
+                    Console.WriteLine(group);
+                }
+
                 foreach(var (name, (description, _, _)) in commands) {
-                    Console.WriteLine($"  {name} - {description}");
+                    Console.WriteLine($"{(string.IsNullOrEmpty(group) ? string.Empty : "  ")}{name} - {description}");
                 }
             }
 
@@ -52,6 +57,7 @@ public static class Command {
         var commandName = positionalFlags.Positionals.ElementAtOrDefault(1);
         if (string.IsNullOrEmpty(commandName) || !Commands.ContainsKey(commandGroupName)) {
             if (Commands.TryGetValue(commandGroupName, out commandGroup)) {
+                Console.WriteLine("No command specified, available commands:");
                 foreach(var (name, (description, _, _)) in commandGroup) {
                     Console.WriteLine($"{name} - {description}");
                 }
@@ -60,7 +66,7 @@ public static class Command {
             }
 
             commandName = commandGroupName;
-            commandGroupName = "";
+            commandGroupName = string.Empty;
         }
 
         commandGroup = Commands[commandGroupName];
@@ -70,9 +76,10 @@ public static class Command {
             return;
         }
 
-        var filteredArgs = args.Where(x => x[0] == '-').Concat(positionalFlags.Positionals.Skip(string.IsNullOrEmpty(commandGroupName) ? 1 : 2)).ToArray();
+        var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
+        var filteredArgs = args.Where(x => x[0] == '-').Concat(positionalFlags.Positionals.Skip(offset)).ToArray();
 
-        var flags = CommandLineFlagsParser.ParseFlags(command.Type, filteredArgs);
+        var flags = CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), PositionalOffset = offset }, filteredArgs);
         if (flags == null) {
             return;
         }

@@ -4,7 +4,7 @@ public class IndentHelperBase {
     internal string? CachedTabs;
     protected int TabSize { get; set; }
 
-    protected virtual string TabCharacter => "";
+    protected virtual string TabCharacter => string.Empty;
 
     protected bool Equals(IndentHelperBase other) => TabSize == other.TabSize && TabCharacter == other.TabCharacter;
 
@@ -23,7 +23,7 @@ public class IndentHelperBase {
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => HashCode.Combine(TabSize, TabCharacter);
 
-    public override string ToString() => CachedTabs ?? "";
+    public override string ToString() => CachedTabs ?? string.Empty;
 
     public static IndentHelperBase operator +(IndentHelperBase a, int b) {
         return Add(a, b);
