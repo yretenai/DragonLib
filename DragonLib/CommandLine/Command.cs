@@ -23,7 +23,9 @@ public static class Command {
         }
     }
 
-    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null,  string[]? args = null) {
+    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, string[]? args = null) => Run<object>(globalFlags, printHelp, args);
+
+    public static T? Run<T>(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null,  string[]? args = null) {
         LoadCommands();
 
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -31,7 +33,7 @@ public static class Command {
         var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions { UseHelp = false });
 
         if (positionalFlags == null) {
-            return;
+            return default;
         }
 
         globalFlags ??= positionalFlags;
@@ -49,7 +51,7 @@ public static class Command {
                 }
             }
 
-            return;
+            return default;
         }
 
         Dictionary<string, (string Description, Type Type, Type Command)>? commandGroup;
@@ -62,7 +64,7 @@ public static class Command {
                     Console.WriteLine($"{name} - {description}");
                 }
 
-                return;
+                return default;
             }
 
             commandName = commandGroupName;
@@ -73,15 +75,15 @@ public static class Command {
 
         if (!commandGroup.TryGetValue(commandName, out var command)) {
             Console.WriteLine($"Command {commandName} not found");
-            return;
+            return default;
         }
 
         var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
         var filteredArgs = args.Where(x => x[0] == '-').Concat(positionalFlags.Positionals.Skip(offset)).ToArray();
 
-        var flags = CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), PositionalOffset = offset }, filteredArgs);
+        var flags = command.Type == globalFlags.GetType() ? globalFlags : CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), PositionalOffset = offset }, filteredArgs);
         if (flags == null) {
-            return;
+            return default;
         }
 
         var constructors = command.Command.GetConstructors();
@@ -92,8 +94,8 @@ public static class Command {
         });
 
         if (globalAndFlagsConstructor != null) {
-            globalAndFlagsConstructor.Invoke(new object[] { globalFlags, flags });
-            return;
+            var instance = globalAndFlagsConstructor.Invoke(new object[] { globalFlags, flags });
+            return instance is T tInstance ? tInstance : default;
         }
 
         var flagsConstructor = constructors.FirstOrDefault(x => {
@@ -102,10 +104,11 @@ public static class Command {
         });
 
         if (flagsConstructor != null) {
-            flagsConstructor.Invoke(new object[] { flags });
-            return;
+            var instance = flagsConstructor.Invoke(new object[] { flags });
+            return instance is T tInstance ? tInstance : default;
         }
 
         Console.WriteLine($"Command {commandName} is not configured properly. Lacking a valid constructor.");
+        return default;
     }
 }
