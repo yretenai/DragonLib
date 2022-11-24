@@ -91,6 +91,7 @@ public sealed class DownloadAccelerator : IDisposable {
                 await stream.CopyToAsync(fileStream).ConfigureAwait(false);
                 return;
             } catch(Exception) {
+                if(i == Retries - 1) throw;
                 // ignored
             }
         }
