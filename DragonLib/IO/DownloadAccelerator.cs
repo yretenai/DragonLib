@@ -49,7 +49,7 @@ public sealed class DownloadAccelerator : IDisposable {
 #pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
             var stream = await Client.GetStreamAsync(uri).ConfigureAwait(false);
             await using var _ = stream.ConfigureAwait(false);
-            var fileStream = File.Open(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
+            var fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
             await using var __ = fileStream.ConfigureAwait(false);
 #pragma warning restore CA2000
             await stream.CopyToAsync(fileStream).ConfigureAwait(false);
