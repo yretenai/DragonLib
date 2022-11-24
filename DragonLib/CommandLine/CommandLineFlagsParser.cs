@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace DragonLib.CommandLine;
 
 public static class CommandLineFlagsParser {
-    public delegate void PrintHelpDelegate(List<(FlagAttribute? Flag, Type FlagType)> flags, CommandLineOptions options, bool helpInvoked);
+    public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute? Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked);
 
     public static void PrintHelp<T>(PrintHelpDelegate printHelp, CommandLineOptions options, bool helpInvoked) {
         PrintHelp(typeof(T), printHelp, options, helpInvoked);
@@ -29,12 +29,12 @@ public static class CommandLineFlagsParser {
         }
 
         typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
-        printHelp.Invoke(typeMap.Values.ToList(), options, helpInvoked);
+        printHelp.Invoke(typeMap, Activator.CreateInstance(t)!, options, helpInvoked);
     }
 
-    public static void PrintHelp(List<(FlagAttribute? Flag, Type FlagType)> flags, CommandLineOptions options, bool helpInvoked) {
-        flags = flags.Where(x => x.Flag?.Hidden == false).ToList();
-        var grouped = flags.GroupBy(x => x.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
+    public static void PrintHelp(Dictionary<PropertyInfo, (FlagAttribute? Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
+        flags = flags.Where(x => x.Value.Flag?.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
+        var grouped = flags.GroupBy(x => x.Value.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
         var entry = Assembly.GetEntryAssembly()?.GetName();
         var usageSlim = "Usage: ";
         if (entry != null) {
@@ -52,16 +52,12 @@ public static class CommandLineFlagsParser {
         var usageSlimOneChOptional = "[-";
         var usageSlimMultiCh = string.Empty;
         var usageSlimPositional = string.Empty;
-        foreach (var (flag, originalType) in flags) {
+        foreach (var (_, (flag, originalType)) in flags) {
             if (flag == null) {
                 continue;
             }
 
-            var type = originalType;
-            if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) {
-                type = type.GetGenericArguments()[0];
-            }
-
+            var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
             var tn = type.Name;
             if (type.IsConstructedGenericType) {
                 var parameters = type.GetGenericArguments().Select(x => x.Name);
@@ -165,16 +161,12 @@ public static class CommandLineFlagsParser {
                 Console.WriteLine($"{group}: ");
             }
 
-            foreach (var (flag, originalType) in attributes) {
+            foreach (var (property, (flag, originalType)) in attributes) {
                 if (flag == null) {
                     continue;
                 }
 
-                var type = originalType;
-                if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) {
-                    type = type.GetGenericArguments()[0];
-                }
-
+                var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
                 var hasValue = type.FullName != "System.Boolean";
                 var tn = type.Name;
                 if (type.IsConstructedGenericType) {
@@ -195,8 +187,15 @@ public static class CommandLineFlagsParser {
                     def = Activator.CreateInstance(type);
                 }
 
-                if (flag.Default != null && !flag.Default.Equals(def) || type.IsEnum) {
-                    requiredParts.Add($"Default: {flag.Default}");
+                var defaultValue = GetDefaultValue(property, flag, instance);
+                if (defaultValue != null) {
+                    if (!defaultValue.Equals(def)) {
+                        if (type.IsEnum) {
+                            requiredParts.Add($"Default: {((Enum)defaultValue).ToString("F")}");
+                        } else {
+                            requiredParts.Add($"Default: {defaultValue}");
+                        }
+                    }
                 }
 
                 if (flag.IsRequired) {
@@ -222,7 +221,7 @@ public static class CommandLineFlagsParser {
 
                 var required = string.Join(", ", requiredParts);
                 if (required.Length > 0) {
-                    required = $" ({required})";
+                    required = $"({required})";
                 }
 
                 var flagStr = flag.Flag;
@@ -230,7 +229,7 @@ public static class CommandLineFlagsParser {
                     flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
                 }
 
-                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help, required);
+                Console.WriteLine("{0}\t{1}\t{2}\t{3} {4}", flagStr.PadRight(sizes[0]), tn, tp, flag.Help?.Trim(), required.Trim());
             }
 
             Console.WriteLine(string.Empty);
@@ -331,7 +330,7 @@ public static class CommandLineFlagsParser {
 
         if (options.UseHelp && propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
             if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag))) {
-                printHelp(typeMap.Values.ToList(), options, true);
+                printHelp(typeMap, instance, options, true);
                 Environment.Exit(0);
                 return null;
             }
@@ -342,11 +341,8 @@ public static class CommandLineFlagsParser {
                 continue;
             }
 
-            var type = originalType;
-            var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-            if (isNullable) {
-                type = type.GetGenericArguments()[0];
-            }
+            var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
+            var isNullable = type != originalType;
 
             var indexList = default(HashSet<int>);
             foreach (var sw in flag.Flags) {
@@ -360,7 +356,7 @@ public static class CommandLineFlagsParser {
                 shouldExit = true;
             }
 
-            var value = flag.Default;
+            var value = GetDefaultValue(property, flag, instance);
             if (indexList != null) {
                 foreach (var index in indexList) {
                     if (type.FullName == "System.Boolean") {
@@ -423,18 +419,15 @@ public static class CommandLineFlagsParser {
                 continue;
             }
 
-            var type = originalType;
-            var isNullable = type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-            if (isNullable) {
-                type = type.GetGenericArguments()[0];
-            }
+            var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
+            var isNullable = type != originalType;
 
             if (flag.IsRequired && flag.Positional >= positionalMap.Count) {
                 Console.WriteLine($"Positional {flag.Flag} needs a value");
                 shouldExit = true;
             }
 
-            var value = flag.Default;
+            var value = GetDefaultValue(property, flag, instance);
             if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                 var temp = default(object?);
                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
@@ -466,9 +459,33 @@ public static class CommandLineFlagsParser {
             return instance;
         }
 
-        printHelp(typeMap.Values.ToList(), options, instance.Help);
+        printHelp(typeMap, instance, options, instance.Help);
         Environment.Exit(0);
         return null;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static object? GetDefaultValue(PropertyInfo property, FlagAttribute flag, object instance) {
+#pragma warning disable CS0618 // Type or member is obsolete
+        var value = flag.Default ?? property.GetValue(instance);
+#pragma warning restore CS0618
+
+        if (value == null) {
+            return null;
+        }
+
+        var originalType = value.GetType();
+        var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
+        var isNullable = type != originalType;
+        if (isNullable) {
+            if (type.GetProperty("HasValue")?.GetValue(value) as bool? == true) {
+                return type.GetProperty("Value")?.GetValue(value);
+            }
+
+            return null;
+        }
+
+        return value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -488,16 +505,31 @@ public static class CommandLineFlagsParser {
         }
 
         if (type.IsEnum) {
-            if(Enum.TryParse(type, sterilizedValue, true, out value)) {
-                return false;
+            if (sterilizedValue.Contains('|')) {
+                var enumValue = 0UL;
+                foreach (var sterilizedValuePart in sterilizedValue.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)) {
+                    if (!ParseEnumValue(type, flag, out var temp, sterilizedValuePart)) {
+                        continue;
+                    }
+
+                    enumValue |= Convert.ToUInt64(temp);
+                }
+
+                value = Enum.ToObject(type, enumValue);
+            } else {
+                if (ParseEnumValue(type, flag, out value, sterilizedValue)) {
+                    return false;
+                }
             }
 
-            if (flag.EnumPrefix is { Length: > 0 }) {
-                foreach (var prefix in flag.EnumPrefix) {
-                    if(Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
-                        return false;
-                    }
-                }
+            if(ulong.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValue)) {
+                value = Enum.ToObject(type, tempValue);
+                return true;
+            }
+
+            if(long.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValueSigned)) {
+                value = Enum.ToObject(type, tempValueSigned);
+                return true;
             }
 
             Console.WriteLine($"Unrecognized value {textValue} for {flag.Flag}! Valid values are {string.Join(", ", Enum.GetNames(type))}");
@@ -524,6 +556,26 @@ public static class CommandLineFlagsParser {
                 Console.WriteLine(e.ToString());
                 Console.WriteLine($"{flag.Flag} failed to parse {textValue} as a {type.Name}");
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ParseEnumValue(Type type, FlagAttribute flag, out object? value, string sterilizedValue) {
+        if (Enum.TryParse(type, sterilizedValue, true, out value))
+        {
+            return true;
+        }
+
+        if (flag.EnumPrefix is { Length: > 0 })
+        {
+            foreach (var prefix in flag.EnumPrefix)
+            {
+                if (Enum.TryParse(type, prefix + sterilizedValue, false, out value))
+                {
+                    return true;
+                }
             }
         }
 
