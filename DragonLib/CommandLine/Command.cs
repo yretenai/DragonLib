@@ -86,7 +86,7 @@ public static class Command {
             return default;
         }
 
-        var stack = new object[2 + carry?.Length ?? 0];
+        var stack = new object[2 + (carry?.Length ?? 0)];
         stack[0] = globalFlags;
         stack[1] = flags;
         if (carry != null) {
