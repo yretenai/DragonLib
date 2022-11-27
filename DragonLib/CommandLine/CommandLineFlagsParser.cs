@@ -65,7 +65,7 @@ public static class CommandLineFlagsParser {
             }
 
             if (flag.Positional > -1) {
-                sizes[2] = Math.Max(sizes[2], $"Positional {flag.Positional + 1 + options.PositionalOffset}".Length);
+                sizes[2] = Math.Max(sizes[2], $"Positional {flag.Positional + 1 + options.SkipPositionals}".Length);
             }
 
             sizes[1] = Math.Max(sizes[1], tn.Length);
@@ -176,7 +176,7 @@ public static class CommandLineFlagsParser {
 
                 var tp = string.Empty;
                 if (flag.Positional > -1) {
-                    tp += $"Positional {flag.Positional + 1 + options.PositionalOffset}";
+                    tp += $"Positional {flag.Positional + 1 + options.SkipPositionals}";
                 }
 
                 tn = tn.PadRight(sizes[1]);
@@ -303,6 +303,7 @@ public static class CommandLineFlagsParser {
         typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
         var argMap = new Dictionary<string, HashSet<int>>();
         var positionalMap = new HashSet<int>();
+        var skipped = options.SkipPositionals;
         for (var index = 0; index < arguments.Length; index++) {
             var argument = arguments[index];
             if (argument.StartsWith("-")) {
@@ -324,6 +325,10 @@ public static class CommandLineFlagsParser {
                     }
                 }
             } else {
+                if (skipped-- > 0) {
+                    continue;
+                }
+
                 positionalMap.Add(index);
             }
         }
@@ -404,10 +409,12 @@ public static class CommandLineFlagsParser {
                 value = Activator.CreateInstance(originalType, value);
             }
 
-            try {
-                value ??= Activator.CreateInstance(type);
-            } catch {
-                // ignored
+            if(type != typeof(string)) {
+                try {
+                    value ??= Activator.CreateInstance(type);
+                } catch {
+                    // ignored
+                }
             }
 
             property.SetValue(instance, value);

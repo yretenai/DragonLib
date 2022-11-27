@@ -5,5 +5,5 @@ public record CommandLineOptions {
 
     public bool UseHelp { get; init; } = true;
     public string Command { get; init; } = string.Empty;
-    public int PositionalOffset { get; init; }
+    public int SkipPositionals { get; init; }
 }

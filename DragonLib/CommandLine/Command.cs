@@ -79,9 +79,8 @@ public static class Command {
         }
 
         var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
-        var filteredArgs = args.Where(x => x[0] == '-').Concat(positionalFlags.Positionals.Skip(offset)).ToArray();
 
-        var flags = command.Type == globalFlags.GetType() ? globalFlags : CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), PositionalOffset = offset }, filteredArgs);
+        var flags = command.Type == globalFlags.GetType() ? globalFlags : CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), SkipPositionals = offset }, args);
         if (flags == null) {
             return default;
         }
