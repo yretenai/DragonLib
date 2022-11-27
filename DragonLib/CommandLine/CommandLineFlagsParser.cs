@@ -208,9 +208,10 @@ public static class CommandLineFlagsParser {
                     var names = Enum.GetNames(type);
                     if (flag.EnumPrefix?.Length > 0) {
                         names = names.Select(x => {
-                            var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
-                            return prefix != null ? x[prefix.Length..] : x;
-                        }).ToArray();
+                                var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
+                                return prefix != null ? x[prefix.Length..] : x;
+                            })
+                            .ToArray();
                     }
 
                     requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
@@ -409,7 +410,7 @@ public static class CommandLineFlagsParser {
                 value = Activator.CreateInstance(originalType, value);
             }
 
-            if(type != typeof(string)) {
+            if (type != typeof(string)) {
                 try {
                     value ??= Activator.CreateInstance(type);
                 } catch {
@@ -529,12 +530,12 @@ public static class CommandLineFlagsParser {
                 }
             }
 
-            if(ulong.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValue)) {
+            if (ulong.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValue)) {
                 value = Enum.ToObject(type, tempValue);
                 return true;
             }
 
-            if(long.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValueSigned)) {
+            if (long.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValueSigned)) {
                 value = Enum.ToObject(type, tempValueSigned);
                 return true;
             }
@@ -555,7 +556,7 @@ public static class CommandLineFlagsParser {
                     "System.Single" => float.Parse(textValue),
                     "System.Half" => Half.Parse(textValue),
                     "System.String" => sterilizedValue,
-                    "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
+                    "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions)(flag.Extra ?? RegexOptions.Compiled)),
                     "DragonLib.Numerics.Half" => Half.Parse(textValue),
                     _ => InvokeVisitor<T>(flag, type, textValue),
                 };
@@ -570,17 +571,13 @@ public static class CommandLineFlagsParser {
     }
 
     private static bool ParseEnumValue(Type type, FlagAttribute flag, out object? value, string sterilizedValue) {
-        if (Enum.TryParse(type, sterilizedValue, true, out value))
-        {
+        if (Enum.TryParse(type, sterilizedValue, true, out value)) {
             return true;
         }
 
-        if (flag.EnumPrefix is { Length: > 0 })
-        {
-            foreach (var prefix in flag.EnumPrefix)
-            {
-                if (Enum.TryParse(type, prefix + sterilizedValue, false, out value))
-                {
+        if (flag.EnumPrefix is { Length: > 0 }) {
+            foreach (var prefix in flag.EnumPrefix) {
+                if (Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
                     return true;
                 }
             }
@@ -614,5 +611,52 @@ public static class CommandLineFlagsParser {
         }
 
         return visitorMethod.Invoke(null, new object?[] { textValue });
+    }
+
+    public static string ReconstructArgs(CommandLineFlags inst) {
+        var type = inst.GetType();
+
+        var sb = new StringBuilder();
+
+        var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+        var typeMap = properties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).ToDictionary(x => x.x, y => y.Item2);
+        var flags = typeMap.Where(x => x.Value?.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
+
+        foreach (var (prop, flag) in flags) {
+            if (flag == null || flag.Positional > -1) {
+                continue;
+            }
+
+            var value = prop.GetValue(inst);
+            if (value is null or false) {
+                continue;
+            }
+
+            sb.Append("--");
+            sb.Append(flag.Flag);
+            sb.Append(' ');
+
+            string strValue;
+
+            if (prop.PropertyType.IsEnum) {
+                strValue = ((Enum)value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
+            } else {
+                strValue = value.ToString()!;
+            }
+
+            if (strValue.Contains(' ')) {
+                sb.Append('"');
+                sb.Append(strValue);
+                sb.Append('"');
+            } else {
+                sb.Append(strValue);
+            }
+
+            sb.Append(' ');
+        }
+
+        sb.Append(string.Join(' ', inst.Positionals.Select(x => x.Contains(' ') ? $"\"{x}\"" : x)));
+
+        return sb.ToString();
     }
 }
