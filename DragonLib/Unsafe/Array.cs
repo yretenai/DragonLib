@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace DragonLib.Unsafe;
 
@@ -78,20 +77,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
 
     public Memory<T> Memory => ToManaged().AsMemory();
 
-    public unsafe ref T this[int index] {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get {
-            ThrowIfDisposed();
-
-            if (index >= Length || index < 0) {
-#pragma warning disable CA1065
-                throw new IndexOutOfRangeException();
-#pragma warning restore CA1065
-            }
-
-            return ref ((T*) Ptr)[index];
-        }
-    }
+    public ref T this[int index] => ref Get(index);
 
     public void Dispose() {
         Free();
@@ -109,6 +95,27 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public bool Equals(Array<T>? other) => base.Equals(other);
+
+    private unsafe ref T Get(int index) {
+        ThrowIfDisposed();
+
+        if (index >= Length || index < 0) {
+            throw new IndexOutOfRangeException();
+        }
+
+        return ref ((T*) Ptr)[index];
+    }
+
+    private unsafe void Set(int index, T value) {
+        ThrowIfDisposed();
+
+        if (index >= Length || index < 0) {
+            throw new IndexOutOfRangeException();
+        }
+
+
+        ((T*) Ptr)[index] = value;
+    }
 
     public static unsafe void NullFree(void* ptr) { }
 
@@ -153,7 +160,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
     public static unsafe Array<T> Alloc(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
     public static unsafe Array<T> AllocZeroed(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AllocZeroed((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
     public static unsafe Array<T> AllocAligned(int length, int alignment = 16) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AlignedAlloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), (nuint) alignment), length, NativeMemory.AlignedFree);
-    // todo: public static NativeArray<T> AllocPool(int length, TLSFPool? pool = null) => length == 0 ? Empty : new((pool ?? TLSFPool.Shared).Alloc((nuint)(length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
+    // todo: public static NativeArray<T> AllocPool(int length, TLSFPool? pool = null) => length == 0 ? Empty : new Array<T>((pool ?? TLSFPool.Shared).Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
 
     public unsafe void Free() {
         if (Ptr != 0) {
