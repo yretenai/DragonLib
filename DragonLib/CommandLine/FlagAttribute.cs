@@ -15,6 +15,7 @@ public sealed class FlagAttribute : Attribute {
     public Assembly? VisitorAssembly { get; set; }
     public bool IsRequired { get; set; }
     public int Positional { get; set; } = -1;
+    [Obsolete("Set the property directly instead")]
     public object? Default { get; set; }
     public string[]? ValidValues { get; set; } = Array.Empty<string>();
     public string[]? Aliases { get; set; } = Array.Empty<string>();
@@ -39,7 +40,7 @@ public sealed class FlagAttribute : Attribute {
         base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category &&
         Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly &&
         IsRequired == other.IsRequired && Positional == other.Positional &&
-        Default?.Equals(other.Default) == true && ValidValues?.Equals(other.ValidValues) == true &&
+        ValidValues?.Equals(other.ValidValues) == true &&
         Aliases?.Equals(other.Aliases) == true && EnumPrefix?.Equals(other.EnumPrefix) == true &&
         ReplaceDashes.Equals(other.ReplaceDashes);
 
@@ -65,5 +66,5 @@ public sealed class FlagAttribute : Attribute {
             HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
             IsRequired,
             Positional,
-            HashCode.Combine(Default, ValidValues, Aliases, EnumPrefix, ReplaceDashes));
+            HashCode.Combine(ValidValues, Aliases, EnumPrefix, ReplaceDashes));
 }

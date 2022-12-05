@@ -23,9 +23,9 @@ public static class Command {
         }
     }
 
-    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, string[]? args = null) => Run<object>(globalFlags, printHelp, args);
+    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) => Run<object>(globalFlags, printHelp, carry, args);
 
-    public static T? Run<T>(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null,  string[]? args = null) {
+    public static T? Run<T>(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) {
         LoadCommands();
 
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -79,36 +79,49 @@ public static class Command {
         }
 
         var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
-        var filteredArgs = args.Where(x => x[0] == '-').Concat(positionalFlags.Positionals.Skip(offset)).ToArray();
 
-        var flags = command.Type == globalFlags.GetType() ? globalFlags : CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), PositionalOffset = offset }, filteredArgs);
+        var flags = command.Type == globalFlags.GetType() ? globalFlags : CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions { Command = $"{commandGroupName} {commandName}".Trim(), SkipPositionals = offset }, args);
         if (flags == null) {
             return default;
         }
 
-        var constructors = command.Command.GetConstructors();
-        var globalType = globalFlags.GetType();
-        var globalAndFlagsConstructor = constructors.FirstOrDefault(x => {
-            var @params = x.GetParameters();
-            return @params.Length == 2 && @params[0].ParameterType.IsAssignableFrom(globalType) && @params[1].ParameterType.IsAssignableFrom(command.Type);
-        });
+        var stack = new object[2 + (carry?.Length ?? 0)];
+        stack[0] = globalFlags;
+        stack[1] = flags;
+        if (carry != null) {
+            Array.Copy(carry, 2, stack, 0, carry.Length);
+        }
+        var stackTypes = stack.Select(x => x.GetType()).ToArray();
 
-        if (globalAndFlagsConstructor != null) {
-            var instance = globalAndFlagsConstructor.Invoke(new object[] { globalFlags, flags });
+        // all types + global flags + command flags
+        var constructor = command.Command.GetConstructor(stackTypes);
+        if (constructor != null) {
+            var instance = constructor.Invoke(stack.ToArray());
             return instance is T tInstance ? tInstance : default;
         }
 
-        var flagsConstructor = constructors.FirstOrDefault(x => {
-            var @params = x.GetParameters();
-            return @params.Length == 1 && @params[0].ParameterType.IsAssignableFrom(command.Type);
-        });
-
-        if (flagsConstructor != null) {
-            var instance = flagsConstructor.Invoke(new object[] { flags });
+        // all types + command flags
+        constructor = command.Command.GetConstructor(stackTypes.Skip(1).ToArray());
+        if (constructor != null) {
+            var instance = constructor.Invoke(stack.Skip(1).ToArray());
             return instance is T tInstance ? tInstance : default;
         }
 
-        Console.WriteLine($"Command {commandName} is not configured properly. Lacking a valid constructor.");
+        // global flags + command flags
+        constructor = command.Command.GetConstructor(stackTypes.Take(2).ToArray());
+        if (constructor != null) {
+            var instance = constructor.Invoke(stack.Take(2).ToArray());
+            return instance is T tInstance ? tInstance : default;
+        }
+
+        // command flags
+        constructor = command.Command.GetConstructor(stackTypes.Take(1).ToArray());
+        if (constructor != null) {
+            var instance = constructor.Invoke(stack.Take(1).ToArray());
+            return instance is T tInstance ? tInstance : default;
+        }
+
+        Console.WriteLine($"Command {commandName} is not configured properly. Lacking a valid constructor");
         return default;
     }
 }

@@ -27,9 +27,26 @@ public static class Extensions {
 
     public static void EnsureDirectoryExists(this string path) {
         var fullPath = Path.GetFullPath(path);
-        var directory = Path.GetDirectoryName(fullPath)!;
+        var directory = Path.GetDirectoryName(fullPath);
+        if (directory == null) {
+            return;
+        }
+
         if (!Directory.Exists(directory)) {
             Directory.CreateDirectory(directory);
+        }
+    }
+
+    public static void EnsureDirectoriesExists(this IEnumerable<string> path) {
+        var paths = path.Select(Path.GetFullPath).Select(Path.GetDirectoryName).Distinct().ToArray();
+        foreach (var directory in paths) {
+            if (directory == null) {
+                continue;
+            }
+
+            if (!Directory.Exists(directory)) {
+                Directory.CreateDirectory(directory);
+            }
         }
     }
 
