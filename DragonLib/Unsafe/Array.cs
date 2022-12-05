@@ -3,6 +3,10 @@
 namespace DragonLib.Unsafe;
 
 public abstract class ArrayBase : IEquatable<ArrayBase> {
+    public static unsafe FreeArrayDelegate NullFree { get; } = _ => { };
+    internal static unsafe FreeArrayDelegate NativeFree { get; } = NativeMemory.Free;
+    internal static unsafe FreeArrayDelegate NativeAlignedFree { get; } = NativeMemory.AlignedFree;
+
     public readonly int Length;
     protected nint Ptr;
 
@@ -25,7 +29,7 @@ public abstract class ArrayBase : IEquatable<ArrayBase> {
     public static bool operator ==(ArrayBase? left, ArrayBase? right) => Equals(left, right);
     public static bool operator !=(ArrayBase? left, ArrayBase? right) => !Equals(left, right);
 
-    public virtual unsafe Array<T> Cast<T>() where T : unmanaged => Length == 0 ? Array<T>.Empty : new Array<T>(Ptr, Length, Array<T>.NullFree);
+    public virtual Array<T> Cast<T>() where T : unmanaged => Length == 0 ? Array<T>.Empty : new Array<T>(Ptr, Length, NullFree);
 }
 
 public unsafe delegate void FreeArrayDelegate(void* ptr);
@@ -33,7 +37,7 @@ public unsafe delegate void FreeArrayDelegate(void* ptr);
 public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatable<Array<T>> where T : unmanaged {
     private readonly FreeArrayDelegate FreeArrayInner;
 
-    private unsafe Array() : base(0) {
+    private Array() : base(0) {
         Ptr = 0;
         FreeArrayInner = NullFree;
     }
@@ -117,8 +121,6 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
         ((T*) Ptr)[index] = value;
     }
 
-    public static unsafe void NullFree(void* ptr) { }
-
     private void ThrowIfDisposed() {
         if (Ptr == 0 && Length != 0) {
             throw new ObjectDisposedException(nameof(Array<T>));
@@ -157,9 +159,9 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
         Free();
     }
 
-    public static unsafe Array<T> Alloc(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
-    public static unsafe Array<T> AllocZeroed(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AllocZeroed((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeMemory.Free);
-    public static unsafe Array<T> AllocAligned(int length, int alignment = 16) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AlignedAlloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), (nuint) alignment), length, NativeMemory.AlignedFree);
+    public static unsafe Array<T> Alloc(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeFree);
+    public static unsafe Array<T> AllocZeroed(int length) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AllocZeroed((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>())), length, NativeFree);
+    public static unsafe Array<T> AllocAligned(int length, int alignment = 16) => length == 0 ? Empty : new Array<T>((nint) NativeMemory.AlignedAlloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), (nuint) alignment), length, NativeAlignedFree);
     // todo: public static NativeArray<T> AllocPool(int length, TLSFPool? pool = null) => length == 0 ? Empty : new Array<T>((pool ?? TLSFPool.Shared).Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
 
     public unsafe void Free() {
