@@ -96,7 +96,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
 
     public bool Equals(Array<T>? other) => base.Equals(other);
 
-    private unsafe ref T Get(int index) {
+    public unsafe ref T Get(int index) {
         ThrowIfDisposed();
 
         if (index >= Length || index < 0) {
@@ -106,7 +106,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
         return ref ((T*) Ptr)[index];
     }
 
-    private unsafe void Set(int index, T value) {
+    public unsafe void Set(int index, T value) {
         ThrowIfDisposed();
 
         if (index >= Length || index < 0) {
