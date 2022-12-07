@@ -10,6 +10,20 @@ public class MemoryBufferStream : Stream {
 
     private UnmanagedMemoryStream Stream { get; }
     private MemoryHandle Handle { get; }
+
+    public override bool CanRead => Stream.CanRead;
+
+    public override bool CanSeek => Stream.CanSeek;
+
+    public override bool CanWrite => Stream.CanWrite;
+
+    public override long Length => Stream.Length;
+
+    public override long Position {
+        get => Stream.Position;
+        set => Stream.Position = value;
+    }
+
     public override void Flush() {
         Stream.Flush();
     }
@@ -24,19 +38,6 @@ public class MemoryBufferStream : Stream {
 
     public override void Write(byte[] buffer, int offset, int count) {
         Stream.Write(buffer, offset, count);
-    }
-
-    public override bool CanRead => Stream.CanRead;
-
-    public override bool CanSeek => Stream.CanSeek;
-
-    public override bool CanWrite => Stream.CanWrite;
-
-    public override long Length => Stream.Length;
-
-    public override long Position {
-        get => Stream.Position;
-        set => Stream.Position = value;
     }
 
     public override void Close() {

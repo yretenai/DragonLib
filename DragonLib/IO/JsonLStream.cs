@@ -5,10 +5,6 @@ using System.Threading.Tasks;
 namespace DragonLib.IO;
 
 public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDisposable {
-    public TextReader? Reader { get; set; }
-    public TextWriter? Writer { get; set; }
-    public JsonSerializerOptions Options { get; set; }
-
     public JsonLStream(Stream stream, JsonSerializerOptions? options = null, Encoding? encoding = null, bool leaveOpen = false) {
         Options = options ?? JsonSerializerOptions.Default;
         if (stream.CanRead) {
@@ -19,6 +15,41 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
             Writer = new StreamWriter(stream, encoding ?? Encoding.UTF8, 4096, leaveOpen);
         }
     }
+
+    public TextReader? Reader { get; set; }
+    public TextWriter? Writer { get; set; }
+    public JsonSerializerOptions Options { get; set; }
+
+    public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new()) {
+        while (true) {
+            var item = await ReadItemAsync(cancellationToken).ConfigureAwait(false);
+            if (item == null) {
+                yield break;
+            }
+
+            yield return item;
+        }
+    }
+
+    public void Dispose() {
+        Reader?.Dispose();
+        Writer?.Dispose();
+        Reader = null;
+        Writer = null;
+    }
+
+    public IEnumerator<T> GetEnumerator() {
+        while (true) {
+            var item = ReadItem();
+            if (item == null) {
+                yield break;
+            }
+
+            yield return item;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public async Task WriteItemAsync(T item, CancellationToken? cancellationToken = null) {
         if (Writer == null) {
@@ -65,7 +96,9 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
         var items = new List<T>();
         for (var i = 0; i < count; i++) {
             var item = await ReadItemAsync(cancellationToken).ConfigureAwait(false);
-            if (item == null) break;
+            if (item == null) {
+                break;
+            }
 
             items.Add(item);
         }
@@ -73,17 +106,8 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
         return items;
     }
 
-    public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new()) {
-        while (true) {
-            var item = await ReadItemAsync(cancellationToken).ConfigureAwait(false);
-            if (item == null) yield break;
-
-            yield return item;
-        }
-    }
-
     public void WriteItem(T item) {
-        if(Writer == null) {
+        if (Writer == null) {
             throw new InvalidOperationException("Stream is not writable");
         }
 
@@ -103,7 +127,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
     }
 
     public T? ReadItem() {
-        if(Reader == null) {
+        if (Reader == null) {
             throw new InvalidOperationException("Stream is not readable");
         }
 
@@ -115,7 +139,9 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
         var items = new List<T>();
         for (var i = 0; i < count; i++) {
             var item = ReadItem();
-            if (item == null) break;
+            if (item == null) {
+                break;
+            }
 
             items.Add(item);
         }
@@ -127,29 +153,13 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
         var items = new List<T>();
         while (true) {
             var item = ReadItem();
-            if (item == null) break;
+            if (item == null) {
+                break;
+            }
 
             items.Add(item);
         }
 
         return items;
-    }
-
-    public IEnumerator<T> GetEnumerator() {
-        while (true) {
-            var item = ReadItem();
-            if (item == null) yield break;
-
-            yield return item;
-        }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public void Dispose() {
-        Reader?.Dispose();
-        Writer?.Dispose();
-        Reader = null;
-        Writer = null;
     }
 }

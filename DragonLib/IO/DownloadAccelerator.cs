@@ -61,7 +61,7 @@ public sealed class DownloadAccelerator : IDisposable {
             if (ThreadCount > 0) {
                 threads = ThreadCount;
             } else {
-                threads = (int)Math.Min(length / MinimumSizePerThread + 1, Environment.ProcessorCount);
+                threads = (int) Math.Min(length / MinimumSizePerThread + 1, Environment.ProcessorCount);
             }
         }
 
