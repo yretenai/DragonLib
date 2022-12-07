@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
@@ -42,7 +43,7 @@ public sealed class DownloadAccelerator : IDisposable {
     public async Task DownloadFileThreaded(RequestInfo info, string path, int threads = -1) {
         var (uri, exists, supportsThreading, length) = info;
         if (!exists) {
-            throw new IOException("File does not exist");
+            throw new WebException("File does not exist", new FileNotFoundException(), WebExceptionStatus.ReceiveFailure, null);
         }
 
         if (!supportsThreading || threads == 1 || length < MinimumSizePerThread) {
