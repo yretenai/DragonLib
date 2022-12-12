@@ -25,13 +25,9 @@ public class IndentHelperBase {
 
     public override string ToString() => CachedTabs ?? string.Empty;
 
-    public static IndentHelperBase operator +(IndentHelperBase a, int b) {
-        return Add(a, b);
-    }
+    public static IndentHelperBase operator +(IndentHelperBase a, int b) => Add(a, b);
 
-    public static IndentHelperBase operator -(IndentHelperBase a, int b) {
-        return Subtract(a, b);
-    }
+    public static IndentHelperBase operator -(IndentHelperBase a, int b) => Subtract(a, b);
 
     public static bool operator ==(IndentHelperBase a, int c) => a.TabSize == c;
 
@@ -44,16 +40,14 @@ public class IndentHelperBase {
 
     public string Compile() => string.Join(string.Empty, Enumerable.Repeat(TabCharacter, TabSize));
 
-    public static IndentHelperBase Add(IndentHelperBase a, int b)
-    {
+    public static IndentHelperBase Add(IndentHelperBase a, int b) {
         var c = a.Clone();
         c.TabSize += b;
         c.CachedTabs = c.Compile();
         return c;
     }
 
-    public static IndentHelperBase Subtract(IndentHelperBase a, int b)
-    {
+    public static IndentHelperBase Subtract(IndentHelperBase a, int b) {
         var c = a.Clone();
         c.TabSize -= b;
         if (c.TabSize < 0) {

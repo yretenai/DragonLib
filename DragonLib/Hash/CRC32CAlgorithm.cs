@@ -53,3 +53,4 @@ public sealed class CRC32CAlgorithm : HashAlgorithm {
     public void Reset() => Value = uint.MaxValue;
     public override void Initialize() => Reset();
 }
+

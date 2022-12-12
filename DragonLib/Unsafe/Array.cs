@@ -117,7 +117,6 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
             throw new IndexOutOfRangeException();
         }
 
-
         ((T*) Ptr)[index] = value;
     }
 

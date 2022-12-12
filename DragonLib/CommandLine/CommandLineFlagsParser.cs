@@ -191,7 +191,7 @@ public static class CommandLineFlagsParser {
                 if (defaultValue != null) {
                     if (!defaultValue.Equals(def)) {
                         if (type.IsEnum) {
-                            requiredParts.Add($"Default: {((Enum)defaultValue).ToString("F")}");
+                            requiredParts.Add($"Default: {((Enum) defaultValue).ToString("F")}");
                         } else {
                             requiredParts.Add($"Default: {defaultValue}");
                         }
@@ -556,7 +556,7 @@ public static class CommandLineFlagsParser {
                     "System.Single" => float.Parse(textValue),
                     "System.Half" => Half.Parse(textValue),
                     "System.String" => sterilizedValue,
-                    "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions)(flag.Extra ?? RegexOptions.Compiled)),
+                    "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
                     "DragonLib.Numerics.Half" => Half.Parse(textValue),
                     _ => InvokeVisitor<T>(flag, type, textValue),
                 };
@@ -639,7 +639,7 @@ public static class CommandLineFlagsParser {
             string strValue;
 
             if (prop.PropertyType.IsEnum) {
-                strValue = ((Enum)value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
+                strValue = ((Enum) value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
             } else {
                 strValue = value.ToString()!;
             }

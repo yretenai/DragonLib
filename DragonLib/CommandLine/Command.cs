@@ -41,12 +41,12 @@ public static class Command {
         var commandGroupName = positionalFlags.Positionals.ElementAtOrDefault(0);
         if (string.IsNullOrEmpty(commandGroupName)) {
             Console.WriteLine("No command specified, available commands:");
-            foreach(var (group, commands) in Commands) {
+            foreach (var (group, commands) in Commands) {
                 if (!string.IsNullOrEmpty(group)) {
                     Console.WriteLine(group);
                 }
 
-                foreach(var (name, (description, _, _)) in commands) {
+                foreach (var (name, (description, _, _)) in commands) {
                     Console.WriteLine($"{(string.IsNullOrEmpty(group) ? string.Empty : "  ")}{name} - {description}");
                 }
             }
@@ -60,7 +60,7 @@ public static class Command {
         if (string.IsNullOrEmpty(commandName) || !Commands.ContainsKey(commandGroupName)) {
             if (Commands.TryGetValue(commandGroupName, out commandGroup)) {
                 Console.WriteLine("No command specified, available commands:");
-                foreach(var (name, (description, _, _)) in commandGroup) {
+                foreach (var (name, (description, _, _)) in commandGroup) {
                     Console.WriteLine($"{name} - {description}");
                 }
 
@@ -91,6 +91,7 @@ public static class Command {
         if (carry != null) {
             Array.Copy(carry, 2, stack, 0, carry.Length);
         }
+
         var stackTypes = stack.Select(x => x.GetType()).ToArray();
 
         // all types + global flags + command flags
