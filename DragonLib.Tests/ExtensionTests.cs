@@ -2,7 +2,7 @@
 
 namespace DragonLib.Tests;
 
-public class Extensions {
+public class ExtensionTests {
     [Test]
     public void SpanClone() {
         Span<byte> testSpan = stackalloc byte[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

@@ -11,9 +11,10 @@
         <LangVersion>preview</LangVersion>
         <TargetFramework>net7.0</TargetFramework>
         <PackageId>DragonLib</PackageId>
-        <Version>3.0.1.0</Version>
+        <TieredPGO>true</TieredPGO>
+        <Version>3.1.0.0-prerel</Version>
         <Authors>yretenai</Authors>
-        <PackageDescription>Various utility functions and classes to make life easier.</PackageDescription>
+        <PackageDescription>Various utility functions and classes. Note: This library is not designed to be used widely, and is not guaranteed to be stable.</PackageDescription>
         <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
         <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
