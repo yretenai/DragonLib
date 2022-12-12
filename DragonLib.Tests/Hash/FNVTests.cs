@@ -5,7 +5,7 @@ using DragonLib.Hash.Generic;
 
 namespace DragonLib.Tests.Hash;
 
-public class FnvTest {
+public class FNVTests {
     [TestCase(FNVAlgorithm<uint>.FNV1_IV, 0x811c9dc5u), TestCase(FNVAlgorithm<uint>.FNV1B_IV, 0x8d9a085eu)]
     public void FnvTestBasis32(string iv, uint check) {
         var basis = FNVAlgorithm<uint>.CalculateBasis(iv, 0x01000193u);

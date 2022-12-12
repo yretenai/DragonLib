@@ -1,10 +1,9 @@
-﻿using System.Text;
-using DragonLib.Hash;
+﻿using DragonLib.Hash;
 using DragonLib.Hash.Basis;
 
 namespace DragonLib.Tests.Hash;
 
-public class CrcTest {
+public class CRCTests {
     [Test]
     public void SimdTest() {
         if (!CRC32CAlgorithm.IsSupported) {
@@ -13,9 +12,9 @@ public class CrcTest {
         }
 
         using var simd = new CRC32CAlgorithm();
-        var test = simd.ComputeHash(Encoding.ASCII.GetBytes("123456789"));
+        var test = simd.ComputeHash("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(BitConverter.GetBytes(0xe3069283)));
-        var test2 = simd.ComputeHashValue(Encoding.ASCII.GetBytes("123456789"));
+        var test2 = simd.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test2, Is.EqualTo(0xe3069283));
     }
 
@@ -24,7 +23,7 @@ public class CrcTest {
         var variant = (CRCVariant<ulong>) typeof(CRC64Variants).GetProperty(name)!.GetValue(null)!;
 
         using var crc = CyclicRedundancyCheck.Create(variant);
-        var test = crc.ComputeHashValue(Encoding.ASCII.GetBytes("123456789"));
+        var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
 
@@ -33,7 +32,7 @@ public class CrcTest {
         var variant = (CRCVariant<uint>) typeof(CRC32Variants).GetProperty(name)!.GetValue(null)!;
 
         using var crc = CyclicRedundancyCheck.Create(variant);
-        var test = crc.ComputeHashValue(Encoding.ASCII.GetBytes("123456789"));
+        var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
 
@@ -42,7 +41,7 @@ public class CrcTest {
         var variant = (CRCVariant<byte>) typeof(CRC8Variants).GetProperty(name)!.GetValue(null)!;
 
         using var crc = CyclicRedundancyCheck.Create(variant);
-        var test = crc.ComputeHashValue(Encoding.ASCII.GetBytes("123456789"));
+        var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
 
@@ -51,7 +50,7 @@ public class CrcTest {
         var variant = (CRCVariant<ushort>) typeof(CRC16Variants).GetProperty(name)!.GetValue(null)!;
 
         using var crc = CyclicRedundancyCheck.Create(variant);
-        var test = crc.ComputeHashValue(Encoding.ASCII.GetBytes("123456789"));
+        var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo((ushort) check));
     }
 }

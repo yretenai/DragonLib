@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace DragonLib;
 
@@ -28,7 +29,7 @@ public static class Extensions {
     public static void EnsureDirectoryExists(this string path) {
         var fullPath = Path.GetFullPath(path);
         var directory = Path.GetDirectoryName(fullPath);
-        if (directory == null) {
+        if (string.IsNullOrEmpty(directory)) {
             return;
         }
 
@@ -40,7 +41,7 @@ public static class Extensions {
     public static void EnsureDirectoriesExists(this IEnumerable<string> path) {
         var paths = path.Select(Path.GetFullPath).Select(Path.GetDirectoryName).Distinct().ToArray();
         foreach (var directory in paths) {
-            if (directory == null) {
+            if (string.IsNullOrEmpty(directory)) {
                 continue;
             }
 
@@ -54,24 +55,43 @@ public static class Extensions {
 
     public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : unmanaged => MemoryMarshal.AsBytes(data);
 
-    public static string? ReadString(this Span<byte> data, Encoding? encoding = null) {
-        if (data.Length == 0 || data[0] == 0) {
+    public static string? ReadString<T>(this Span<T> data, Encoding encoding, T terminator, int limit = -1) where T : unmanaged, IEquatable<T> {
+        if (limit > -1) {
+            data = data[..limit];
+        }
+
+        if (data.Length == 0 || data[0].Equals(terminator)) {
             return null;
         }
 
-        var index = data.IndexOf<byte>(0);
+        var index = data.IndexOf(terminator);
         if (index <= -1) {
             index = data.Length;
         }
 
-        return (encoding ?? Encoding.UTF8).GetString(data[..index]);
+        return encoding.GetString(data[..index].AsBytes());
     }
 
-    public static string ReadStringNonNull(this Span<byte> data, Encoding? encoding = null) => ReadString(data, encoding) ?? string.Empty;
-
-    public static string? ReadString(this Span<char> data, Encoding? encoding = null) => MemoryMarshal.AsBytes(data).ReadString(encoding);
-
-    public static string ReadStringNonNull(this Span<char> data, Encoding? encoding = null) => MemoryMarshal.AsBytes(data).ReadStringNonNull(encoding);
+    public static string? ReadUTF8String(this Span<byte> data, int limit = -1) => ReadString(data, Encoding.UTF8, (byte) 0, limit);
+    public static string ReadUTF8StringNonNull(this Span<byte> data) => ReadUTF8String(data) ?? string.Empty;
+    public static string? ReadUTF8String(this Span<sbyte> data, int limit = -1) => ReadUTF8String(MemoryMarshal.Cast<sbyte, byte>(data), limit);
+    public static string ReadUTF8StringNonNull(this Span<sbyte> data, int limit = -1) => ReadUTF8String(MemoryMarshal.Cast<sbyte, byte>(data), limit) ?? string.Empty;
+    public static string? ReadUTF16String(this Span<char> data, int limit = -1, bool bigEndian = false) => ReadString(data, bigEndian ? Encoding.BigEndianUnicode : Encoding.Unicode, '\0', limit);
+    public static string ReadUTF16StringNonNull(this Span<char> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(data, limit, bigEndian) ?? string.Empty;
+    public static string? ReadUTF16String(this Span<ushort> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<ushort, char>(data), limit, bigEndian);
+    public static string ReadUTF16StringNonNull(this Span<ushort> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<ushort, char>(data), limit, bigEndian) ?? string.Empty;
+    public static string? ReadUTF16String(this Span<short> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<short, char>(data), limit, bigEndian);
+    public static string ReadUTF16StringNonNull(this Span<short> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<short, char>(data), limit, bigEndian) ?? string.Empty;
+    public static string? ReadUTF16String(this Span<byte> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<byte, char>(data), limit, bigEndian);
+    public static string ReadUTF16StringNonNull(this Span<byte> data, int limit = -1, bool bigEndian = false) => ReadUTF16String(MemoryMarshal.Cast<byte, char>(data), limit, bigEndian) ?? string.Empty;
+    public static string? ReadUTF32String(this Span<uint> data, int limit = -1) => ReadString(data, Encoding.UTF32, 0u, limit);
+    public static string ReadUTF32StringNonNull(this Span<uint> data, int limit = -1) => ReadUTF32String(data, limit) ?? string.Empty;
+    public static string? ReadUTF32String(this Span<int> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<int, uint>(data), limit);
+    public static string ReadUTF32StringNonNull(this Span<int> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<int, uint>(data), limit) ?? string.Empty;
+    public static string? ReadUTF32String(this Span<char> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<char, uint>(data), limit);
+    public static string ReadUTF32StringNonNull(this Span<char> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<char, uint>(data), limit) ?? string.Empty;
+    public static string? ReadUTF32String(this Span<byte> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<byte, uint>(data), limit);
+    public static string ReadUTF32StringNonNull(this Span<byte> data, int limit = -1) => ReadUTF32String(MemoryMarshal.Cast<byte, uint>(data), limit) ?? string.Empty;
 
     public static int Align(this int value, int n) => unchecked(value + (n - 1)) & ~(n - 1);
 
@@ -82,14 +102,22 @@ public static class Extensions {
     public static ulong Align(this ulong value, ulong n) => unchecked(value + (n - 1)) & ~(n - 1);
 
     public static string UnixPath(this string path, bool isDir) {
+        if (string.IsNullOrEmpty(path)) {
+            return string.Empty;
+        }
+
         var p = path.Replace('\\', '/');
         return isDir ? p + "/" : p;
     }
 
     public static string[] ToHexOctets(this string? input) {
         var cleaned = input?.Replace(" ", string.Empty).Trim();
-        if (cleaned == null || cleaned.Length % 2 != 0) {
+        if (string.IsNullOrEmpty(cleaned)) {
             return Array.Empty<string>();
+        }
+
+        if (cleaned.Length % 2 != 0) {
+            throw new FormatException("Input string must have an even number of characters.");
         }
 
         return Enumerable.Range(0, cleaned.Length)
@@ -98,18 +126,41 @@ public static class Extensions {
             .ToArray();
     }
 
-    public static string ToHexString(this byte[] input, string separator = "", string prefix = "") {
-        return string.Join(separator, input.Select(x => prefix + x.ToString("x2")));
-    }
+    public static string ToHexString<T>(this Span<T> input, string separator = "", string prefix = "") where T : IConvertible {
+        var formatter = $"x{Marshal.SizeOf<T>() * 2}";
+        var sb = new StringBuilder();
+        if (prefix.Length > 0 && separator.Length == 0) {
+            sb.Append(prefix);
+        }
 
-    public static string ToHexString(this Span<byte> input, string separator = "", string prefix = "") {
-        return string.Join(separator, input.ToArray().Select(x => prefix + x.ToString("x2")));
+        for (var index = 0; index < input.Length; index++) {
+            var b = input[index];
+            if (prefix.Length > 0 && separator.Length != 0) {
+                sb.Append(prefix);
+            }
+
+            sb.Append(b.ToUInt64(null).ToString(formatter));
+
+            if(separator.Length > 0 && index < input.Length - 1) {
+                sb.Append(separator);
+            }
+        }
+
+        return sb.ToString();
     }
 
     public static byte[] ToBytes(this string? input, int hextetLength = 2) {
+        if (hextetLength is > 2 or < 1) {
+            throw new FormatException("Hextet length must be 1 or 2.");
+        }
+
         var cleaned = input?.Replace(" ", string.Empty).Replace(", ", string.Empty).Trim();
-        if (cleaned == null || cleaned.Length % hextetLength != 0) {
+        if (string.IsNullOrWhiteSpace(cleaned)) {
             return Array.Empty<byte>();
+        }
+
+        if (cleaned.Length % hextetLength != 0) {
+            throw new FormatException("Input string must have an even number of characters.");
         }
 
         if (cleaned.StartsWith("0x")) {
@@ -122,82 +173,10 @@ public static class Extensions {
             .ToArray();
     }
 
-    public static int FindPointerFromSignature(this Span<byte> buffer, string signatureTemplate) {
-        var signatureOctets = signatureTemplate.ToHexOctets();
-        if (signatureOctets.Length < 1) {
-            return -1;
-        }
-
-        var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
-        for (var ptr = 0; ptr < buffer.Length - signature.Length; ++ptr) {
-            var slice = buffer.Slice(ptr, signature.Length);
-            var found = true;
-            for (var i = 0; i < signature.Length; ++i) {
-                var b = signature[i];
-                if (b.HasValue && b != slice[i]) {
-                    found = false;
-                    break;
-                }
-            }
-
-            if (found) {
-                return ptr;
-            }
-        }
-
-        return -1;
-    }
-
-    public static int
-        FindPointerFromSignatureReverse(this Span<byte> buffer, string signatureTemplate, int start = -1) {
-        var signatureOctets = signatureTemplate.ToHexOctets();
-        if (signatureOctets.Length < 1) {
-            return -1;
-        }
-
-        var signature = signatureOctets.Select(x => x == "??" ? (byte?) null : Convert.ToByte(x, 16)).ToArray();
-        if (start == -1 || start + signature.Length > buffer.Length) {
-            start = buffer.Length - signature.Length;
-        }
-
-        for (var ptr = start; ptr > 0; --ptr) {
-            var slice = buffer.Slice(ptr, signature.Length);
-            var found = true;
-            for (var i = 0; i < signature.Length; ++i) {
-                var b = signature[i];
-                if (b.HasValue && b != slice[i]) {
-                    found = false;
-                    break;
-                }
-            }
-
-            if (found) {
-                return ptr;
-            }
-        }
-
-        return -1;
-    }
-
-    public static int FindFirstAlphanumericSequence(this Span<byte> buffer, int length = 1) {
-        for (var ptr = 0; ptr < buffer.Length - length; ++ptr) {
-            var slice = buffer.Slice(ptr, length);
-            if (slice.ToArray().All(x => x is >= 0x30 and <= 0x7F)) {
-                return ptr;
-            }
-        }
-
-        return -1;
-    }
-
     public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
 
-    public static short ShortClamp(this int value) {
-        return value switch {
-            > short.MaxValue => short.MaxValue,
-            < short.MinValue => short.MinValue,
-            _ => (short) value,
-        };
+    public static T Clamp<T, V>(this V value) where T : unmanaged, INumberBase<T> where V : unmanaged, INumberBase<V> {
+        return T.CreateSaturating(value);
     }
 
     public static byte GetHighNibble(this byte value) => (byte) ((value >> 4) & 0xF);
