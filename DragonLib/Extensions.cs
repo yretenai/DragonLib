@@ -72,6 +72,15 @@ public static class Extensions {
         return encoding.GetString(data[..index].AsBytes());
     }
 
+    public static string ReadStringNonNull<T>(this Span<T> data, Encoding encoding, T terminator, int limit = -1) where T : unmanaged, IEquatable<T> {
+        var str = data.ReadString(encoding, terminator, limit);
+        return str ?? string.Empty;
+    }
+
+    public static string? ReadASCIIString(this Span<byte> data, int limit = -1) => ReadString(data, Encoding.ASCII, (byte) 0, limit);
+    public static string ReadASCIIStringNonNull(this Span<byte> data) => ReadASCIIString(data) ?? string.Empty;
+    public static string? ReadASCIIString(this Span<sbyte> data, int limit = -1) => ReadASCIIString(MemoryMarshal.Cast<sbyte, byte>(data), limit);
+    public static string ReadASCIIStringNonNull(this Span<sbyte> data, int limit = -1) => ReadASCIIString(MemoryMarshal.Cast<sbyte, byte>(data), limit) ?? string.Empty;
     public static string? ReadUTF8String(this Span<byte> data, int limit = -1) => ReadString(data, Encoding.UTF8, (byte) 0, limit);
     public static string ReadUTF8StringNonNull(this Span<byte> data) => ReadUTF8String(data) ?? string.Empty;
     public static string? ReadUTF8String(this Span<sbyte> data, int limit = -1) => ReadUTF8String(MemoryMarshal.Cast<sbyte, byte>(data), limit);
