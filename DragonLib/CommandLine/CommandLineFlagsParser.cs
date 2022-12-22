@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -546,6 +547,8 @@ public static class CommandLineFlagsParser {
                 value = type.FullName switch {
                     "System.Int64" => long.Parse(textValue, NumberStyles.Any),
                     "System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
+                    "System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
+                    "System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
                     "System.Int32" => int.Parse(textValue, NumberStyles.Any),
                     "System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
                     "System.Int16" => short.Parse(textValue, NumberStyles.Any),
@@ -558,6 +561,13 @@ public static class CommandLineFlagsParser {
                     "System.String" => sterilizedValue,
                     "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
                     "DragonLib.Numerics.Half" => Half.Parse(textValue),
+                    "System.TimeSpan" => TimeSpan.Parse(textValue),
+                    "System.DateTime" => DateTime.Parse(textValue),
+                    "System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
+                    "System.Guid" => Guid.Parse(textValue),
+                    "System.Uri" => new Uri(textValue),
+                    "System.Version" => Version.Parse(textValue),
+                    "System.Numerics.BigInteger" => BigInteger.Parse(textValue),
                     _ => InvokeVisitor<T>(flag, type, textValue),
                 };
             } catch (Exception e) {

@@ -9,4 +9,3 @@ public static class FowlerNollVo {
     public static FNVAlgorithm<ulong> Create(FNV64Basis basis = FNV64Basis.Default, ulong prime = 0x00000100000001B3UL) => new((ulong) basis, prime);
     public static FNVAlternateAlgorithm<ulong> CreateAlternate(FNV64Basis basis = FNV64Basis.Default, ulong prime = 0x00000100000001B3UL) => new((ulong) basis, prime);
 }
-
