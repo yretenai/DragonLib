@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace DragonLib.Unsafe;
 
@@ -81,7 +82,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
 
     public Memory<T> Memory => ToManaged().AsMemory();
 
-    public ref T this[int index] => ref Get(index);
+    public ref T this[in int index] => ref Get(index);
 
     public void Dispose() {
         Free();
@@ -100,7 +101,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
 
     public bool Equals(Array<T>? other) => base.Equals(other);
 
-    public unsafe ref T Get(int index) {
+    public unsafe ref T Get(in int index) {
         ThrowIfDisposed();
 
         if (index >= Length || index < 0) {
@@ -110,7 +111,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
         return ref ((T*) Ptr)[index];
     }
 
-    public unsafe void Set(int index, T value) {
+    public unsafe void Set(in int index, in T value) {
         ThrowIfDisposed();
 
         if (index >= Length || index < 0) {
@@ -139,6 +140,24 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
         }
 
         return array;
+    }
+
+    public unsafe IMemoryOwner<byte> ToMemoryPool() {
+        ThrowIfDisposed();
+
+        if (IsEmpty) {
+            return MemoryPool<byte>.Shared.Rent(0);
+        }
+
+        var array = MemoryPool<byte>.Shared.Rent(0);
+        try {
+            using var pin = array.Memory.Pin();
+            NativeMemory.Copy((void*)Ptr, pin.Pointer, (uint)(Length * sizeof(T)));
+            return array;
+        } catch {
+            array.Dispose();
+            throw;
+        }
     }
 
     public unsafe Array<T> ToAligned(int alignment = 16) {
