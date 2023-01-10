@@ -89,7 +89,7 @@ public static class Command {
         stack[0] = globalFlags;
         stack[1] = flags;
         if (carry != null) {
-            Array.Copy(carry, 2, stack, 0, carry.Length);
+            Array.Copy(carry, 0, stack, 2, carry.Length);
         }
 
         var stackTypes = stack.Select(x => x.GetType()).ToArray();

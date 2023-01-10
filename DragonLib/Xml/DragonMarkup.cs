@@ -294,21 +294,21 @@ public static class DragonMarkup {
         instance == null
             ? "{null}"
             : instance.ToString()
-                ?.Replace("\\", "\\\\")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n")
-                .Replace("<", "\\<")
-                .Replace(">", "\\>");
+                ?.Replace("\\", "\\\\", StringComparison.Ordinal)
+                .Replace("\r", "\\r", StringComparison.Ordinal)
+                .Replace("\n", "\\n", StringComparison.Ordinal)
+                .Replace("<", "\\<", StringComparison.Ordinal)
+                .Replace(">", "\\>", StringComparison.Ordinal);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static string? FormatValueType(object? instance) =>
         instance == null
             ? "{null}"
             : instance.ToString()
-                ?.Replace("\\", "\\\\")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n")
-                .Replace("\"", "\\\"");
+                ?.Replace("\\", "\\\\", StringComparison.Ordinal)
+                .Replace("\r", "\\r", StringComparison.Ordinal)
+                .Replace("\n", "\\n", StringComparison.Ordinal)
+                .Replace("\"", "\\\"", StringComparison.Ordinal);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static string? FormatName(string? typeName) => typeName?.Replace('<', '_').Replace('>', '_').Replace('`', '_');
