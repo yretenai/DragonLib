@@ -10,13 +10,17 @@ public record struct RequestInfo(Uri Uri, bool Exists, bool SupportsThreading, l
 public sealed class DownloadAccelerator : IDisposable {
     public DownloadAccelerator() => Client = new HttpClient();
 
-    public HttpClient Client { get; }
+    public HttpClient Client { get; private set; }
     public int ThreadCount { get; set; } = -1;
     public int MinimumSizePerThread { get; set; } = 0x1000000; // 16MB
     public int Retries { get; set; } = 3;
 
     public void Dispose() {
         Client.Dispose();
+    }
+
+    public void SetBaseAddress(Uri baseAddress) {
+        Client = new HttpClient { BaseAddress = baseAddress };
     }
 
     public Task DownloadFileThreaded(string url, string path, int threads = -1) => DownloadFileThreaded(new Uri((Client.BaseAddress?.AbsoluteUri ?? "") + url), path, threads);
