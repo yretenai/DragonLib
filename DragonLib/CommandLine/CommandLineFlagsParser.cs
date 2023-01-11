@@ -62,7 +62,7 @@ public static class CommandLineFlagsParser {
             var tn = type.Name;
             if (type.IsConstructedGenericType) {
                 var parameters = type.GetGenericArguments().Select(x => x.Name);
-                tn = type.Name[..type.Name.IndexOf('`')] + $"<{string.Join(", ", parameters)}>";
+                tn = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)] + $"<{string.Join(", ", parameters)}>";
             }
 
             if (flag.Positional > -1) {
@@ -172,7 +172,7 @@ public static class CommandLineFlagsParser {
                 var tn = type.Name;
                 if (type.IsConstructedGenericType) {
                     var parameters = type.GetGenericArguments().Select(x => x.Name);
-                    tn = type.Name[..type.Name.IndexOf('`')] + $"<{string.Join(", ", parameters)}>";
+                    tn = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)] + $"<{string.Join(", ", parameters)}>";
                 }
 
                 var tp = string.Empty;
@@ -374,10 +374,10 @@ public static class CommandLineFlagsParser {
                         value = !b;
                     } else {
                         var argument = arguments[index];
-                        var hasInnateValue = argument.Contains('=');
+                        var hasInnateValue = argument.Contains('=', StringComparison.Ordinal);
                         string textValue;
                         if (hasInnateValue) {
-                            textValue = argument[(argument.IndexOf('=') + 1)..];
+                            textValue = argument[(argument.IndexOf('=', StringComparison.Ordinal) + 1)..];
                             if (string.IsNullOrWhiteSpace(textValue)) {
                                 Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
                                 shouldExit = true;
@@ -514,7 +514,7 @@ public static class CommandLineFlagsParser {
         }
 
         if (type.IsEnum) {
-            if (sterilizedValue.Contains('|')) {
+            if (sterilizedValue.Contains('|', StringComparison.Ordinal)) {
                 var enumValue = 0UL;
                 foreach (var sterilizedValuePart in sterilizedValue.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)) {
                     if (!ParseEnumValue(type, flag, out var temp, sterilizedValuePart)) {
@@ -654,7 +654,7 @@ public static class CommandLineFlagsParser {
                 strValue = value.ToString()!;
             }
 
-            if (strValue.Contains(' ')) {
+            if (strValue.Contains(' ', StringComparison.Ordinal)) {
                 sb.Append('"');
                 sb.Append(strValue);
                 sb.Append('"');
@@ -665,7 +665,7 @@ public static class CommandLineFlagsParser {
             sb.Append(' ');
         }
 
-        sb.Append(string.Join(' ', inst.Positionals.Select(x => x.Contains(' ') ? $"\"{x}\"" : x)));
+        sb.Append(string.Join(' ', inst.Positionals.Select(x => x.Contains(' ', StringComparison.Ordinal) ? $"\"{x}\"" : x)));
 
         return sb.ToString();
     }

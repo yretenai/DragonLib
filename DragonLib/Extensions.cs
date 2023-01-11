@@ -120,7 +120,7 @@ public static class Extensions {
     }
 
     public static string[] ToHexOctets(this string? input) {
-        var cleaned = input?.Replace(" ", string.Empty).Trim();
+        var cleaned = input?.Replace(" ", string.Empty, StringComparison.Ordinal).Trim();
         if (string.IsNullOrEmpty(cleaned)) {
             return Array.Empty<string>();
         }
@@ -163,7 +163,7 @@ public static class Extensions {
             throw new FormatException("Hextet length must be 1 or 2.");
         }
 
-        var cleaned = input?.Replace(" ", string.Empty).Replace(", ", string.Empty).Trim();
+        var cleaned = input?.Replace(" ", string.Empty, StringComparison.Ordinal).Replace(", ", string.Empty, StringComparison.Ordinal).Trim();
         if (string.IsNullOrWhiteSpace(cleaned)) {
             return Array.Empty<byte>();
         }
