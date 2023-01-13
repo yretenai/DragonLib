@@ -1,6 +1,9 @@
-﻿using System.Net;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DragonLib.IO;
@@ -8,9 +11,17 @@ namespace DragonLib.IO;
 public record struct RequestInfo(Uri Uri, bool Exists, bool SupportsThreading, long Size);
 
 public sealed class DownloadAccelerator : IDisposable {
-    public DownloadAccelerator() => Client = new HttpClient();
+    public DownloadAccelerator() {
+        Handler = new HttpClientHandler();
+        Handler.AutomaticDecompression = DecompressionMethods.All;
+        Client = new HttpClient(Handler, true);
+    }
 
-    public HttpClient Client { get; private set; }
+    public HttpClient Client { get; }
+    public HttpClientHandler Handler { get; }
+
+    public Uri? BaseAddress { get; set; }
+
     public int ThreadCount { get; set; } = -1;
     public int MinimumSizePerThread { get; set; } = 0x1000000; // 16MB
     public int Retries { get; set; } = 3;
@@ -19,15 +30,29 @@ public sealed class DownloadAccelerator : IDisposable {
         Client.Dispose();
     }
 
-    public void SetBaseAddress(Uri baseAddress) {
-        Client = new HttpClient { BaseAddress = baseAddress };
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Uri CombineUri(string text) => CombineUri(text[0] == '/' || !text.Contains("://", StringComparison.Ordinal) ? new Uri(text, UriKind.Relative) : new Uri(text, UriKind.RelativeOrAbsolute));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Uri CombineUri(Uri uri) {
+        if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Host)) {
+            return uri;
+        }
+
+        if (BaseAddress == null) {
+            throw new InvalidOperationException("Relative URI cannot be resolved without a base address");
+        }
+
+        return new Uri(BaseAddress, uri);
     }
 
-    public Task DownloadFileThreaded(string url, string path, int threads = -1) => DownloadFileThreaded(new Uri((Client.BaseAddress?.AbsoluteUri ?? "") + url), path, threads);
+    public Task DownloadFileThreaded(string url, string path, int threads = -1) => DownloadFileThreaded(CombineUri(url), path, threads);
 
-    public async Task<RequestInfo> GetInfo(string url) => await GetInfo(new Uri((Client.BaseAddress?.AbsoluteUri ?? "") + url)).ConfigureAwait(false);
+    public async Task<RequestInfo> GetInfo(string url) => await GetInfo(CombineUri(url)).ConfigureAwait(false);
 
     public async Task<RequestInfo> GetInfo(Uri uri) {
+        uri = CombineUri(uri);
+
         using var headRequest = new HttpRequestMessage(HttpMethod.Head, uri);
         var response = await Client.SendAsync(headRequest, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) {
@@ -46,17 +71,19 @@ public sealed class DownloadAccelerator : IDisposable {
 
     public async Task DownloadFileThreaded(RequestInfo info, string path, int threads = -1) {
         var (uri, exists, supportsThreading, length) = info;
+        uri = CombineUri(uri);
+
         if (!exists) {
             throw new WebException("File does not exist", new FileNotFoundException(), WebExceptionStatus.ReceiveFailure, null);
         }
 
         if (!supportsThreading || threads == 1 || length < MinimumSizePerThread) {
-#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
+        #pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
             var stream = await Client.GetStreamAsync(uri).ConfigureAwait(false);
             await using var _ = stream.ConfigureAwait(false);
             var fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
             await using var __ = fileStream.ConfigureAwait(false);
-#pragma warning restore CA2000
+        #pragma warning restore CA2000
             await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             return;
         }
@@ -121,5 +148,58 @@ public sealed class DownloadAccelerator : IDisposable {
                 // ignored
             }
         }
+    }
+
+    public async Task<string?> FetchString(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) => await FetchString(method, CombineUri(url), body, headers, encoding).ConfigureAwait(false);
+    public async Task<string?> FetchString(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) {
+        uri = CombineUri(uri);
+
+        var data = await FetchBytes(method, uri, body, headers).ConfigureAwait(false);
+        if (data == null) {
+            return null;
+        }
+
+        return encoding?.GetString(data) ?? Encoding.UTF8.GetString(data);
+    }
+
+    public async Task<T?> FetchJson<T>(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) => await FetchJson<T>(method, CombineUri(url), body, headers, options).ConfigureAwait(false);
+    public async Task<T?> FetchJson<T>(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) {
+        uri = CombineUri(uri);
+        var data = await FetchBytes(method, uri, body, headers).ConfigureAwait(false);
+        return data == null ? default : JsonSerializer.Deserialize<T>(data, options ?? JsonSerializerOptions.Default);
+    }
+
+    public async Task<byte[]?> FetchBytes(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) => await FetchBytes(method, CombineUri(url), body, headers).ConfigureAwait(false);
+    public async Task<byte[]?> FetchBytes(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) {
+        uri = CombineUri(uri);
+        using var request = new HttpRequestMessage(method, uri) { Version = HttpVersion.Version11, VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
+
+        if (body != null) {
+            request.Content = new ByteArrayContent(body);
+        }
+
+        if (headers != null) {
+            foreach (var (key, value) in headers) {
+                try {
+                    request.Headers.Add(key, value);
+                } catch {
+                    // ignored
+                }
+
+                try {
+                    request.Content?.Headers.Add(key, value);
+                } catch {
+                    // ignored
+                }
+            }
+        }
+
+        var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode) {
+            return default;
+        }
+
+        return await response.Content.ReadAsByteArrayAsync();
     }
 }
