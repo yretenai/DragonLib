@@ -216,4 +216,22 @@ public static class Extensions {
     public static string GetHumanReadableBytes(this int bytes) => GetHumanReadableBytes((ulong) bytes);
 
     public static string GetHumanReadableBytes(this uint bytes) => GetHumanReadableBytes((ulong) bytes);
+
+    public static T[] SplitFlags<T>(this T flags) where T : Enum {
+        var v = Convert.ToUInt64(flags);
+        if (v == 0) {
+            return Array.Empty<T>();
+        }
+
+        var t = new T[BitOperations.PopCount(v)];
+
+        var i = 0;
+        for (var j = 0; j < 64; ++j) {
+            if ((v & (1UL << j)) != 0) {
+                t[i++] = (T) Enum.ToObject(typeof(T), 1UL << j);
+            }
+        }
+
+        return t;
+    }
 }

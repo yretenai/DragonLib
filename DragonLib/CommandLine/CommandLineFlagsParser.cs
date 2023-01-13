@@ -364,6 +364,7 @@ public static class CommandLineFlagsParser {
             }
 
             var value = GetDefaultValue(property, flag, instance);
+            var shouldSet = true;
             if (indexList != null) {
                 foreach (var index in indexList) {
                     if (type.FullName == "System.Boolean") {
@@ -400,6 +401,7 @@ public static class CommandLineFlagsParser {
 
                             value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
                             type.GetMethod("Add")?.Invoke(value, new[] { temp });
+                            shouldSet = false;
                         } else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
                             return null;
                         }
@@ -408,10 +410,8 @@ public static class CommandLineFlagsParser {
             }
 
             if (isNullable) {
-                value = Activator.CreateInstance(originalType, value);
-            }
-
-            if (type != typeof(string)) {
+                value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+            } else if (type != typeof(string)) {
                 try {
                     value ??= Activator.CreateInstance(type);
                 } catch {
@@ -419,7 +419,10 @@ public static class CommandLineFlagsParser {
                 }
             }
 
-            property.SetValue(instance, value);
+
+            if (shouldSet) {
+                property.SetValue(instance, value);
+            }
         }
 
         var positionals = positionalMap.Select(x => arguments[x]).ToList();
@@ -437,6 +440,7 @@ public static class CommandLineFlagsParser {
             }
 
             var value = GetDefaultValue(property, flag, instance);
+            var shouldSet = true;
             if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
                 var temp = default(object?);
                 value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
@@ -447,21 +451,24 @@ public static class CommandLineFlagsParser {
 
                     type.GetMethod("Add")?.Invoke(value, new[] { temp });
                 }
+                shouldSet = false;
             } else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
                 shouldExit = true;
             }
 
             if (isNullable) {
-                value = Activator.CreateInstance(originalType, value);
+                value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+            } else if(type != typeof(string)) {
+                try {
+                    value ??= Activator.CreateInstance(type);
+                } catch {
+                    // ignored
+                }
             }
 
-            try {
-                value ??= Activator.CreateInstance(type);
-            } catch {
-                // ignored
+            if (shouldSet) {
+                property.SetValue(instance, value);
             }
-
-            property.SetValue(instance, value);
         }
 
         if (!options.UseHelp || !instance.Help && !shouldExit) {

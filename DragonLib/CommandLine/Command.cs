@@ -4,7 +4,7 @@ namespace DragonLib.CommandLine;
 
 public static class Command {
     //                        group,             name
-    private static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command)>> Commands { get; } = new() {
+    public static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command)>> Commands { get; } = new() {
         { string.Empty, new Dictionary<string, (string Description, Type Type, Type Command)>() },
     };
 
@@ -23,10 +23,13 @@ public static class Command {
         }
     }
 
-    public static void Run(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) => Run<object>(globalFlags, printHelp, carry, args);
+    public static void Run(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) => Run<object>(out commandName, out commandGroupName, globalFlags, printHelp, carry, args);
 
-    public static T? Run<T>(CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) {
+    public static T? Run<T>(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null) {
         LoadCommands();
+
+        commandName = null;
+        commandGroupName = null;
 
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
         printHelp ??= CommandLineFlagsParser.PrintHelp;
@@ -38,7 +41,7 @@ public static class Command {
 
         globalFlags ??= positionalFlags;
 
-        var commandGroupName = positionalFlags.Positionals.ElementAtOrDefault(0);
+        commandGroupName = positionalFlags.Positionals.ElementAtOrDefault(0);
         if (string.IsNullOrEmpty(commandGroupName)) {
             Console.WriteLine("No command specified, available commands:");
             foreach (var (group, commands) in Commands) {
@@ -56,7 +59,7 @@ public static class Command {
 
         Dictionary<string, (string Description, Type Type, Type Command)>? commandGroup;
 
-        var commandName = positionalFlags.Positionals.ElementAtOrDefault(1);
+        commandName = positionalFlags.Positionals.ElementAtOrDefault(1);
         if (string.IsNullOrEmpty(commandName) || !Commands.ContainsKey(commandGroupName)) {
             if (Commands.TryGetValue(commandGroupName, out commandGroup)) {
                 Console.WriteLine("No command specified, available commands:");
