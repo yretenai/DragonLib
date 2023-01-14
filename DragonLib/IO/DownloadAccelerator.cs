@@ -14,6 +14,7 @@ public sealed class DownloadAccelerator : IDisposable {
     public DownloadAccelerator() {
         Handler = new HttpClientHandler();
         Handler.AutomaticDecompression = DecompressionMethods.All;
+        Handler.CheckCertificateRevocationList = true;
         Client = new HttpClient(Handler, true);
     }
 
