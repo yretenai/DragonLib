@@ -189,14 +189,8 @@ public static class CommandLineFlagsParser {
                 }
 
                 var defaultValue = GetDefaultValue(property, flag, instance);
-                if (defaultValue != null) {
-                    if (!defaultValue.Equals(def)) {
-                        if (type.IsEnum) {
-                            requiredParts.Add($"Default: {((Enum) defaultValue).ToString("F")}");
-                        } else {
-                            requiredParts.Add($"Default: {defaultValue}");
-                        }
-                    }
+                if (defaultValue != null && !defaultValue.Equals(def)) {
+                    requiredParts.Add($"Default: {(type.IsEnum ? ((Enum) defaultValue).ToString("F") : defaultValue.ToString())}");
                 }
 
                 if (flag.IsRequired) {
@@ -494,11 +488,7 @@ public static class CommandLineFlagsParser {
         var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
         var isNullable = type != originalType;
         if (isNullable) {
-            if (type.GetProperty("HasValue")?.GetValue(value) as bool? == true) {
-                return type.GetProperty("Value")?.GetValue(value);
-            }
-
-            return null;
+            return type.GetProperty("HasValue")?.GetValue(value) as bool? != true ? null : type.GetProperty("Value")?.GetValue(value);
         }
 
         return value;
@@ -653,13 +643,7 @@ public static class CommandLineFlagsParser {
             sb.Append(flag.Flag);
             sb.Append(' ');
 
-            string strValue;
-
-            if (prop.PropertyType.IsEnum) {
-                strValue = ((Enum) value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
-            } else {
-                strValue = value.ToString()!;
-            }
+            var strValue = !prop.PropertyType.IsEnum ? value.ToString()! : ((Enum) value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
 
             if (strValue.Contains(' ', StringComparison.Ordinal)) {
                 sb.Append('"');

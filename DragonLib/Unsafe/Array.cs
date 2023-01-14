@@ -4,12 +4,13 @@ using System.Runtime.InteropServices;
 namespace DragonLib.Unsafe;
 
 public abstract class ArrayBase : IEquatable<ArrayBase> {
-    public static unsafe FreeArrayDelegate NullFree { get; } = _ => { };
+    protected static unsafe FreeArrayDelegate NullFree { get; } = _ => { };
     internal static unsafe FreeArrayDelegate NativeFree { get; } = NativeMemory.Free;
     internal static unsafe FreeArrayDelegate NativeAlignedFree { get; } = NativeMemory.AlignedFree;
 
-    public readonly int Length;
-    protected nint Ptr;
+    protected int Length { get; init; }
+    protected nint Ptr { get; init; }
+    protected bool Freed { get; set; }
 
     protected ArrayBase(int length) => Length = length;
 
@@ -122,7 +123,7 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
     }
 
     private void ThrowIfDisposed() {
-        if (Ptr == 0 && Length != 0) {
+        if (Freed) {
             throw new ObjectDisposedException(nameof(Array<T>));
         }
     }
@@ -183,9 +184,9 @@ public sealed class Array<T> : ArrayBase, IDisposable, IEnumerable<T>, IEquatabl
     // todo: public static NativeArray<T> AllocPool(int length, TLSFPool? pool = null) => length == 0 ? Empty : new Array<T>((pool ?? TLSFPool.Shared).Alloc((nuint) (length * System.Runtime.CompilerServices.Unsafe.SizeOf<T>()), length, TLSFPool.Shared.Free); -- surely one day i'll make a tlsf arena in C#
 
     public unsafe void Free() {
-        if (Ptr != 0) {
+        if (Freed && Ptr != 0) {
             FreeArrayInner((void*) Ptr);
-            Ptr = 0;
+            Freed = true;
         }
     }
 

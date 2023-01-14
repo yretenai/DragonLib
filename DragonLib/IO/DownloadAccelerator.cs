@@ -106,10 +106,10 @@ public sealed class DownloadAccelerator : IDisposable {
         ranges[^1] = (ranges[^1].start, length);
 
         {
-#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
+        #pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
             var fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
             await using var _ = fileStream.ConfigureAwait(false);
-#pragma warning restore CA2000
+        #pragma warning restore CA2000
             fileStream.SetLength(length);
         }
 
