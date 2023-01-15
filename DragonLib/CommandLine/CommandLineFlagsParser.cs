@@ -7,20 +7,25 @@ using System.Text.RegularExpressions;
 namespace DragonLib.CommandLine;
 
 public static class CommandLineFlagsParser {
-    public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute? Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked);
+    public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked);
 
     public static void PrintHelp<T>(PrintHelpDelegate printHelp, CommandLineOptions options, bool helpInvoked) {
         PrintHelp(typeof(T), printHelp, options, helpInvoked);
     }
 
     public static void PrintHelp(Type t, PrintHelpDelegate printHelp, CommandLineOptions options, bool helpInvoked) {
+        printHelp.Invoke(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
+    }
+
+    public static Dictionary<PropertyInfo, (FlagAttribute Flag, Type PropertyType)> GetFlags(Type t) {
         var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
         var typeMap = properties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
         var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
         foreach (var @interface in t.GetInterfaces()) {
             var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
             foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
-                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
+                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) ||
+                    !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
                     continue;
                 }
 
@@ -30,12 +35,12 @@ public static class CommandLineFlagsParser {
         }
 
         typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
-        printHelp.Invoke(typeMap, Activator.CreateInstance(t)!, options, helpInvoked);
+        return typeMap!;
     }
 
-    public static void PrintHelp(Dictionary<PropertyInfo, (FlagAttribute? Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
-        flags = flags.Where(x => x.Value.Flag?.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
-        var grouped = flags.GroupBy(x => x.Value.Flag?.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
+    public static void PrintHelp(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
+        flags = flags.Where(x => x.Value.Flag.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
+        var grouped = flags.GroupBy(x => x.Value.Flag.Category ?? string.Empty).Select(x => (x.Key, x.ToArray())).ToArray();
         var entry = Assembly.GetEntryAssembly()?.GetName();
         var usageSlim = "Usage: ";
         if (entry != null) {
@@ -54,10 +59,6 @@ public static class CommandLineFlagsParser {
         var usageSlimMultiCh = string.Empty;
         var usageSlimPositional = string.Empty;
         foreach (var (_, (flag, originalType)) in flags) {
-            if (flag == null) {
-                continue;
-            }
-
             var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
             var tn = type.Name;
             if (type.IsConstructedGenericType) {
@@ -163,10 +164,6 @@ public static class CommandLineFlagsParser {
             }
 
             foreach (var (property, (flag, originalType)) in attributes) {
-                if (flag == null) {
-                    continue;
-                }
-
                 var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
                 var hasValue = type.FullName != "System.Boolean";
                 var tn = type.Name;
@@ -281,22 +278,8 @@ public static class CommandLineFlagsParser {
     public static T? ParseFlags<T>(PrintHelpDelegate printHelp, CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
         var shouldExit = false;
         var instance = Activator.CreateInstance<T>();
-        var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
-        var typeMap = properties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
-        var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
-        foreach (var @interface in typeof(T).GetInterfaces()) {
-            var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
-            foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
-                if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) || !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
-                    continue;
-                }
-
-                propertySet.Item1 = info;
-                typeMap[propertyImplementation] = propertySet;
-            }
-        }
-
-        typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
+        var typeMap = GetFlags(typeof(T));
+        var propertyNameToProperty = typeMap.Keys.ToDictionary(x => x.Name, y => y);
         var argMap = new Dictionary<string, HashSet<int>>();
         var positionalMap = new HashSet<int>();
         var skipped = options.SkipPositionals;
@@ -330,18 +313,14 @@ public static class CommandLineFlagsParser {
         }
 
         if (options.UseHelp && propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
-            if (helpEntry.Item1 != null && helpEntry.Item1.Flags.Any(flag => argMap.ContainsKey(flag))) {
+            if (helpEntry.Flag.Flags.Any(flag => argMap.ContainsKey(flag))) {
                 printHelp(typeMap, instance, options, true);
                 Environment.Exit(0);
                 return null;
             }
         }
 
-        foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional == -1)) {
-            if (flag == null) {
-                continue;
-            }
-
+        foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Flag.Positional == -1)) {
             var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
             var isNullable = type != originalType;
 
@@ -470,11 +449,7 @@ public static class CommandLineFlagsParser {
         }
 
         var positionals = positionalMap.Select(x => arguments[x]).ToList();
-        foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Item1?.Positional > -1)) {
-            if (flag == null) {
-                continue;
-            }
-
+        foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Flag.Positional > -1)) {
             var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
             var isNullable = type != originalType;
 
