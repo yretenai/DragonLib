@@ -32,19 +32,29 @@ public sealed class DownloadAccelerator : IDisposable {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Uri CombineUri(string text) => CombineUri(text[0] == '/' || !text.Contains("://", StringComparison.Ordinal) ? new Uri(text, UriKind.Relative) : new Uri(text, UriKind.RelativeOrAbsolute));
+    public Uri CombineUri(string text, Uri? baseUri = null) {
+        if (string.IsNullOrEmpty(text)) {
+            return baseUri ?? throw new InvalidOperationException("Base URI is null");
+        }
+
+        var uri = text[0] == '/' || !text.Contains("://", StringComparison.Ordinal) ? new Uri(text, UriKind.Relative) : new Uri(text, UriKind.RelativeOrAbsolute);
+
+        return CombineUri(uri, baseUri);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Uri CombineUri(Uri uri) {
+    public Uri CombineUri(Uri uri, Uri? baseUri = null) {
         if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Host)) {
             return uri;
         }
 
-        if (BaseAddress == null) {
+        baseUri ??= BaseAddress;
+
+        if (baseUri == null || !baseUri.IsAbsoluteUri) {
             throw new InvalidOperationException("Relative URI cannot be resolved without a base address");
         }
 
-        return new Uri(BaseAddress, uri);
+        return new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/" + uri.OriginalString.TrimStart('/'));
     }
 
     public Task DownloadFileThreaded(string url, string path, int threads = -1) => DownloadFileThreaded(CombineUri(url), path, threads);
@@ -133,12 +143,12 @@ public sealed class DownloadAccelerator : IDisposable {
                 using var request = new HttpRequestMessage(HttpMethod.Get, uri);
                 request.Headers.Range = new RangeHeaderValue(rangeStart, rangeEnd);
                 var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
+            #pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
                 var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 await using var _ = stream.ConfigureAwait(false);
                 var fileStream = File.Open(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
                 await using var __ = fileStream.ConfigureAwait(false);
-#pragma warning restore CA2000
+            #pragma warning restore CA2000
                 fileStream.Seek(rangeStart, SeekOrigin.Begin);
                 await stream.CopyToAsync(fileStream).ConfigureAwait(false);
                 return;
@@ -152,6 +162,7 @@ public sealed class DownloadAccelerator : IDisposable {
     }
 
     public async Task<string?> FetchString(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) => await FetchString(method, CombineUri(url), body, headers, encoding).ConfigureAwait(false);
+
     public async Task<string?> FetchString(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) {
         uri = CombineUri(uri);
 
@@ -164,6 +175,7 @@ public sealed class DownloadAccelerator : IDisposable {
     }
 
     public async Task<T?> FetchJson<T>(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) => await FetchJson<T>(method, CombineUri(url), body, headers, options).ConfigureAwait(false);
+
     public async Task<T?> FetchJson<T>(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) {
         uri = CombineUri(uri);
         var data = await FetchBytes(method, uri, body, headers).ConfigureAwait(false);
@@ -171,9 +183,13 @@ public sealed class DownloadAccelerator : IDisposable {
     }
 
     public async Task<byte[]?> FetchBytes(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) => await FetchBytes(method, CombineUri(url), body, headers).ConfigureAwait(false);
+
     public async Task<byte[]?> FetchBytes(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) {
         uri = CombineUri(uri);
-        using var request = new HttpRequestMessage(method, uri) { Version = HttpVersion.Version11, VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
+        using var request = new HttpRequestMessage(method, uri) {
+            Version = HttpVersion.Version11,
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
+        };
 
         if (body != null) {
             request.Content = new ByteArrayContent(body);
