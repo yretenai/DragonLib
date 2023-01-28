@@ -15,22 +15,51 @@ public class FNVAlgorithm<T> : SpanHashAlgorithm<T>
     public FNVAlgorithm(T basis, T prime) {
         Basis = basis;
         Prime = prime;
-        Reset();
+        Reset(Basis);
+    }
+
+    public T HashNext(T value) {
+        Value *= Prime;
+        Value ^= value;
+        return Value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         while (cbSize > 0) {
-            Value *= Prime;
-            Value ^= T.CreateSaturating(array[ibStart++]);
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(ushort[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(uint[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(ulong[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
             cbSize--;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Reset() => Value = Basis;
+    public void Reset(T value) => Value = value;
 
-    public override void Initialize() => Reset();
+    public override void Initialize() => Reset(Basis);
 
     // there's some math behind the theory on selecting FNV primes, read more on it on either linked pages.
     // the IETF page also has sample C code for 128 and higher bit spaces.

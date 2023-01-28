@@ -15,14 +15,43 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T>
         Basis = basis;
         Prime = prime;
         HashSizeValue = sizeof(T) * 8;
-        Reset();
+        Reset(Basis);
+    }
+
+    public T HashNext(T value) {
+        Value ^= value;
+        Value *= Prime;
+        return Value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     protected override void HashCore(byte[] array, int ibStart, int cbSize) {
         while (cbSize > 0) {
-            Value ^= T.CreateTruncating(array[ibStart++]);
-            Value *= Prime;
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(ushort[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(uint[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
+            cbSize--;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void HashCore(ulong[] array, int ibStart, int cbSize) {
+        while (cbSize > 0) {
+            HashNext(T.CreateSaturating(array[ibStart++]));
             cbSize--;
         }
     }
@@ -34,8 +63,8 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Reset() => Value = Basis;
+    public void Reset(T value) => Value = value;
 
-    public override void Initialize() => Reset();
+    public override void Initialize() => Reset(Basis);
     protected override T GetValueFinal() => Value;
 }
