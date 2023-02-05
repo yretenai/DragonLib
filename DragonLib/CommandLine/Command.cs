@@ -4,8 +4,8 @@ namespace DragonLib.CommandLine;
 
 public static class Command {
     //                        group,             name
-    public static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command)>> Commands { get; } = new() {
-        { string.Empty, new Dictionary<string, (string Description, Type Type, Type Command)>() },
+    public static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>> Commands { get; } = new() {
+        { string.Empty, new Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>() },
     };
 
     private static void LoadCommands() {
@@ -15,10 +15,10 @@ public static class Command {
             foreach (var commandAttribute in commandAttributes) {
                 var flagsType = commandAttribute.FlagsType;
                 if (!Commands.ContainsKey(commandAttribute.Group)) {
-                    Commands[commandAttribute.Group] = new Dictionary<string, (string Description, Type Type, Type Command)>();
+                    Commands[commandAttribute.Group] = new Dictionary<string, (string Description, Type Type, Type Command, bool)>();
                 }
 
-                Commands[commandAttribute.Group][commandAttribute.Name] = (commandAttribute.Description, flagsType, type);
+                Commands[commandAttribute.Group][commandAttribute.Name] = (commandAttribute.Description, flagsType, type, commandAttribute.Hide);
             }
         }
     }
@@ -45,11 +45,15 @@ public static class Command {
         if (string.IsNullOrEmpty(commandGroupName)) {
             Console.WriteLine("No command specified, available commands:");
             foreach (var (group, commands) in Commands) {
+                if (commands.All(x => x.Value.Hide)) {
+                    continue;
+                }
+
                 if (!string.IsNullOrEmpty(group)) {
                     Console.WriteLine(group);
                 }
 
-                foreach (var (name, (description, _, _)) in commands) {
+                foreach (var (name, (description, _, _, _)) in commands.Where(x => !x.Value.Hide)) {
                     Console.WriteLine($"{(string.IsNullOrEmpty(group) ? string.Empty : "  ")}{name} - {description}");
                 }
             }
@@ -57,13 +61,18 @@ public static class Command {
             return default;
         }
 
-        Dictionary<string, (string Description, Type Type, Type Command)>? commandGroup;
+        Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>? commandGroup;
 
         commandName = positionalFlags.Positionals.ElementAtOrDefault(1);
         if (string.IsNullOrEmpty(commandName) || !Commands.ContainsKey(commandGroupName)) {
             if (Commands.TryGetValue(commandGroupName, out commandGroup)) {
+                if (commandGroup.All(x => x.Value.Hide)) {
+                    Console.WriteLine("No command specified.");
+                    return default;
+                }
+
                 Console.WriteLine("No command specified, available commands:");
-                foreach (var (name, (description, _, _)) in commandGroup) {
+                foreach (var (name, (description, _, _, _)) in commandGroup.Where(x => !x.Value.Hide)) {
                     Console.WriteLine($"{name} - {description}");
                 }
 
