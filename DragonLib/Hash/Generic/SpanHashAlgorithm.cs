@@ -12,7 +12,7 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm
         }
     }
 
-    protected T Value { get; set; }
+    public T Value { get; set; }
 
     protected override byte[] HashFinal() {
         Span<T> tmp = stackalloc T[1];
