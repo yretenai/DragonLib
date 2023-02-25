@@ -38,6 +38,17 @@ public static class Extensions {
         }
     }
 
+    public static void EnsureDirectoryRootExists(this string path) {
+        var directory = Path.GetFullPath(path);
+        if (string.IsNullOrEmpty(directory)) {
+            return;
+        }
+
+        if (!Directory.Exists(directory)) {
+            Directory.CreateDirectory(directory);
+        }
+    }
+
     public static void EnsureDirectoriesExists(this IEnumerable<string> path) {
         var paths = path.Select(Path.GetFullPath).Select(Path.GetDirectoryName).Distinct().ToArray();
         foreach (var directory in paths) {
