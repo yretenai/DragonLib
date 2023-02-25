@@ -52,7 +52,7 @@ public static class Signature {
 
             signatures.Add(ptr);
 
-            if (limit-- == 0) {
+            if (--limit == 0) {
                 break;
             }
         }
@@ -118,7 +118,7 @@ public static class Signature {
 
             signatures.Add(ptr);
 
-            if (limit-- == 0) {
+            if (--limit == 0) {
                 break;
             }
         }
