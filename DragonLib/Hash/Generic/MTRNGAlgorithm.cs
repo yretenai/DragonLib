@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using CS = System.Runtime.CompilerServices;
 
 namespace DragonLib.Hash.Generic;
 
@@ -93,10 +94,10 @@ public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBi
 
     public Span<byte> Bytes(int n = -1) {
         if (n == -1) {
-            n = System.Runtime.CompilerServices.Unsafe.SizeOf<T>();
+            n = CS.Unsafe.SizeOf<T>();
         }
 
-        Span<byte> bytes = new byte[n.Align(System.Runtime.CompilerServices.Unsafe.SizeOf<T>())];
+        Span<byte> bytes = new byte[n.Align(CS.Unsafe.SizeOf<T>())];
         var arr = MemoryMarshal.Cast<byte, T>(bytes);
 
         for (var i = 0; i < arr.Length; ++i) {
@@ -111,8 +112,8 @@ public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBi
             n = bytes.Length;
         }
 
-        if ((n % System.Runtime.CompilerServices.Unsafe.SizeOf<T>()) == 0) {
-            Span<byte> tmp = stackalloc byte[n.Align(System.Runtime.CompilerServices.Unsafe.SizeOf<T>())];
+        if ((n % CS.Unsafe.SizeOf<T>()) != 0) {
+            Span<byte> tmp = stackalloc byte[n.Align(CS.Unsafe.SizeOf<T>())];
             var arr = MemoryMarshal.Cast<byte, T>(bytes);
 
             for (var i = 0; i < arr.Length; ++i) {
