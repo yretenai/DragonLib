@@ -1,10 +1,11 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Generic;
 
 // modified https://github.com/lineplay/mt19937_64_cs/blob/master/mt19937_64.cs to take mt parameters.
-public record struct MTRNGAlgorithm<T> where T : IUnsignedNumber<T>, IBinaryInteger<T>, IMinMaxValue<T> {
+public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBinaryInteger<T>, IMinMaxValue<T> {
     private readonly T A;
     private readonly T B;
     private readonly T C;
@@ -88,5 +89,43 @@ public record struct MTRNGAlgorithm<T> where T : IUnsignedNumber<T>, IBinaryInte
         r ^= (r << Y) & D;
         r ^= r >> Z;
         return r;
+    }
+
+    public Span<byte> Bytes(int n = -1) {
+        if (n == -1) {
+            n = System.Runtime.CompilerServices.Unsafe.SizeOf<T>();
+        }
+
+        Span<byte> bytes = new byte[n.Align(System.Runtime.CompilerServices.Unsafe.SizeOf<T>())];
+        var arr = MemoryMarshal.Cast<byte, T>(bytes);
+
+        for (var i = 0; i < arr.Length; ++i) {
+            arr[i] = Next();
+        }
+
+        return bytes[..n];
+    }
+
+    public void Bytes(Span<byte> bytes, int n = -1) {
+        if (n == -1) {
+            n = bytes.Length;
+        }
+
+        if ((n % System.Runtime.CompilerServices.Unsafe.SizeOf<T>()) == 0) {
+            Span<byte> tmp = stackalloc byte[n.Align(System.Runtime.CompilerServices.Unsafe.SizeOf<T>())];
+            var arr = MemoryMarshal.Cast<byte, T>(bytes);
+
+            for (var i = 0; i < arr.Length; ++i) {
+                arr[i] = Next();
+            }
+
+            tmp[..n].CopyTo(bytes);
+        } else {
+            var arr = MemoryMarshal.Cast<byte, T>(bytes);
+
+            for (var i = 0; i < arr.Length; ++i) {
+                arr[i] = Next();
+            }
+        }
     }
 }
