@@ -1,7 +1,22 @@
 ﻿namespace DragonLib.IO;
 
+public readonly record struct SignatureByte(byte Value, bool IsWildcard) {
+    public SignatureByte() : this(0, true) { }
+
+    public static bool operator ==(SignatureByte left, byte right) => left.IsWildcard || left.Value.Equals(right);
+    public static bool operator !=(SignatureByte left, byte right) => !(left == right);
+    public static bool operator ==(byte left, SignatureByte right) => right.IsWildcard || left.Equals(right.Value);
+    public static bool operator !=(byte left, SignatureByte right) => !(left == right);
+    public static implicit operator SignatureByte(byte left) => new(left, false);
+    public static implicit operator SignatureByte(bool left) => new(0, left);
+    public static implicit operator byte(SignatureByte left) => left.Value;
+    public static implicit operator bool(SignatureByte left) => left.IsWildcard;
+
+    public override string ToString() => IsWildcard ? "??" : Value.ToString("X2");
+}
+
 public static class Signature {
-    public static int FindSignature(Span<byte> buffer, Span<short> signature) {
+    public static int FindSignature(Span<byte> buffer, Span<SignatureByte> signature) {
         if (signature.Length == 0) {
             return -1;
         }
@@ -11,7 +26,7 @@ public static class Signature {
             for (var i = 0; i < signature.Length; ++i) {
                 var b = signature[i];
                 unchecked {
-                    if (b != -1 && (byte) b != buffer[ptr + i]) {
+                    if (b != buffer[ptr + i]) {
                         found = false;
                         break;
                     }
@@ -26,7 +41,7 @@ public static class Signature {
         return -1;
     }
 
-    public static List<int> FindSignatures(Span<byte> buffer, Span<short> signature, int stop = -1, int limit = 0) {
+    public static List<int> FindSignatures(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int limit = 0) {
         if (signature.Length == 0) {
             return new List<int>(0);
         }
@@ -60,7 +75,7 @@ public static class Signature {
         return signatures;
     }
 
-    public static int FindSignatureReverse(Span<byte> buffer, Span<short> signature, int start = -1) {
+    public static int FindSignatureReverse(Span<byte> buffer, Span<SignatureByte> signature, int start = -1) {
         if (signature.Length == 0) {
             return -1;
         }
@@ -74,7 +89,7 @@ public static class Signature {
             for (var i = 0; i < signature.Length; ++i) {
                 var b = signature[i];
                 unchecked {
-                    if (b != -1 && (byte) b != buffer[ptr + i]) {
+                    if (b != buffer[ptr + i]) {
                         found = false;
                         break;
                     }
@@ -89,7 +104,7 @@ public static class Signature {
         return -1;
     }
 
-    public static List<int> FindSignaturesReverse(Span<byte> buffer, Span<short> signature, int stop = -1, int start = -1, int limit = 0) {
+    public static List<int> FindSignaturesReverse(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int start = -1, int limit = 0) {
         if (signature.Length == 0) {
             return new List<int>(0);
         }
@@ -126,16 +141,16 @@ public static class Signature {
         return signatures;
     }
 
-    public static Span<short> CreateSignature(string signatureTemplate) {
+    public static Span<SignatureByte> CreateSignature(string signatureTemplate) {
         var signatureOctets = signatureTemplate.ToHexOctets();
         if (signatureOctets.Length < 1) {
-            return Span<short>.Empty;
+            return Span<SignatureByte>.Empty;
         }
 
-        Span<short> signature = new short[signatureOctets.Length];
+        Span<SignatureByte> signature = new SignatureByte[signatureOctets.Length];
         for (var i = 0; i < signatureOctets.Length; ++i) {
             if (signatureOctets[i] == "??") {
-                signature[i] = -1;
+                signature[i] = new SignatureByte();
             } else {
                 signature[i] = byte.Parse(signatureOctets[i], NumberStyles.HexNumber);
             }
