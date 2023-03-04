@@ -58,12 +58,14 @@ public static class Signature {
             signatures.EnsureCapacity(limit);
         }
 
-        var ptr = -signature.Length;
+        var ptr = 0;
         while (ptr < stop) {
-            ptr = FindSignature(buffer[(ptr + signature.Length)..], signature);
-            if (ptr == -1) {
+            var val = FindSignature(buffer[(ptr + signature.Length)..], signature);
+            if (val == -1) {
                 break;
             }
+
+            ptr += val + signature.Length;
 
             signatures.Add(ptr);
 
@@ -141,13 +143,13 @@ public static class Signature {
         return signatures;
     }
 
-    public static Span<SignatureByte> CreateSignature(string signatureTemplate) {
+    public static SignatureByte[] CreateSignature(string signatureTemplate) {
         var signatureOctets = signatureTemplate.ToHexOctets();
         if (signatureOctets.Length < 1) {
-            return Span<SignatureByte>.Empty;
+            return Array.Empty<SignatureByte>();
         }
 
-        Span<SignatureByte> signature = new SignatureByte[signatureOctets.Length];
+        var signature = new SignatureByte[signatureOctets.Length];
         for (var i = 0; i < signatureOctets.Length; ++i) {
             if (signatureOctets[i] == "??") {
                 signature[i] = new SignatureByte();
