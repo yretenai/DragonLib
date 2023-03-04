@@ -20,7 +20,6 @@ public class IndentHelperBase {
         return obj.GetType() == GetType() && Equals((IndentHelperBase) obj);
     }
 
-    // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => HashCode.Combine(TabSize, TabCharacter);
 
     public override string ToString() => CachedTabs ?? string.Empty;

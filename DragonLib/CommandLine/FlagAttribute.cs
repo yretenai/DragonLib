@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -55,7 +54,6 @@ public sealed class FlagAttribute : Attribute {
 
     public override bool IsDefaultAttribute() => string.IsNullOrWhiteSpace(Flag);
 
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Attribute properties tend to not get updated")]
     public override int GetHashCode() =>
         HashCode.Combine(base.GetHashCode(),
                          Flag,
