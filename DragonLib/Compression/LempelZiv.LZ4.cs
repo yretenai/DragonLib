@@ -90,6 +90,10 @@ public static partial class LempelZiv {
                     return (-1, -1);
                 }
 
+                if (encPos < 0) {
+                    return (-1, -1);
+                }
+
                 dec.Slice(encPos, encCount).CopyTo(dec[decPos..]);
 
                 decPos += encCount;
