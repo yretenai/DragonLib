@@ -1,7 +1,6 @@
 ﻿using System.Buffers;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
 namespace DragonLib.Unsafe;
 
