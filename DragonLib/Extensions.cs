@@ -232,6 +232,58 @@ public static class Extensions {
 
     public static sbyte GetLowNibbleSigned(this byte value) => SignedNibbles[value.GetLowNibble()];
 
+    public static TimeSpan OneYear { get; } = TimeSpan.FromDays(356);
+    public static TimeSpan OneMonth { get; } = TimeSpan.FromDays(30);
+    public static TimeSpan OneDay { get; } = TimeSpan.FromDays(1);
+    public static TimeSpan OneHour { get; } = TimeSpan.FromHours(1);
+    public static TimeSpan OneMinute { get; } = TimeSpan.FromMinutes(1);
+    public static TimeSpan OneSecond { get; } = TimeSpan.FromSeconds(1);
+    public static TimeSpan OneMilisecond { get; } = TimeSpan.FromMilliseconds(1);
+    public static TimeSpan OneMicrosecond { get; } = TimeSpan.FromMicroseconds(1);
+
+    public static string GetHumanReadableTime(this TimeSpan time, bool shortForm = false) {
+        long amount;
+        string metric;
+        if (time >= OneYear) {
+            amount = (long) Math.Floor(time / OneYear);
+            metric = shortForm ? "y" : "year";
+        } else if (time >= OneMonth) {
+            amount = (long) Math.Floor(time / OneMonth);
+            metric = shortForm ? "mo" : "month";
+        } else if (time >= OneDay) {
+            amount = (long) Math.Floor(time / OneDay);
+            metric = shortForm ? "d" : "day";
+        } else if (time >= OneHour) {
+            amount = (long) Math.Floor(time / OneHour);
+            metric = shortForm ? "h" : "hour";
+        } else if (time >= OneMinute) {
+            amount = (long) Math.Floor(time / OneMinute);
+            metric = shortForm ? "m" : "minute";
+        } else if (time >= OneSecond) {
+            amount = (long) Math.Floor(time / OneSecond);
+            metric = shortForm ? "s" : "second";
+        } else if (time >= OneMilisecond) {
+            amount = (long) Math.Floor(time / OneMilisecond);
+            metric = shortForm ? "ms" : "milisecond";
+        } else if (time >= OneMicrosecond) {
+            amount = (long) Math.Floor(time / OneMicrosecond);
+            metric = shortForm ? "us" : "microsecond";
+        } else {
+            amount = time.Ticks;
+            metric = shortForm ? "t" : "tick";
+        }
+
+        if (shortForm) {
+            return $"{amount}{metric}";
+        }
+
+        if (amount != 1) {
+            metric += "s";
+        }
+
+        return $"{amount} {metric}";
+    }
+
     public static string GetHumanReadableBytes(this ulong bytes) {
         for (var i = 0; i < BytePoints.Length; ++i) {
             var divisor = Math.Pow(0x400, i);
@@ -247,9 +299,17 @@ public static class Extensions {
         return $"{bytes} B";
     }
 
-    public static string GetHumanReadableBytes(this long bytes) => GetHumanReadableBytes((ulong) bytes);
+    public static string GetHumanReadableBytes(this long bytes) {
+        var value = bytes;
+        if (bytes < 0) {
+            value = 0 - bytes;
+        }
 
-    public static string GetHumanReadableBytes(this int bytes) => GetHumanReadableBytes((ulong) bytes);
+        var amount = GetHumanReadableBytes((ulong) value);
+        return bytes < 0 ? "-" + amount : amount;
+    }
+
+    public static string GetHumanReadableBytes(this int bytes) => GetHumanReadableBytes((long) bytes);
 
     public static string GetHumanReadableBytes(this uint bytes) => GetHumanReadableBytes((ulong) bytes);
 
