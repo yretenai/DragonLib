@@ -21,8 +21,13 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm
     }
 
     public T ComputeHashValue(Span<byte> bytes) {
-        HashCore(bytes.ToArray(), 0, bytes.Length);
+        HashCore(bytes);
         return GetValueFinal();
+    }
+
+    public byte[] ComputeHash(Span<byte> bytes) {
+        HashCore(bytes);
+        return HashFinal();
     }
 
     protected abstract T GetValueFinal();
