@@ -169,7 +169,7 @@ public sealed class RuntimeArray<T> : RuntimeArrayBase, IDisposable, IEnumerable
             return MemoryPool<byte>.Shared.Rent(0);
         }
 
-        var array = MemoryPool<byte>.Shared.Rent(0);
+        var array = MemoryPool<byte>.Shared.Rent((int)(Length * sizeof(T)));
         try {
             using var pin = array.Memory.Pin();
             NativeMemory.Copy((void*) Ptr, pin.Pointer, (uint) (Length * sizeof(T)));
