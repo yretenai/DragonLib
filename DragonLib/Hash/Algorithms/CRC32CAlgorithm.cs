@@ -1,11 +1,10 @@
 ﻿using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
 
-namespace DragonLib.Hash;
+namespace DragonLib.Hash.Algorithms;
 
-public sealed class CRC32CAlgorithm : HashAlgorithm {
+public sealed class CRC32CAlgorithm : SpanHashAlgorithm<uint> {
     private readonly bool X64 = Sse42.X64.IsSupported;
 
     public CRC32CAlgorithm() {
@@ -16,8 +15,6 @@ public sealed class CRC32CAlgorithm : HashAlgorithm {
         HashSizeValue = 32;
         Reset();
     }
-
-    public uint Value { get; private set; }
 
     public static bool IsSupported => Sse42.IsSupported;
 
@@ -43,10 +40,11 @@ public sealed class CRC32CAlgorithm : HashAlgorithm {
         }
     }
 
-    public uint ComputeHashValue(Span<byte> bytes) {
-        HashCore(bytes.ToArray(), 0, bytes.Length);
-        return ~Value;
+    public override uint ComputeHashValue(Span<byte> bytes) {
+        return ~base.ComputeHashValue(bytes);
     }
+
+    protected override uint GetValueFinal() => ~Value;
 
     protected override byte[] HashFinal() => BitConverter.GetBytes(~Value);
 

@@ -1,7 +1,7 @@
-﻿using System.Text;
+using System.Text;
 using DragonLib.Hash;
 using DragonLib.Hash.Basis;
-using DragonLib.Hash.Generic;
+using DragonLib.Hash.Algorithms;
 
 namespace DragonLib.Tests.Hash;
 

@@ -1,8 +1,8 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace DragonLib.Hash.Generic;
+namespace DragonLib.Hash.Algorithms;
 
 public abstract class SpanHashAlgorithm<T> : HashAlgorithm
     where T : unmanaged, INumber<T> {
@@ -20,7 +20,7 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 
-    public T ComputeHashValue(Span<byte> bytes) {
+    public virtual T ComputeHashValue(Span<byte> bytes) {
         HashCore(bytes);
         return GetValueFinal();
     }

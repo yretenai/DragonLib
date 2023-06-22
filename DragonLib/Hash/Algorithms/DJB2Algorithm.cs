@@ -1,26 +1,20 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-namespace DragonLib.Hash.Generic;
+namespace DragonLib.Hash.Algorithms;
 
-// https://tools.ietf.org/html/draft-eastlake-fnv-17
-// http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T>
-    where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
+// https://theartincode.stanis.me/008-djb2/
+public class DJB2Algorithm<T> : SpanHashAlgorithm<T>
+    where T : unmanaged, INumber<T>, IBinaryInteger<T> {
     private readonly T Basis;
-    private readonly T Prime;
 
-    public unsafe FNVAlternateAlgorithm(T basis, T prime) {
+    public DJB2Algorithm(T basis) {
         Basis = basis;
-        Prime = prime;
-        HashSizeValue = sizeof(T) * 8;
         Reset(Basis);
     }
 
     public T HashNext(T value) {
-        Value ^= value;
-        Value *= Prime;
+        Value = (Value << 5) + Value + value;
         return Value;
     }
 
@@ -56,15 +50,10 @@ public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T>
         }
     }
 
-    protected override byte[] HashFinal() {
-        Span<T> tmp = stackalloc T[1];
-        tmp[0] = Value;
-        return MemoryMarshal.AsBytes(tmp).ToArray();
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Reset(T value) => Value = value;
 
     public override void Initialize() => Reset(Basis);
+
     protected override T GetValueFinal() => Value;
 }

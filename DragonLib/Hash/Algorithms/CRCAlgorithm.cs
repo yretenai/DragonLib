@@ -1,8 +1,8 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace DragonLib.Hash.Generic;
+namespace DragonLib.Hash.Algorithms;
 
 public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IMinMaxValue<T> {
