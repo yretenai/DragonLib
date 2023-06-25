@@ -61,6 +61,11 @@ public static class CommandLineFlagsParser {
         foreach (var (_, (flag, originalType)) in flags) {
             var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
             var tn = type.Name;
+
+            if (type.FullName is "System.IO.DirectoryInfo" or "System.IO.FileInfo") {
+                tn = "path";
+            }
+            
             if (type.IsConstructedGenericType) {
                 var parameters = type.GetGenericArguments().Select(x => x.Name);
                 tn = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)] + $"<{string.Join(", ", parameters)}>";
@@ -591,6 +596,8 @@ public static class CommandLineFlagsParser {
                             "System.Uri"                           => new Uri(textValue),
                             "System.Version"                       => Version.Parse(textValue),
                             "System.Numerics.BigInteger"           => BigInteger.Parse(textValue),
+                            "System.IO.DirectoryInfo"              => new DirectoryInfo(textValue),
+                            "System.IO.FileInfo"                   => new FileInfo(textValue),
                             _                                      => InvokeVisitor<T>(flag, type, textValue),
                         };
             } catch (Exception e) {
