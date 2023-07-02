@@ -4,8 +4,11 @@ using DragonLib.Hash.Algorithms;
 namespace DragonLib.Hash;
 
 public static class FNV {
-    public static FNVAlgorithm<uint> Create(FNV32Basis basis = FNV32Basis.Default, uint prime = 0x01000193U) => new((uint) basis, prime);
-    public static FNVAlternateAlgorithm<uint> CreateAlternate(FNV32Basis basis = FNV32Basis.Default, uint prime = 0x01000193U) => new((uint) basis, prime);
-    public static FNVAlgorithm<ulong> Create(FNV64Basis basis = FNV64Basis.Default, ulong prime = 0x00000100000001B3UL) => new((ulong) basis, prime);
-    public static FNVAlternateAlgorithm<ulong> CreateAlternate(FNV64Basis basis = FNV64Basis.Default, ulong prime = 0x00000100000001B3UL) => new((ulong) basis, prime);
+    public const uint FNV32Prime = 0x01000193U;
+    public const ulong FNV64Prime = 0x00000100000001B3UL;
+
+    public static FNVAlgorithm<uint> Create(FNV32Basis basis = FNV32Basis.Default, uint prime = FNV32Prime) => new((uint) basis, prime);
+    public static FNVInverseAlgorithm<uint> CreateInverse(FNV32Basis basis = FNV32Basis.Default, uint prime = FNV32Prime) => new((uint) basis, prime);
+    public static FNVAlgorithm<ulong> Create(FNV64Basis basis = FNV64Basis.Default, ulong prime = FNV64Prime) => new((ulong) basis, prime);
+    public static FNVInverseAlgorithm<ulong> CreateInverse(FNV64Basis basis = FNV64Basis.Default, ulong prime = FNV64Prime) => new((ulong) basis, prime);
 }

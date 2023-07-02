@@ -6,12 +6,12 @@ namespace DragonLib.Hash.Algorithms;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVAlternateAlgorithm<T> : SpanHashAlgorithm<T>
+public class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
     private readonly T Basis;
     private readonly T Prime;
 
-    public unsafe FNVAlternateAlgorithm(T basis, T prime) {
+    public unsafe FNVInverseAlgorithm(T basis, T prime) {
         Basis = basis;
         Prime = prime;
         HashSizeValue = sizeof(T) * 8;
