@@ -5,8 +5,24 @@ namespace DragonLib;
 
 public static class Extensions {
     private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
-
     private static readonly string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+    public const long OneKiB = 1024;
+    public const long OneMiB = OneKiB * 1024;
+    public const long OneGiB = OneMiB * 1024;
+    public const long OneTiB = OneGiB * 1024;
+    public const long OnePiB = OneTiB * 1024;
+    public const long OneEiB = OnePiB * 1024;
+    public static TimeSpan OneMicrosecond { get; } = TimeSpan.FromMicroseconds(1);
+    public static TimeSpan OneMilisecond { get; } = TimeSpan.FromMilliseconds(1);
+    public static TimeSpan OneSecond { get; } = TimeSpan.FromSeconds(1);
+    public static TimeSpan OneMinute { get; } = TimeSpan.FromMinutes(1);
+    public static TimeSpan OneHour { get; } = TimeSpan.FromHours(1);
+    public static TimeSpan OneDay { get; } = TimeSpan.FromDays(1);
+    public static TimeSpan OneMonth { get; } = TimeSpan.FromDays(30);
+    public static TimeSpan OneYear { get; } = TimeSpan.FromDays(356);
+    public static TimeSpan OneDecade { get; } = OneYear * 10;
+    public static TimeSpan OneCentury { get; } = OneDecade * 10;
+    public static TimeSpan OneKiloyear { get; } = OneCentury * 10;
 
     public static Span<T> Clone<T>(this Span<T> span) {
         var clone = new T[span.Length];
@@ -232,19 +248,19 @@ public static class Extensions {
 
     public static sbyte GetLowNibbleSigned(this byte value) => SignedNibbles[value.GetLowNibble()];
 
-    public static TimeSpan OneYear { get; } = TimeSpan.FromDays(356);
-    public static TimeSpan OneMonth { get; } = TimeSpan.FromDays(30);
-    public static TimeSpan OneDay { get; } = TimeSpan.FromDays(1);
-    public static TimeSpan OneHour { get; } = TimeSpan.FromHours(1);
-    public static TimeSpan OneMinute { get; } = TimeSpan.FromMinutes(1);
-    public static TimeSpan OneSecond { get; } = TimeSpan.FromSeconds(1);
-    public static TimeSpan OneMilisecond { get; } = TimeSpan.FromMilliseconds(1);
-    public static TimeSpan OneMicrosecond { get; } = TimeSpan.FromMicroseconds(1);
-
     public static string GetHumanReadableTime(this TimeSpan time, bool shortForm = false) {
         long amount;
         string metric;
-        if (time >= OneYear) {
+        if (time >= OneKiloyear) {
+            amount = (long) Math.Floor(time / OneKiloyear);
+            metric = shortForm ? "kyr" : "kiloyear";
+        } else if (time >= OneCentury) {
+            amount = (long) Math.Floor(time / OneCentury);
+            metric = shortForm ? "c" : "century";
+        } else if (time >= OneDecade) {
+            amount = (long) Math.Floor(time / OneDecade);
+            metric = shortForm ? "s" : "decade";
+        } else if (time >= OneYear) {
             amount = (long) Math.Floor(time / OneYear);
             metric = shortForm ? "y" : "year";
         } else if (time >= OneMonth) {
@@ -282,6 +298,30 @@ public static class Extensions {
         }
 
         return $"{amount} {metric}";
+    }
+
+    public static long KiB(this int value) {
+        return OneKiB * value;
+    }
+
+    public static long MiB(this int value) {
+        return OneMiB * value;
+    }
+
+    public static long GiB(this int value) {
+        return OneGiB * value;
+    }
+
+    public static long TiB(this int value) {
+        return OneTiB * value;
+    }
+
+    public static long PiB(this int value) {
+        return OnePiB * value;
+    }
+
+    public static long EiB(this int value) {
+        return OneEiB * value;
     }
 
     public static string GetHumanReadableBytes(this ulong bytes) {
