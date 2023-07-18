@@ -27,6 +27,14 @@ public static class DragonMarkup {
             settings ?? DragonMarkupSettings.Default,
             true);
 
+    public static T[] UnwrapMemory<T>(Memory<T> memory) {
+        return memory.ToArray();
+    }
+
+    public static T[] UnwrapReadOnlyMemory<T>(Memory<T> memory) {
+        return memory.ToArray();
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static string? Print(object? instance,
         Dictionary<object, int> visited,
@@ -35,13 +43,12 @@ public static class DragonMarkup {
         DragonMarkupSettings settings,
         bool root = false) {
         if (root && settings.WriteXmlHeader) {
-            return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                   Print(instance, visited, indents, valueName, settings);
+            return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + Print(instance, visited, indents, valueName, settings);
         }
 
         var type = instance?.GetType();
         IDragonMarkupSerializer? customSerializer = null;
-        var target = GetCustomSerializer(settings.TypeSerializers, type, ref customSerializer);
+        var target = GetCustomSerializer(settings, type, ref customSerializer);
 
         var hmlNameTag = string.Empty;
         if (!string.IsNullOrWhiteSpace(valueName)) {
@@ -55,11 +62,13 @@ public static class DragonMarkup {
                 return $"{indents}<{CreateNamespacedTag("null", settings.Namespace)}{hmlNameTag} />\n";
             case DragonMarkupType.Object when type != null && customSerializer != null:
             case DragonMarkupType.Array when type != null && customSerializer != null:
+            case DragonMarkupType.Memory when type != null && customSerializer != null:
                 return customSerializer.Print(instance, visited, indents, valueName, settings) as string;
             case DragonMarkupType.Value when type != null:
                 return
-                    $"{indents}<{FormatName(type.Name)}>{FormatTextValueType((customSerializer ?? DragonMarkupToStringSerializer.Default).Print(instance, visited, innerIndent, valueName, settings))}</{FormatName(type.Name)}>\n";
+                    $"{indents}<{FormatName(type, settings.Namespace)}>{FormatTextValueType((customSerializer ?? DragonMarkupToStringSerializer.Default).Print(instance, visited, innerIndent, valueName, settings))}</{FormatName(type, settings.Namespace)}>\n";
             case DragonMarkupType.Array when type != null:
+            case DragonMarkupType.Memory when type != null:
             case DragonMarkupType.Enumerable when type != null:
                 if (!visited.ContainsKey(instance!)) {
                     visited[instance!] = visited.Count;
@@ -69,14 +78,30 @@ public static class DragonMarkup {
                     var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
                     if (target == DragonMarkupType.Enumerable && instance is IEnumerable enumerable) {
                         instance = enumerable.Cast<object>().ToArray();
+                    } else if (target == DragonMarkupType.Memory) {
+                        var target1 = instance!.GetType().GetGenericArguments()[0];
+                        if (instance.GetType().GetGenericTypeDefinition() == typeof(Memory<>)) {
+                            instance = typeof(DragonMarkup).GetMethod("UnwrapMemory")!.MakeGenericMethod(target1).Invoke(null, new[] { instance });
+                        } else {
+                            instance = typeof(DragonMarkup).GetMethod("UnwrapReadOnlyMemory")!.MakeGenericMethod(target1).Invoke(null, new[] { instance });
+                        }
                     }
 
-                    if (instance is not Array array) {
-                        tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)} />\n";
-                    } else {
-                        for (long i = 0; i < array.LongLength; ++i) {
-                            tag += Print(array.GetValue(i), visited, innerIndent, null, settings);
+                    if (instance is Array array) {
+                        if (array.Length == 0) {
+                            tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
+                            return tag;
                         }
+
+                        if (instance is byte[] buffer) {
+                            tag += Print(Convert.ToBase64String(buffer), visited, innerIndent, null, settings);
+                        } else {
+                            for (long i = 0; i < array.LongLength; ++i) {
+                                tag += Print(array.GetValue(i), visited, innerIndent, null, settings);
+                            }
+                        }
+                    } else {
+                        tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)} />\n";
                     }
 
                     tag += $"{indents}</{CreateNamespacedTag("array", settings.Namespace)}>\n";
@@ -93,14 +118,26 @@ public static class DragonMarkup {
                     var hmlIdTag = settings.UseRefId
                         ? $" {CreateNamespacedTag("id", settings.Namespace)}=\"{visited[instance!]}\""
                         : string.Empty;
-                    var tag = $"{indents}<{FormatName(type.Name)}{hmlIdTag}{hmlNameTag}";
-                    var members = GetMembers(type);
+
+                    var nsTag = "";
+                    if (visited.Count == 1) {
+                        foreach (var (ns, nsUri) in settings.Namespaces) {
+                            nsTag += $" xmlns:{ns}=\"{nsUri}\"";
+                        }
+
+                        if (!settings.Namespaces.ContainsKey(settings.Namespace)) {
+                            nsTag += $" xmlns:{settings.Namespace}=\"https://legiayayana.com/dml/v1\"";
+                        }
+                    }
+
+                    var tag = $"{indents}<{FormatName(type, settings.Namespace)}{nsTag}{hmlIdTag}{hmlNameTag}";
+                    var members = GetMembers(type, settings);
                     var complexMembers = new List<(object? value, string memberName, IDragonMarkupSerializer? custom)>();
                     foreach (var member in members) {
                         var value = GetMemberValue(instance, member);
                         var valueType = value?.GetType();
                         IDragonMarkupSerializer? targetCustomSerializer = null;
-                        var targetMemberTarget = GetCustomSerializer(settings.TypeSerializers,
+                        var targetMemberTarget = GetCustomSerializer(settings,
                             valueType,
                             ref targetCustomSerializer);
 
@@ -109,16 +146,6 @@ public static class DragonMarkup {
                         } else {
                             tag +=
                                 $" {member.Name}=\"{(targetCustomSerializer != null ? targetCustomSerializer.Print(value, visited, indents, member.Name, settings) : FormatValueType(value))}\"";
-                        }
-                    }
-
-                    if (visited.Count == 1) {
-                        foreach (var (ns, nsUri) in settings.Namespaces) {
-                            tag += $" xmlns:{ns}=\"{nsUri}\"";
-                        }
-
-                        if (!settings.Namespaces.ContainsKey(settings.Namespace)) {
-                            tag += $" xmlns:{settings.Namespace}=\"https://legiayayana.com/dml/v1\"";
                         }
                     }
 
@@ -132,7 +159,7 @@ public static class DragonMarkup {
                                 : Print(value, visited, innerIndent, name, settings);
                         }
 
-                        tag += $"{indents}</{FormatName(type.Name)}>\n";
+                        tag += $"{indents}</{FormatName(type, settings.Namespace)}>\n";
                     }
 
                     return tag;
@@ -197,17 +224,17 @@ public static class DragonMarkup {
                         IDragonMarkupSerializer? customValueSerializer = null;
                         IDragonMarkupSerializer? customKeySerializer = null;
 
-                        var valueTarget = GetCustomSerializer(settings.TypeSerializers,
+                        var valueTarget = GetCustomSerializer(settings,
                             valueType,
                             ref customValueSerializer);
-                        var keyTarget = GetCustomSerializer(settings.TypeSerializers, keyType, ref customKeySerializer);
+                        var keyTarget = GetCustomSerializer(settings, keyType, ref customKeySerializer);
 
                         if (valueTarget == DragonMarkupType.Null) {
                             tag += $"{innerIndent}<{CreateNamespacedTag("null", settings.Namespace)}";
                         } else
                             // ReSharper disable once PossibleNullReferenceException
                         {
-                            tag += $"{innerIndent}<{FormatName(valueType?.Name)}";
+                            tag += $"{innerIndent}<{FormatName(valueType, settings.Namespace)}";
                         }
 
                         switch (keyTarget) {
@@ -250,7 +277,7 @@ public static class DragonMarkup {
                             } else
                                 // ReSharper disable once PossibleNullReferenceException
                             {
-                                tag += $"{innerIndent}</{FormatName(valueType?.Name)}>\n";
+                                tag += $"{innerIndent}</{FormatName(valueType, settings.Namespace)}>\n";
                             }
                         }
                     }
@@ -270,11 +297,16 @@ public static class DragonMarkup {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static DragonMarkupType GetCustomSerializer(
-        IReadOnlyDictionary<Type, IDragonMarkupSerializer> customTypeSerializers,
+        DragonMarkupSettings settings,
         Type? type,
         ref IDragonMarkupSerializer? customSerializer) {
+        var customTypeSerializers = settings.TypeSerializers;
         DragonMarkupType target;
-        if (type != null && customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type))) {
+        if (type == null) {
+            return DragonMarkupType.Null;
+        }
+
+        if (customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type))) {
             customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type)).Value;
             target = customSerializer.OverrideTarget;
         } else if (type is { IsConstructedGenericType: true } &&
@@ -283,35 +315,47 @@ public static class DragonMarkup {
                 .Value;
             target = customSerializer.OverrideTarget;
         } else {
-            target = GetSerializationType(type);
+            customSerializer = settings.TypeFactories.Select(factory => factory.GetSerializer(type)).FirstOrDefault(instance => instance != null);
+            target = customSerializer?.OverrideTarget ?? GetSerializationType(type);
         }
 
         return target;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static string? FormatTextValueType(object? instance) =>
+    public static string? FormatTextValueType(object? instance) =>
         instance == null
             ? "{null}"
             : instance.ToString()
-                ?.Replace("\\", "\\\\", StringComparison.Ordinal)
-                .Replace("\r", "\\r", StringComparison.Ordinal)
-                .Replace("\n", "\\n", StringComparison.Ordinal)
-                .Replace("<", "\\<", StringComparison.Ordinal)
-                .Replace(">", "\\>", StringComparison.Ordinal);
+                ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+                .Replace("\r", "&#13;", StringComparison.Ordinal)
+                .Replace("\n", "&#10;", StringComparison.Ordinal)
+                .Replace("<", "&lt;", StringComparison.Ordinal)
+                .Replace(">", "&gt;", StringComparison.Ordinal);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static string? FormatValueType(object? instance) =>
+    public static string? FormatValueType(object? instance) =>
         instance == null
             ? "{null}"
             : instance.ToString()
-                ?.Replace("\\", "\\\\", StringComparison.Ordinal)
-                .Replace("\r", "\\r", StringComparison.Ordinal)
-                .Replace("\n", "\\n", StringComparison.Ordinal)
-                .Replace("\"", "\\\"", StringComparison.Ordinal);
+                ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+                .Replace("\r", "&#10;", StringComparison.Ordinal)
+                .Replace("\n", "&#13;", StringComparison.Ordinal)
+                .Replace("\"", "&quot;", StringComparison.Ordinal);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static string? FormatName(string? typeName) => typeName?.Replace('<', '_').Replace('>', '_').Replace('`', '_');
+    public static string FormatName(Type? type, string ns) {
+        if (type == null) {
+            return CreateNamespacedTag("null", ns);
+        }
+
+        var name = type.Name;
+        if (type.IsGenericType) {
+            name = name[..name.IndexOf('`', StringComparison.Ordinal)];
+        }
+
+        return name.Replace('<', '_').Replace('>', '_');
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static object? GetMemberValue(object? instance, MemberInfo member) {
@@ -322,23 +366,41 @@ public static class DragonMarkup {
         };
     }
 
+    private static bool IsGenericTypePair(Type t, Type a, Type b) {
+        if (!t.IsConstructedGenericType) {
+            return false;
+        }
+
+        var generic = t.GetGenericTypeDefinition();
+        return generic == a || generic == b;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static IEnumerable<MemberInfo> GetMembers(Type? type) {
+    private static IEnumerable<MemberInfo> GetMembers(Type? type, DragonMarkupSettings settings) {
         if (type == null) {
             return ArraySegment<MemberInfo>.Empty;
         }
 
         // ReSharper disable once InvertIf
-        if (!TypeCache.TryGetValue(type, out var members)) {
-            members = type.GetFields()
-                .Cast<MemberInfo>()
-                .Concat(type.GetProperties())
-                .Where(x => x.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)
-                .ToArray();
-            TypeCache.Add(type, members);
+        if (!TypeCache.TryGetValue(type, out var arrayMembers)) {
+            IEnumerable<MemberInfo> members = ArraySegment<MemberInfo>.Empty;
+            if (settings.WriteFields) {
+                members = members.Concat(
+                    type.GetFields(BindingFlags.Public | BindingFlags.GetField | BindingFlags.Instance).Where(x => !IsGenericTypePair(x.FieldType, typeof(Span<>), typeof(ReadOnlySpan<>)))
+                );
+            }
+
+            if (settings.WriteProperties) {
+                members = members.Concat(
+                    type.GetProperties(BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).Where(x => !IsGenericTypePair(x.PropertyType, typeof(Span<>), typeof(ReadOnlySpan<>))).Where(x => x.GetMethod!.GetParameters().Length == 0)
+                );
+            }
+
+            arrayMembers = members.Where(x => x.GetCustomAttribute<IgnoreDataMemberAttribute>() == null).ToArray();
+            TypeCache.Add(type, arrayMembers);
         }
 
-        return members;
+        return arrayMembers;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -351,6 +413,8 @@ public static class DragonMarkup {
         if (!TargetCache.TryGetValue(type, out var target)) {
             if (type.IsArray || typeof(Array).IsAssignableFrom(type)) {
                 target = DragonMarkupType.Array;
+            } else if (IsGenericTypePair(type, typeof(Memory<>), typeof(ReadOnlyMemory<>))) {
+                target = DragonMarkupType.Memory;
             } else if (type.IsEnum || type.IsPrimitive || type == typeof(string)) {
                 target = DragonMarkupType.Value;
             } else if (typeof(IDictionary).IsAssignableFrom(type)) {

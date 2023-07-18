@@ -7,10 +7,5 @@ public class DragonMarkupToStringSerializer : IDragonMarkupSerializer {
 
     public DragonMarkupType OverrideTarget => DragonMarkupType.Value;
 
-    public object? Print(object? instance,
-        Dictionary<object, int> visited,
-        IndentHelperBase indent,
-        string? name,
-        DragonMarkupSettings settings) =>
-        instance?.ToString();
+    public string? Print(object? instance, Dictionary<object, int> visited, IndentHelperBase indent, string? name, DragonMarkupSettings settings) => instance?.ToString();
 }
