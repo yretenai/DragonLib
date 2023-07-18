@@ -9,9 +9,9 @@
         <DebugType>portable</DebugType>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <TargetFramework>net7.0</TargetFramework>
+        <Features>InterceptorsPreview</Features>
+        <TargetFramework>net8.0</TargetFramework>
         <PackageId>DragonLib</PackageId>
-        <TieredPGO>true</TieredPGO>
         <Version>3.1.0.0-prerel</Version>
         <Authors>yretenai</Authors>
         <PackageDescription>Various utility functions and classes. Note: This library is not designed to be used widely, and is not guaranteed to be stable.</PackageDescription>

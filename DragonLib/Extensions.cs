@@ -162,6 +162,20 @@ public static class Extensions {
 
     public static ulong Align(this ulong value, ulong n) => unchecked(value + (n - 1)) & ~(n - 1);
 
+    public static void Align(this Stream stream, long n) {
+        if (stream.CanWrite) {
+            var count = stream.Length.Align(n) - stream.Length;
+            if (count == 0) {
+                return;
+            }
+            Span<byte> bytes = stackalloc byte[(int) count];
+            bytes.Clear();
+            stream.Write(bytes);
+        } else {
+            stream.Position = stream.Length.Align(n);
+        }
+    }
+
     public static string UnixPath(this string path, bool isDir) {
         if (string.IsNullOrEmpty(path)) {
             return string.Empty;
