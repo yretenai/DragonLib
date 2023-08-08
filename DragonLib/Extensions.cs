@@ -163,16 +163,11 @@ public static class Extensions {
     public static ulong Align(this ulong value, ulong n) => unchecked(value + (n - 1)) & ~(n - 1);
 
     public static void Align(this Stream stream, long n) {
-        if (stream.CanWrite) {
-            var count = stream.Length.Align(n) - stream.Length;
-            if (count == 0) {
-                return;
-            }
-            Span<byte> bytes = stackalloc byte[(int) count];
-            bytes.Clear();
-            stream.Write(bytes);
+        if (stream.CanWrite && stream.Position.Align(n) >= stream.Length) {
+            stream.SetLength(stream.Length.Align(n));
+            stream.Position = stream.Length;
         } else {
-            stream.Position = stream.Length.Align(n);
+            stream.Position = stream.Position.Align(n);
         }
     }
 
