@@ -216,9 +216,10 @@ public sealed class RuntimeArray<T> : RuntimeArrayBase, IDisposable, IEnumerable
         var fs = fi.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         var mmap = MemoryMappedFile.CreateFromFile(fs, fi.Name, fs.Length, MemoryMappedFileAccess.Read, HandleInheritability.Inheritable, false);
         byte* ptr = null;
-        var view = mmap.CreateViewAccessor(0, 0);
+        var view = mmap.CreateViewAccessor(0, fs.Length, MemoryMappedFileAccess.Read);
         view.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-        return new RuntimeArray<T>((nint) (ptr + view.PointerOffset), fs.Length, FreeMemoryMap, mmap, view);
+        var array = new RuntimeArray<T>((nint) ptr, fs.Length, FreeMemoryMap, mmap, view, fs);
+        return array;
     }
 
     public override bool Equals(object? obj) => base.Equals(obj) && obj is RuntimeArray<T> other && Equals(other);
@@ -242,10 +243,16 @@ public sealed class RuntimeArray<T> : RuntimeArrayBase, IDisposable, IEnumerable
             return;
         }
 
-        var mmap = (MemoryMappedFile) carry[0];
         var view = (MemoryMappedViewAccessor) carry[1];
         view.SafeMemoryMappedViewHandle.ReleasePointer();
-        view.Dispose();
-        mmap.Dispose();
+        FreeDispose(ptr, carry);
+    }
+
+    private static unsafe void FreeDispose(void* _, IEnumerable<object> carry) {
+        foreach (var obj in carry) {
+            if (obj is IDisposable disposable) {
+                disposable.Dispose();
+            }
+        }
     }
 }
