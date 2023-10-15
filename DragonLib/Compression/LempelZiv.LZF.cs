@@ -1,4 +1,4 @@
-﻿namespace DragonLib.Compression;
+namespace DragonLib.Compression;
 
 public static partial class LempelZiv {
     // Some old code, idk where it's from. If you are the author and want to be credited, please contact me.

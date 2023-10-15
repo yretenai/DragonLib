@@ -1,4 +1,4 @@
-﻿// original source: https://github.com/Thealexbarney/LibHac/blob/e0b482f44b5f225cfe29af0b80186bcb8895806c/src/LibHac/Util/Lz4.cs
+// original source: https://github.com/Thealexbarney/LibHac/blob/e0b482f44b5f225cfe29af0b80186bcb8895806c/src/LibHac/Util/Lz4.cs
 /*
 MIT License
 

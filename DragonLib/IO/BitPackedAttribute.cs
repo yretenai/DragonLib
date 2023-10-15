@@ -1,4 +1,4 @@
-﻿namespace DragonLib.IO;
+namespace DragonLib.IO;
 
 [AttributeUsage(AttributeTargets.Struct)]
 public sealed class BitPackedAttribute : Attribute {

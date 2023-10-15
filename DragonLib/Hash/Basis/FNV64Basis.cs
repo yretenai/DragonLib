@@ -1,4 +1,4 @@
-﻿namespace DragonLib.Hash.Basis;
+namespace DragonLib.Hash.Basis;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html

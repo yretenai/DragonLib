@@ -1,4 +1,4 @@
-﻿namespace DragonLib.Hash.Basis;
+namespace DragonLib.Hash.Basis;
 
 // https://reveng.sourceforge.io/crc-catalogue/all.htm
 public static class CRC8Variants {

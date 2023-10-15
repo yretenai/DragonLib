@@ -1,4 +1,4 @@
-﻿namespace DragonLib.CommandLine;
+namespace DragonLib.CommandLine;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
 public sealed class CommandAttribute : Attribute {

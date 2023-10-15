@@ -1,4 +1,4 @@
-﻿namespace DragonLib.IO;
+namespace DragonLib.IO;
 
 public static class TreePrinter {
     private const char Junction = '├';

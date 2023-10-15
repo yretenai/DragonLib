@@ -1,4 +1,4 @@
-﻿using DragonLib.IO;
+using DragonLib.IO;
 
 namespace DragonLib.TestProgram;
 

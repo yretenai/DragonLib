@@ -1,4 +1,4 @@
-﻿namespace DragonLib.CommandLine;
+namespace DragonLib.CommandLine;
 
 public record CommandLineOptions {
     public static CommandLineOptions Empty { get; } = new() { UseHelp = true };

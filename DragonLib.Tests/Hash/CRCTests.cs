@@ -1,4 +1,4 @@
-﻿using DragonLib.Hash;
+using DragonLib.Hash;
 using DragonLib.Hash.Basis;
 
 namespace DragonLib.Tests.Hash;

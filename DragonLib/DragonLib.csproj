@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <!-- commit -> update RepositoryCommit -->
     <!-- dotnet pack -c Release -->
     <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->

@@ -1,4 +1,4 @@
-﻿namespace DragonLib.IO;
+namespace DragonLib.IO;
 
 public readonly record struct SignatureByte(byte Value, bool IsWildcard) {
     public SignatureByte() : this(0, true) { }

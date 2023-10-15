@@ -1,4 +1,4 @@
-﻿// original source: https://github.com/tompazourek/NaturalSort.Extension/blob/7e99f4e52b2e8e16e3de542f2fce547d4abe047a/src/NaturalSort.Extension/NaturalSortComparer.cs
+// original source: https://github.com/tompazourek/NaturalSort.Extension/blob/7e99f4e52b2e8e16e3de542f2fce547d4abe047a/src/NaturalSort.Extension/NaturalSortComparer.cs
 /*
 The MIT License (MIT)
 
