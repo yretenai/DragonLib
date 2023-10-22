@@ -11,14 +11,16 @@ public static class Command {
     private static void LoadCommands() {
         var types = Assembly.GetEntryAssembly()?.GetTypes() ?? Type.EmptyTypes;
         foreach (var type in types) {
-            var commandAttributes = type.GetCustomAttributes<CommandAttribute>();
-            foreach (var commandAttribute in commandAttributes) {
+            var commandAttributes = type.GetCustomAttributes().Where(x => x is ICommandAttribute);
+            foreach (var attribute in commandAttributes) {
+                var commandAttribute = (ICommandAttribute)attribute;
                 var flagsType = commandAttribute.FlagsType;
-                if (!Commands.ContainsKey(commandAttribute.Group)) {
-                    Commands[commandAttribute.Group] = new Dictionary<string, (string Description, Type Type, Type Command, bool)>();
+                if (!Commands.TryGetValue(commandAttribute.Group, out var value)) {
+                    value = new Dictionary<string, (string Description, Type Type, Type Command, bool)>();
+                    Commands[commandAttribute.Group] = value;
                 }
 
-                Commands[commandAttribute.Group][commandAttribute.Name] = (commandAttribute.Description, flagsType, type, commandAttribute.Hide);
+                value[commandAttribute.Name] = (commandAttribute.Description, flagsType, type, commandAttribute.Hide);
             }
         }
     }
