@@ -1,6 +1,6 @@
 DRAGON Asset Version 1
 
-Magic is written in LITTLE ENDIAN.
+Magic MUST BE written in LITTLE ENDIAN.
 In the case of the file being Big Endian, DRAGON.meta.magic will be 0x445241474F4E1A0A
 
 <...> = struct
@@ -37,7 +37,7 @@ enum ... : <type> = enum (iota 0)
     read <T> count times
 
 <bool>
-    uint8 truth; // if non zero, assume true.
+    uint8 truth; // MUST BE 0 or 1
 
 FILE
     <DRAGON> header;
@@ -47,7 +47,7 @@ FILE
     uint64 magic;
     uint32 version;
     <guid> guid;
-    uint32 size; // inclusive of section header size (44 bytes as of version 1)
+    uint32 size; // MUST BE inclusive of section header size (44 bytes as of version 1)
     uint32 count;
     <guid> settings; // settings specific to this section
 
@@ -118,9 +118,9 @@ Section <SKELETON> Version 1
         <cstring> name;
         <bool> enabled;
         int32 parent;
-        <vec3> position; // if rotation type is NOT mat3 OR mat4
+        <vec3> position; // MUST ONLY BE present if rotation type is NOT mat3 OR mat4
         <T> rotation; // T = RotationType
-        <vec3> scale; // // if rotation type is NOT mat3 OR mat4
+        <vec3> scale; // // MUST ONLY BE present if rotation type is NOT mat3 OR mat4
 
 Section <VERTEX> Version 1
     <section> meta; // meta.magic = 0x5F5F584554524556 / "VERTEX__"
@@ -132,7 +132,7 @@ Section <VERTEX> Version 1
     <attribute>
         AttributeType type;
         D3DDECLUSAGE semantic;
-        <bool> normalized; // has to be FALSE on type == float.
+        <bool> normalized; // MUST BE be FALSE on type == float.
         // i.e. { type = unsigned, normalized = true,  width = 1 } = read 1 byte,  divide by 0xFF (normalized byte)
         //      { type = float,    normalized = false, width = 4 } = read 4 bytes, cast to float  (float32)
         uint8 width; 
@@ -321,9 +321,9 @@ Section <ANITRACK> Version 1
     AnimationType animation_type;
     AnimationSamplingType sampling_type;
     AnimationSmoothingType smoothing_type;
-    vec2 d1; // if sampling_type is bezier
-    vec2 d2; // if sampling type is bezier
-    uint8 width; // frame count of one frame. 3 = vec3, 4 = vec4, 9 = matrix3, 16 = matrix4...
+    vec2 d1; // MUST ONLY BE present if sampling_type is bezier
+    vec2 d2; // MUST ONLY BE present if sampling type is bezier
+    uint8 width; // MUST BE element count of one frame. 3 = vec3, 4 = vec4, 9 = matrix3, 16 = matrix4...
     float32[meta.count] data;
 
     enum AnimationType : <uint8>
