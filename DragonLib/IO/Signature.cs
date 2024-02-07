@@ -41,21 +41,17 @@ public static class Signature {
         return -1;
     }
 
-    public static List<int> FindSignatures(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int limit = 0) {
+    public static IEnumerable<int> FindSignatures(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int limit = 0) {
         if (signature.Length == 0) {
-            return new List<int>(0);
+            yield break;
         }
 
         if (stop == -1) {
             stop = buffer.Length - signature.Length + 1;
         }
 
-        var signatures = new List<int>();
-
         if (limit == 0) {
             limit = buffer.Length;
-        } else {
-            signatures.EnsureCapacity(limit);
         }
 
         var ptr = 0;
@@ -67,14 +63,12 @@ public static class Signature {
 
             ptr += val + signature.Length;
 
-            signatures.Add(ptr);
+            yield return ptr;
 
             if (--limit == 0) {
                 break;
             }
         }
-
-        return signatures;
     }
 
     public static int FindSignatureReverse(Span<byte> buffer, Span<SignatureByte> signature, int start = -1) {
@@ -106,9 +100,9 @@ public static class Signature {
         return -1;
     }
 
-    public static List<int> FindSignaturesReverse(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int start = -1, int limit = 0) {
+    public static IEnumerable<int> FindSignaturesReverse(Span<byte> buffer, Span<SignatureByte> signature, int stop = -1, int start = -1, int limit = 0) {
         if (signature.Length == 0) {
-            return new List<int>(0);
+            yield break;
         }
 
         if (stop == -1) {
@@ -119,11 +113,8 @@ public static class Signature {
             start = buffer.Length;
         }
 
-        var signatures = new List<int>();
         if (limit == 0) {
             limit = buffer.Length;
-        } else {
-            signatures.EnsureCapacity(limit);
         }
 
         var ptr = start;
@@ -133,14 +124,12 @@ public static class Signature {
                 break;
             }
 
-            signatures.Add(ptr);
+            yield return ptr;
 
             if (--limit == 0) {
                 break;
             }
         }
-
-        return signatures;
     }
 
     public static SignatureByte[] CreateSignature(string signatureTemplate) {
@@ -166,7 +155,7 @@ public static class Signature {
         return FindSignature(buffer, signature);
     }
 
-    public static List<int> FindSignatures(Span<byte> buffer, string signatureTemplate, int stop = -1, int limit = 0) {
+    public static IEnumerable<int> FindSignatures(Span<byte> buffer, string signatureTemplate, int stop = -1, int limit = 0) {
         var signature = CreateSignature(signatureTemplate);
         return FindSignatures(buffer, signature, stop, limit);
     }
@@ -176,7 +165,7 @@ public static class Signature {
         return FindSignatureReverse(buffer, signature, start);
     }
 
-    public static List<int> FindSignaturesReverse(Span<byte> buffer, string signatureTemplate, int stop = -1, int start = -1, int limit = 0) {
+    public static IEnumerable<int> FindSignaturesReverse(Span<byte> buffer, string signatureTemplate, int stop = -1, int start = -1, int limit = 0) {
         var signature = CreateSignature(signatureTemplate);
         return FindSignaturesReverse(buffer, signature, stop, start, limit);
     }
