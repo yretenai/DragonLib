@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 namespace DragonLib;
 
 public static class Extensions {
-    private static readonly sbyte[] SignedNibbles = { 0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1 };
-    private static readonly string[] BytePoints = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+    private static readonly sbyte[] SignedNibbles = [0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1];
+    private static readonly string[] BytePoints = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"];
     public const long OneKiB = 1024;
     public const long OneMiB = OneKiB * 1024;
     public const long OneGiB = OneMiB * 1024;
@@ -49,20 +49,7 @@ public static class Extensions {
             return;
         }
 
-        if (!Directory.Exists(directory)) {
-            Directory.CreateDirectory(directory);
-        }
-    }
-
-    public static void EnsureDirectoryRootExists(this string path) {
-        var directory = Path.GetFullPath(path);
-        if (string.IsNullOrEmpty(directory)) {
-            return;
-        }
-
-        if (!Directory.Exists(directory)) {
-            Directory.CreateDirectory(directory);
-        }
+        Directory.CreateDirectory(directory);
     }
 
     public static void EnsureDirectoriesExists(this IEnumerable<string> path) {
@@ -72,9 +59,7 @@ public static class Extensions {
                 continue;
             }
 
-            if (!Directory.Exists(directory)) {
-                Directory.CreateDirectory(directory);
-            }
+            Directory.CreateDirectory(directory);
         }
     }
 
@@ -183,7 +168,7 @@ public static class Extensions {
     public static string[] ToHexOctets(this string? input) {
         var cleaned = input?.Replace(" ", string.Empty, StringComparison.Ordinal).Trim();
         if (string.IsNullOrEmpty(cleaned)) {
-            return Array.Empty<string>();
+            return [];
         }
 
         if (cleaned.Length % 2 != 0) {
@@ -226,7 +211,7 @@ public static class Extensions {
 
         var cleaned = input?.Replace(" ", string.Empty, StringComparison.Ordinal).Replace(", ", string.Empty, StringComparison.Ordinal).Trim();
         if (string.IsNullOrWhiteSpace(cleaned)) {
-            return Array.Empty<byte>();
+            return [];
         }
 
         if (cleaned.Length % hextetLength != 0) {
@@ -365,7 +350,7 @@ public static class Extensions {
     public static T[] SplitFlags<T>(this T flags) where T : Enum {
         var v = Convert.ToUInt64(flags);
         if (v == 0) {
-            return Array.Empty<T>();
+            return [];
         }
 
         var t = new T[BitOperations.PopCount(v)];
