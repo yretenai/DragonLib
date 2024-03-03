@@ -63,11 +63,19 @@ public static class Extensions {
         }
     }
 
-    public static Span<byte> AsBytes<T>(this Span<T> data) where T : unmanaged => MemoryMarshal.AsBytes(data);
+    public static Span<byte> AsBytes<T>(this Span<T> data) where T : struct => MemoryMarshal.AsBytes(data);
 
-    public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : unmanaged => MemoryMarshal.AsBytes(data);
+    public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> data) where T : struct => MemoryMarshal.AsBytes(data);
 
-    public static string? ReadString<T>(this Span<T> data, Encoding encoding, T terminator, out int length, int limit = -1) where T : unmanaged, IEquatable<T> {
+    public static Span<TTo> As<TFrom, TTo>(this Span<TFrom> data) where TFrom : struct where TTo : struct => MemoryMarshal.Cast<TFrom, TTo>(data);
+
+    public static ReadOnlySpan<TTo> As<TFrom, TTo>(this ReadOnlySpan<TFrom> data) where TFrom : struct where TTo : struct => MemoryMarshal.Cast<TFrom, TTo>(data);
+
+    public static Span<TTo> As<TTo>(this Span<byte> data) where TTo : struct => MemoryMarshal.Cast<byte, TTo>(data);
+
+    public static ReadOnlySpan<TTo> As<TTo>(this ReadOnlySpan<byte> data) where TTo : struct => MemoryMarshal.Cast<byte, TTo>(data);
+
+    public static string? ReadString<T>(this Span<T> data, Encoding encoding, T terminator, out int length, int limit = -1) where T : struct, IEquatable<T> {
         if (limit > -1) {
             data = data[..limit];
         }
@@ -85,7 +93,7 @@ public static class Extensions {
         return encoding.GetString(data[..length].AsBytes());
     }
 
-    public static string ReadStringNonNull<T>(this Span<T> data, Encoding encoding, T terminator, out int index, int limit = -1) where T : unmanaged, IEquatable<T> {
+    public static string ReadStringNonNull<T>(this Span<T> data, Encoding encoding, T terminator, out int index, int limit = -1) where T : struct, IEquatable<T> {
         var str = data.ReadString(encoding, terminator, out index, limit);
         return str ?? string.Empty;
     }
@@ -176,9 +184,9 @@ public static class Extensions {
         }
 
         return Enumerable.Range(0, cleaned.Length)
-            .Where(x => x % 2 == 0)
-            .Select(x => cleaned.Substring(x, 2))
-            .ToArray();
+                         .Where(x => x % 2 == 0)
+                         .Select(x => cleaned.Substring(x, 2))
+                         .ToArray();
     }
 
     public static string ToHexString<T>(this Span<T> input, string separator = "", string prefix = "") where T : IConvertible {
@@ -196,7 +204,7 @@ public static class Extensions {
 
             sb.Append(b.ToUInt64(null).ToString(formatter));
 
-            if(separator.Length > 0 && index < input.Length - 1) {
+            if (separator.Length > 0 && index < input.Length - 1) {
                 sb.Append(separator);
             }
         }
@@ -223,14 +231,14 @@ public static class Extensions {
         }
 
         return Enumerable.Range(0, cleaned.Length)
-            .Where(x => x % hextetLength == 0)
-            .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
-            .ToArray();
+                         .Where(x => x % hextetLength == 0)
+                         .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
+                         .ToArray();
     }
 
     public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
 
-    public static T Clamp<T, V>(this V value) where T : unmanaged, INumberBase<T> where V : unmanaged, INumberBase<V> {
+    public static T Clamp<T, V>(this V value) where T : struct, INumberBase<T> where V : struct, INumberBase<V> {
         return T.CreateSaturating(value);
     }
 
@@ -363,5 +371,81 @@ public static class Extensions {
         }
 
         return t;
+    }
+
+    public static string Quoted(this string? value, char quoteValue = '"', char escapeValue = '\\', bool escapeUnicode = false, bool wrapQuotes = true) {
+        if (string.IsNullOrWhiteSpace(value)) {
+            return !wrapQuotes ? string.Empty : $"{quoteValue}{quoteValue}";
+        }
+
+        var sb = new StringBuilder();
+        if (wrapQuotes) {
+            sb.Append(quoteValue);
+        }
+
+        var utf32 = Encoding.UTF32;
+        var text = utf32.GetBytes(value).AsSpan().As<int>();
+        var keyValues = utf32.GetBytes($"{quoteValue}{escapeValue}").AsSpan().As<int>();
+        var quote = keyValues[0];
+        var escape = keyValues[1];
+        var charBuffer = (stackalloc char[5]);
+        var chBuffer32 = (stackalloc int[1]);
+        ReadOnlySpan<byte> chBuffer = chBuffer32.AsBytes();
+        foreach (var ch in text) {
+            if (ch == quote) {
+                sb.Append($"{escapeValue}{quoteValue}");
+                continue;
+            }
+
+            if (ch == escape) {
+                sb.Append($"{escapeValue}{escapeValue}");
+                continue;
+            }
+
+            switch (ch) {
+                case '\0':
+                    sb.Append($"{escapeValue}0");
+                    break;
+                case '\a':
+                    sb.Append($"{escapeValue}a");
+                    break;
+                case '\b':
+                    sb.Append($"{escapeValue}b");
+                    break;
+                case '\f':
+                    sb.Append($"{escapeValue}f");
+                    break;
+                case '\n':
+                    sb.Append($"{escapeValue}n");
+                    break;
+                case '\r':
+                    sb.Append($"{escapeValue}r");
+                    break;
+                case '\t':
+                    sb.Append($"{escapeValue}t");
+                    break;
+                case '\v':
+                    sb.Append($"{escapeValue}v");
+                    break;
+                default:
+                    if ((escapeUnicode && ch is < 0x20 or > 0x7e) || CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.Control) {
+                        sb.Append($"{escapeValue}u{ch:x4}");
+                        continue;
+                    }
+
+                    chBuffer32[0] = ch;
+                    var n = utf32.GetChars(chBuffer, charBuffer);
+                    for (var i = 0; i < n; ++i) {
+                        sb.Append(charBuffer[i]);
+                    }
+                    break;
+            }
+        }
+
+        if (wrapQuotes) {
+            sb.Append(quoteValue);
+        }
+
+        return sb.ToString();
     }
 }

@@ -4,10 +4,8 @@ using System.Text.Json.Serialization;
 namespace DragonLib.CommandLine;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class FlagAttribute : Attribute {
-    public FlagAttribute(string flag) => Flag = flag;
-
-    [JsonIgnore] public string Flag { get; set; }
+public sealed class FlagAttribute(string flag) : Attribute {
+    [JsonIgnore] public string Flag { get; set; } = flag;
     public string? Help { get; set; }
     public string? Category { get; set; }
     public string? Visitor { get; set; }
@@ -15,14 +13,13 @@ public sealed class FlagAttribute : Attribute {
     [JsonIgnore] public Assembly? VisitorAssembly { get; set; }
     public bool IsRequired { get; set; }
     public int Positional { get; set; } = -1;
-    [Obsolete("Set the property directly instead"), JsonIgnore] public object? Default { get; set; }
-    public string[]? ValidValues { get; set; } = Array.Empty<string>();
-    [JsonIgnore] public string[]? Aliases { get; set; } = Array.Empty<string>();
+    public string[]? ValidValues { get; set; } = [];
+    [JsonIgnore] public string[]? Aliases { get; set; } = [];
     public string[]? EnumPrefix { get; set; }
     public char ReplaceDashes { get; set; }
     public char ReplaceDots { get; set; }
     public object? Extra { get; set; }
-    public string[] Flags => Aliases?.Concat(new[] { Flag }).Distinct().Reverse().ToArray() ?? new[] { Flag };
+    public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
     [JsonIgnore] public override object TypeId => Flag;
 
     public override bool Equals(object? obj) {
