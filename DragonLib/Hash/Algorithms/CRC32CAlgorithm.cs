@@ -40,10 +40,6 @@ public sealed class CRC32CAlgorithm : SpanHashAlgorithm<uint> {
         }
     }
 
-    public override uint ComputeHashValue(Span<byte> bytes) {
-        return ~base.ComputeHashValue(bytes);
-    }
-
     protected override uint GetValueFinal() => ~Value;
 
     protected override byte[] HashFinal() => BitConverter.GetBytes(~Value);

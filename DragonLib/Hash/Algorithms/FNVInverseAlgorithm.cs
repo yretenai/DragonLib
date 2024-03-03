@@ -65,6 +65,9 @@ public class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Reset(T value) => Value = value;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Reset() => Reset(Basis);
+
     public override void Initialize() => Reset(Basis);
     protected override T GetValueFinal() => Value;
 }
