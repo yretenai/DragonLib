@@ -20,28 +20,28 @@ public class FNVTests {
 
     [TestCase(FNV32Basis.FNV0, "chongo was here!", 0x007c6c4cu), TestCase(FNV32Basis.FNV1, "chongo was here!", 0xb10d5725u)]
     public void FnvTest32(FNV32Basis basis, string test, uint check) {
-        using var fnv = FowlerNollVo.Create(basis);
+        using var fnv = FNV.Create(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
     [TestCase(FNV32Basis.FNV1, "chongo was here!", 0x448524fdu)]
     public void FnvAltTest32(FNV32Basis basis, string test, uint check) {
-        using var fnv = FowlerNollVo.CreateAlternate(basis);
+        using var fnv = FNV.CreateInverse(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
     [TestCase(FNV64Basis.FNV0, "chongo was here!", 0x4a7c4c49fb224d0cul), TestCase(FNV64Basis.FNV1, "chongo was here!", 0x4c9ca59581b27f45ul)]
     public void FnvTest64(FNV64Basis basis, string test, ulong check) {
-        using var fnv = FowlerNollVo.Create(basis);
+        using var fnv = FNV.Create(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
     [TestCase(FNV64Basis.FNV1, "chongo was here!", 0x858e2fa32a55e61dul)]
     public void FnvAltTest64(FNV64Basis basis, string test, ulong check) {
-        using var fnv = FowlerNollVo.CreateAlternate(basis);
+        using var fnv = FNV.CreateInverse(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }

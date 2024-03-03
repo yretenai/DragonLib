@@ -1,4 +1,5 @@
 using DragonLib.Hash;
+using DragonLib.Hash.Algorithms;
 using DragonLib.Hash.Basis;
 
 namespace DragonLib.Tests.Hash;
@@ -22,7 +23,7 @@ public class CRCTests {
     public void CRC64Test(string name, ulong check) {
         var variant = (CRCVariant<ulong>) typeof(CRC64Variants).GetProperty(name)!.GetValue(null)!;
 
-        using var crc = CyclicRedundancyCheck.Create(variant);
+        using var crc = CRC.Create(variant);
         var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
@@ -31,7 +32,7 @@ public class CRCTests {
     public void CRC32Test(string name, uint check) {
         var variant = (CRCVariant<uint>) typeof(CRC32Variants).GetProperty(name)!.GetValue(null)!;
 
-        using var crc = CyclicRedundancyCheck.Create(variant);
+        using var crc = CRC.Create(variant);
         var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
@@ -40,7 +41,7 @@ public class CRCTests {
     public void CRC8Test(string name, byte check) {
         var variant = (CRCVariant<byte>) typeof(CRC8Variants).GetProperty(name)!.GetValue(null)!;
 
-        using var crc = CyclicRedundancyCheck.Create(variant);
+        using var crc = CRC.Create(variant);
         var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(check));
     }
@@ -49,7 +50,7 @@ public class CRCTests {
     public void CRC16Test(string name, uint check) {
         var variant = (CRCVariant<ushort>) typeof(CRC16Variants).GetProperty(name)!.GetValue(null)!;
 
-        using var crc = CyclicRedundancyCheck.Create(variant);
+        using var crc = CRC.Create(variant);
         var test = crc.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo((ushort) check));
     }
