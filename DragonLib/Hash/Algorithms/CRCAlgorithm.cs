@@ -1,10 +1,9 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Algorithms;
 
-public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
+public sealed class CRCAlgorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, IConvertible, INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IMinMaxValue<T> {
     private readonly T Init;
     private readonly T Polynomial;
@@ -73,16 +72,14 @@ public class CRCAlgorithm<T> : SpanHashAlgorithm<T>
         }
     }
 
-    protected override byte[] HashFinal() {
-        Span<T> tmp = stackalloc T[1];
-        tmp[0] = GetValueFinal();
-        return MemoryMarshal.AsBytes(tmp).ToArray();
+    protected override T GetValueFinal() {
+        var val = Value ^ Xor;
+        Reset();
+        return val;
     }
 
-    protected override T GetValueFinal() => Value ^ Xor;
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Reset() => Value = Init;
+    public override void Reset() => Value = Init;
 
     public override void Initialize() => Reset();
 

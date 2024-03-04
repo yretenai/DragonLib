@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace DragonLib.Hash.Algorithms;
 
 // https://theartincode.stanis.me/008-djb2/
-public class DJB2Algorithm<T> : SpanHashAlgorithm<T>
+public sealed class DJB2Algorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, INumber<T>, IBinaryInteger<T> {
     private readonly T Basis;
 
@@ -52,8 +52,13 @@ public class DJB2Algorithm<T> : SpanHashAlgorithm<T>
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Reset(T value) => Value = value;
+    public override void Reset() => Value = Basis;
 
     public override void Initialize() => Reset(Basis);
 
-    protected override T GetValueFinal() => Value;
+    protected override T GetValueFinal() {
+        var val = Value;
+        Reset();
+        return val;
+    }
 }

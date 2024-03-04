@@ -15,7 +15,6 @@ public class CRCTests {
         using var simd = new CRC32CAlgorithm();
         var test = simd.ComputeHash("123456789"u8.ToArray());
         Assert.That(test, Is.EqualTo(BitConverter.GetBytes(0xe3069283)));
-        simd.Reset();
         var test2 = simd.ComputeHashValue("123456789"u8.ToArray());
         Assert.That(test2, Is.EqualTo(0xe3069283));
     }

@@ -1,20 +1,20 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace DragonLib.Hash.Algorithms;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
+public sealed class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
+    public const string FNV1_IV = "chongo <Landon Curt Noll> /\\../\\";
+    public const string FNV1B_IV = "chongo (Landon Curt Noll) /\\oo/\\";
     private readonly T Basis;
     private readonly T Prime;
 
-    public unsafe FNVInverseAlgorithm(T basis, T prime) {
+    public FNVInverseAlgorithm(T basis, T prime) {
         Basis = basis;
         Prime = prime;
-        HashSizeValue = sizeof(T) * 8;
         Reset(Basis);
     }
 
@@ -56,18 +56,17 @@ public class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
         }
     }
 
-    protected override byte[] HashFinal() {
-        Span<T> tmp = stackalloc T[1];
-        tmp[0] = Value;
-        return MemoryMarshal.AsBytes(tmp).ToArray();
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Reset(T value) => Value = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Reset() => Reset(Basis);
+    public override void Reset() => Reset(Basis);
 
     public override void Initialize() => Reset(Basis);
-    protected override T GetValueFinal() => Value;
+
+    protected override T GetValueFinal() {
+        var val = Value;
+        Reset();
+        return val;
+    }
 }

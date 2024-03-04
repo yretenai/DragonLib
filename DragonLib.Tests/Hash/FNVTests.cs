@@ -22,7 +22,6 @@ public class FNVTests {
     public void FnvTest32(FNV32Basis basis, string test, uint check) {
         using var fnv = FNV.Create(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
-        fnv.Reset();
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
@@ -30,7 +29,6 @@ public class FNVTests {
     public void FnvAltTest32(FNV32Basis basis, string test, uint check) {
         using var fnv = FNV.CreateInverse(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
-        fnv.Reset();
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
@@ -38,7 +36,6 @@ public class FNVTests {
     public void FnvTest64(FNV64Basis basis, string test, ulong check) {
         using var fnv = FNV.Create(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
-        fnv.Reset();
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 
@@ -46,7 +43,6 @@ public class FNVTests {
     public void FnvAltTest64(FNV64Basis basis, string test, ulong check) {
         using var fnv = FNV.CreateInverse(basis);
         Assert.That(fnv.ComputeHash(Encoding.ASCII.GetBytes(test)), Is.EqualTo(BitConverter.GetBytes(check)));
-        fnv.Reset();
         Assert.That(fnv.ComputeHashValue(Encoding.ASCII.GetBytes(test)), Is.EqualTo(check));
     }
 }

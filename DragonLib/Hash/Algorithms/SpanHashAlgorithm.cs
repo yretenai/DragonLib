@@ -14,9 +14,12 @@ public abstract class SpanHashAlgorithm<T> : HashAlgorithm
 
     public T Value { get; set; }
 
+    public abstract void Reset();
+
     protected override byte[] HashFinal() {
         Span<T> tmp = stackalloc T[1];
         tmp[0] = GetValueFinal();
+        Reset();
         return MemoryMarshal.AsBytes(tmp).ToArray();
     }
 

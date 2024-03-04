@@ -40,10 +40,12 @@ public sealed class CRC32CAlgorithm : SpanHashAlgorithm<uint> {
         }
     }
 
-    protected override uint GetValueFinal() => ~Value;
+    protected override uint GetValueFinal() {
+        var val = ~Value;
+        Reset();
+        return val;
+    }
 
-    protected override byte[] HashFinal() => BitConverter.GetBytes(~Value);
-
-    public void Reset() => Value = uint.MaxValue;
+    public override void Reset() => Value = uint.MaxValue;
     public override void Initialize() => Reset();
 }

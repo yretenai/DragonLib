@@ -5,7 +5,7 @@ namespace DragonLib.Hash.Algorithms;
 
 // https://tools.ietf.org/html/draft-eastlake-fnv-17
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html
-public class FNVAlgorithm<T> : SpanHashAlgorithm<T>
+public sealed class FNVAlgorithm<T> : SpanHashAlgorithm<T>
     where T : unmanaged, INumber<T>, IBitwiseOperators<T, T, T> {
     public const string FNV1_IV = "chongo <Landon Curt Noll> /\\../\\";
     public const string FNV1B_IV = "chongo (Landon Curt Noll) /\\oo/\\";
@@ -60,7 +60,7 @@ public class FNVAlgorithm<T> : SpanHashAlgorithm<T>
     public void Reset(T value) => Value = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Reset() => Reset(Basis);
+    public override void Reset() => Reset(Basis);
 
     public override void Initialize() => Reset(Basis);
 
@@ -71,5 +71,9 @@ public class FNVAlgorithm<T> : SpanHashAlgorithm<T>
         return hasher.ComputeHashValue(Encoding.ASCII.GetBytes(text));
     }
 
-    protected override T GetValueFinal() => Value;
+    protected override T GetValueFinal() {
+        var val = Value;
+        Reset();
+        return val;
+    }
 }
