@@ -126,7 +126,7 @@ public static class DragonMarkup {
                         }
 
                         if (!settings.Namespaces.ContainsKey(settings.Namespace)) {
-                            nsTag += $" xmlns:{settings.Namespace}=\"https://legiayayana.com/dml/v1\"";
+                            nsTag += $" xmlns:{settings.Namespace}=\"https://ns.vore.ink/dml/v1\"";
                         }
                     }
 
