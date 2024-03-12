@@ -15,7 +15,7 @@ public sealed record DragonMarkupSettings {
     public string Namespace { get; init; } = "dragon";
 
     public Dictionary<string, string> Namespaces { get; init; } = new() {
-        { "dragon", "https://legiayayana.com/dml/v1" },
+        { "dragon", "https://ns.vore.ink/dml/v1" },
     };
 
     public static DragonMarkupSettings Default => new();
