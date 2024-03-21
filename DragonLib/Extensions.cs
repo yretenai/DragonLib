@@ -374,8 +374,8 @@ public static class Extensions {
 		var keyValues = utf32.GetBytes($"{quoteValue}{escapeValue}").AsSpan().As<int>();
 		var quote = keyValues[0];
 		var escape = keyValues[1];
-		var charBuffer = stackalloc char[5];
-		var chBuffer32 = stackalloc int[1];
+		var charBuffer = (stackalloc char[5]);
+		var chBuffer32 = (stackalloc int[1]);
 		ReadOnlySpan<byte> chBuffer = chBuffer32.AsBytes();
 		foreach (var ch in text) {
 			if (ch == quote) {
