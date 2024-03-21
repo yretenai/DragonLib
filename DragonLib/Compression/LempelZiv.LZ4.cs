@@ -30,85 +30,85 @@ SOFTWARE.
 namespace DragonLib.Compression;
 
 public static partial class LempelZiv {
-    public static (int CmpPos, int DecPos) DecompressLZ4(ReadOnlySpan<byte> cmp, Span<byte> dec) {
-        var cmpPos = 0;
-        var decPos = 0;
+	public static (int CmpPos, int DecPos) DecompressLZ4(ReadOnlySpan<byte> cmp, Span<byte> dec) {
+		var cmpPos = 0;
+		var decPos = 0;
 
-        int GetLength(int length, ReadOnlySpan<byte> slc) {
-            if (length == 0xf) {
-                byte sum;
-                do {
-                    length += sum = slc[cmpPos++];
-                } while (sum == 0xff);
-            }
+		int GetLength(int length, ReadOnlySpan<byte> slc) {
+			if (length == 0xf) {
+				byte sum;
+				do {
+					length += sum = slc[cmpPos++];
+				} while (sum == 0xff);
+			}
 
-            return length;
-        }
+			return length;
+		}
 
-        do {
-            var token = cmp[cmpPos++];
+		do {
+			var token = cmp[cmpPos++];
 
-            var encCount = (token >> 0) & 0xf;
-            var litCount = (token >> 4) & 0xf;
+			var encCount = (token >> 0) & 0xf;
+			var litCount = (token >> 4) & 0xf;
 
-            litCount = GetLength(litCount, cmp);
+			litCount = GetLength(litCount, cmp);
 
-            if (decPos + litCount > dec.Length) {
-                litCount = dec.Length - decPos;
-            }
+			if (decPos + litCount > dec.Length) {
+				litCount = dec.Length - decPos;
+			}
 
-            if (cmpPos + litCount > cmp.Length) {
-                litCount = cmp.Length - cmpPos;
-            }
+			if (cmpPos + litCount > cmp.Length) {
+				litCount = cmp.Length - cmpPos;
+			}
 
-            if (litCount < 0) {
-                return (-1, -1);
-            }
+			if (litCount < 0) {
+				return (-1, -1);
+			}
 
-            cmp.Slice(cmpPos, litCount).CopyTo(dec[decPos..]);
+			cmp.Slice(cmpPos, litCount).CopyTo(dec[decPos..]);
 
-            cmpPos += litCount;
-            decPos += litCount;
+			cmpPos += litCount;
+			decPos += litCount;
 
-            if (cmpPos >= cmp.Length || decPos >= dec.Length) {
-                break;
-            }
+			if (cmpPos >= cmp.Length || decPos >= dec.Length) {
+				break;
+			}
 
-            var back = (cmp[cmpPos++] << 0) |
-                       (cmp[cmpPos++] << 8);
+			var back = (cmp[cmpPos++] << 0) |
+			           (cmp[cmpPos++] << 8);
 
-            encCount = GetLength(encCount, cmp) + 4;
+			encCount = GetLength(encCount, cmp) + 4;
 
-            var encPos = decPos - back;
+			var encPos = decPos - back;
 
-            if (encCount <= back) {
-                if (decPos + encCount > dec.Length || encPos + encCount > dec.Length) {
-                    encCount = dec.Length - decPos;
-                }
+			if (encCount <= back) {
+				if (decPos + encCount > dec.Length || encPos + encCount > dec.Length) {
+					encCount = dec.Length - decPos;
+				}
 
-                if (encCount < 0) {
-                    return (-1, -1);
-                }
+				if (encCount < 0) {
+					return (-1, -1);
+				}
 
-                if (encPos < 0) {
-                    return (-1, -1);
-                }
+				if (encPos < 0) {
+					return (-1, -1);
+				}
 
-                dec.Slice(encPos, encCount).CopyTo(dec[decPos..]);
+				dec.Slice(encPos, encCount).CopyTo(dec[decPos..]);
 
-                decPos += encCount;
+				decPos += encCount;
 
-                if (decPos >= dec.Length) {
-                    break;
-                }
-            } else {
-                while (encCount-- > 0) {
-                    dec[decPos++] = dec[encPos++];
-                }
-            }
-        } while (cmpPos < cmp.Length &&
-                 decPos < dec.Length);
+				if (decPos >= dec.Length) {
+					break;
+				}
+			} else {
+				while (encCount-- > 0) {
+					dec[decPos++] = dec[encPos++];
+				}
+			}
+		} while (cmpPos < cmp.Length &&
+		         decPos < dec.Length);
 
-        return (cmpPos, decPos);
-    }
+		return (cmpPos, decPos);
+	}
 }

@@ -1,40 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <!-- commit -> update RepositoryCommit -->
-    <!-- dotnet pack -c Release -->
-    <!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
-    <PropertyGroup>
-        <Platform>AnyCPU</Platform>
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DebugType>portable</DebugType>
-        <Nullable>enable</Nullable>
-        <LangVersion>preview</LangVersion>
-        <TargetFramework>net8.0</TargetFramework>
-        <PackageId>DragonLib</PackageId>
-        <Version>3.1.0.0-prerel</Version>
-        <Authors>yretenai</Authors>
-        <PackageDescription>Various utility functions and classes. Note: This library is not designed to be used widely, and is not guaranteed to be stable.</PackageDescription>
-        <PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryBranch>develop</RepositoryBranch>
-        <RepositoryCommit>9ff49bf3a8223a0829c21a44248ee182f7480c49</RepositoryCommit>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <IncludeSymbols>true</IncludeSymbols>
-        <IncludeSource>true</IncludeSource>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-        <DeterministicSourcePaths>true</DeterministicSourcePaths>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    </PropertyGroup>
+	<!-- commit -> update RepositoryCommit -->
+	<!-- dotnet pack -c Release -->
+	<!-- dotnet nuget push "bin/Release/DragonLib.1.0.2.nupkg" -s https://api.nuget.org/v3/index.json -->
+	<PropertyGroup>
+		<Platform>AnyCPU</Platform>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugType>portable</DebugType>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+		<TargetFramework>net8.0</TargetFramework>
+		<PackageId>DragonLib</PackageId>
+		<Version>3.1.0.0-prerel</Version>
+		<Authors>yretenai</Authors>
+		<PackageDescription>Various utility functions and classes. Note: This library is not designed to be used widely, and is not guaranteed to be stable.</PackageDescription>
+		<PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/yretenai/DragonLib</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryBranch>develop</RepositoryBranch>
+		<RepositoryCommit>9ff49bf3a8223a0829c21a44248ee182f7480c49</RepositoryCommit>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSource>true</IncludeSource>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<DeterministicSourcePaths>true</DeterministicSourcePaths>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <Optimize>True</Optimize>
-    </PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<Optimize>True</Optimize>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+	</ItemGroup>
 
 </Project>
