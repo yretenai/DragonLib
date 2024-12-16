@@ -293,7 +293,7 @@ public static class CommandLineFlagsParser {
 			if (argument.StartsWith('-')) {
 				if (argument.StartsWith("--")) {
 					if (!argMap.TryGetValue(argument[2..], out var argIndex)) {
-						argIndex = new HashSet<int>();
+						argIndex = [];
 						argMap[argument[2..]] = argIndex;
 					}
 
@@ -301,7 +301,7 @@ public static class CommandLineFlagsParser {
 				} else {
 					foreach (var argc in argument[1..]) {
 						if (!argMap.TryGetValue(argc.ToString(), out var argIndex)) {
-							argIndex = new HashSet<int>();
+							argIndex = [];
 							argMap[argc.ToString()] = argIndex;
 						}
 

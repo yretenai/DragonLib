@@ -8,7 +8,7 @@ public static class BitPacked {
 	private static List<(PropertyInfo Property, int Offset, ulong Mask)> Preload<T>() where T : struct {
 		// ReSharper disable once InvertIf
 		if (!CachedBits.TryGetValue(typeof(T), out var cached)) {
-			cached = new List<(PropertyInfo, int, ulong)>();
+			cached = [];
 			var type = typeof(T);
 			var properties = type.GetMembers()
 			                     .OfType<PropertyInfo>()
