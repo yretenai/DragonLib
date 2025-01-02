@@ -106,14 +106,12 @@ internal static partial class WindowsPlatform {
 			return false;
 		}
 
-		Span<byte> buffer = stackalloc byte[size];
-		fixed (byte* ptr = &buffer.GetPinnableReference()) {
-			if (!NativeMethods.GetTokenInformation(tokenHandle, TokenInformationClass.Privileges, (nint) ptr, buffer.Length, out _)) {
-				return false;
-			}
+		var buffer = stackalloc byte[size];
+		if (!NativeMethods.GetTokenInformation(tokenHandle, TokenInformationClass.Privileges, (nint) buffer, size, out _)) {
+			return false;
 		}
 
-		var tokenPrivileges = MemoryMarshal.Read<TokenPrivileges>(buffer);
+		var tokenPrivileges = MemoryMarshal.Read<TokenPrivileges>(new ReadOnlySpan<byte>(buffer, size));
 		var privileges = new ReadOnlySpan<LUIDAttributes>(tokenPrivileges.Privileges, tokenPrivileges.PrivilegeCount);
 		foreach (var privilege in privileges) {
 			if (privilege.LUID == symlinkLUID) {
