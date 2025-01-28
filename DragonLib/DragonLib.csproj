@@ -9,9 +9,9 @@
 		<DebugType>portable</DebugType>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
-		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<TargetFramework>net9.0</TargetFramework>
 		<PackageId>DragonLib</PackageId>
-		<Version>3.1.0.0-prerel</Version>
+		<Version>3.2.0.0-rc1</Version>
 		<Authors>yretenai</Authors>
 		<PackageDescription>Various utility functions and classes. Note: This library is not designed to be used widely, and is not guaranteed to be stable.</PackageDescription>
 		<PackageProjectUrl>https://github.com/yretenai/DragonLib</PackageProjectUrl>
