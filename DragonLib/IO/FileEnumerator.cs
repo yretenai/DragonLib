@@ -44,13 +44,12 @@ public class FileEnumerator : IEnumerable<string> {
 				continue;
 			}
 
-			if (info.Directory is not {
-				    Exists: true,
-			    }) {
+			var dir = new DirectoryInfo(path);
+			if (!dir.Exists) {
 				continue;
 			}
 
-			foreach (var file in info.Directory.EnumerateFiles("*", Options)) {
+			foreach (var file in dir.GetFiles("*", Options)) {
 				if (IsMatch(file.Name) || IsMatch(file.FullName)) {
 					yield return Path.Combine(path, Path.GetRelativePath(path, file.FullName));
 				}
