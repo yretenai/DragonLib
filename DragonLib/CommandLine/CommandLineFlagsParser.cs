@@ -17,6 +17,10 @@ public static class CommandLineFlagsParser {
 		printHelp.Invoke(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
 	}
 
+	public static void PrintHelpInvoker<T>(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
+		PrintHelp(GetFlags(typeof(T)), instance, options, helpInvoked);
+	}
+
 	public static Dictionary<PropertyInfo, (FlagAttribute Flag, Type PropertyType)> GetFlags(Type t) {
 		var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
 		var typeMap = properties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).ToDictionary(x => x.x, y => (y.Item2, y.x.PropertyType));
