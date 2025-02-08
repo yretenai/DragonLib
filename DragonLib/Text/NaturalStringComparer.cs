@@ -26,8 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //  non-uniform descending number and string sorting
 //  renamed to NaturalStringComparer to reduce conflicts.
 
-using System.Runtime.CompilerServices;
-
 namespace DragonLib.Text;
 
 public class NaturalStringComparer : IComparer<string> {
@@ -56,7 +54,6 @@ public class NaturalStringComparer : IComparer<string> {
 		StringDirectionDescending = stringDescending;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public int Compare(string? str1, string? str2) {
 		if (str1 == str2) {
 			return 0;
@@ -186,7 +183,6 @@ public class NaturalStringComparer : IComparer<string> {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private static byte GetTokenFromChar(char c) =>
 		c >= 'a'
 			? c <= 'z'

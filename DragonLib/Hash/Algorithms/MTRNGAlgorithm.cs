@@ -44,7 +44,6 @@ public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBi
 		}
 	}
 
-	[CS.MethodImpl(CS.MethodImplOptions.AggressiveInlining | CS.MethodImplOptions.AggressiveOptimization)]
 	private void LORefill() {
 		ulong i;
 		for (i = 0; i < N - M; ++i) {
@@ -64,7 +63,6 @@ public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBi
 		Index = 0;
 	}
 
-	[CS.MethodImpl(CS.MethodImplOptions.AggressiveInlining | CS.MethodImplOptions.AggressiveOptimization)]
 	private void HIRefill() {
 		for (var i = N; i < 2 * N; ++i) {
 			var v = (State[i - N] & Upper) | (State[i - N + 1] & Lower);
@@ -72,10 +70,8 @@ public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBi
 		}
 	}
 
-	[CS.MethodImpl(CS.MethodImplOptions.AggressiveInlining | CS.MethodImplOptions.AggressiveOptimization)]
 	private T Check(T v) => (v & T.One) != T.Zero ? A : T.Zero;
 
-	[CS.MethodImpl(CS.MethodImplOptions.AggressiveInlining | CS.MethodImplOptions.AggressiveOptimization)]
 	public T Next() {
 		if (Index == N) {
 			HIRefill();

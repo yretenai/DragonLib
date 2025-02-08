@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -31,7 +30,6 @@ public sealed class DownloadAccelerator : IDisposable {
 		Client.Dispose();
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Uri CombineUri(string text, Uri? baseUri = null) {
 		if (string.IsNullOrEmpty(text)) {
 			return baseUri ?? throw new InvalidOperationException("Base URI is null");
@@ -42,7 +40,6 @@ public sealed class DownloadAccelerator : IDisposable {
 		return CombineUri(uri, baseUri);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Uri CombineUri(Uri uri, Uri? baseUri = null) {
 		if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Host)) {
 			return uri;
@@ -89,12 +86,10 @@ public sealed class DownloadAccelerator : IDisposable {
 		}
 
 		if (!supportsThreading || threads == 1 || length < MinimumSizePerThread) {
-		#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
 			var stream = await Client.GetStreamAsync(uri).ConfigureAwait(false);
 			await using var _ = stream.ConfigureAwait(false);
 			var fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
 			await using var __ = fileStream.ConfigureAwait(false);
-		#pragma warning restore CA2000
 			await stream.CopyToAsync(fileStream).ConfigureAwait(false);
 			return;
 		}
@@ -117,10 +112,8 @@ public sealed class DownloadAccelerator : IDisposable {
 		ranges[^1] = (ranges[^1].start, length);
 
 		{
-		#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
 			var fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
 			await using var _ = fileStream.ConfigureAwait(false);
-		#pragma warning restore CA2000
 			fileStream.SetLength(length);
 		}
 
@@ -143,12 +136,10 @@ public sealed class DownloadAccelerator : IDisposable {
 				using var request = new HttpRequestMessage(HttpMethod.Get, uri);
 				request.Headers.Range = new RangeHeaderValue(rangeStart, rangeEnd);
 				var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-			#pragma warning disable CA2000 // Dispose objects before losing scope, buggy: https://github.com/dotnet/roslyn-analyzers/issues/5712
 				var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 				await using var _ = stream.ConfigureAwait(false);
 				var fileStream = File.Open(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
 				await using var __ = fileStream.ConfigureAwait(false);
-			#pragma warning restore CA2000
 				fileStream.Seek(rangeStart, SeekOrigin.Begin);
 				await stream.CopyToAsync(fileStream).ConfigureAwait(false);
 				return;

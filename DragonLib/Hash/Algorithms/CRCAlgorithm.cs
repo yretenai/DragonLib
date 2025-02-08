@@ -1,5 +1,4 @@
 using System.Numerics;
-using System.Runtime.CompilerServices;
 
 namespace DragonLib.Hash.Algorithms;
 
@@ -25,7 +24,6 @@ public sealed class CRCAlgorithm<T> : SpanHashAlgorithm<T>
 		CreateTable();
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private unsafe void CreateTable() {
 		var width = sizeof(T) * 8;
 		var msb = 1ul << (width - 1);
@@ -58,7 +56,6 @@ public sealed class CRCAlgorithm<T> : SpanHashAlgorithm<T>
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	protected override unsafe void HashCore(byte[] array, int ibStart, int cbSize) {
 		while (cbSize > 0) {
 			var @byte = T.CreateTruncating(array[ibStart++]);
@@ -78,12 +75,10 @@ public sealed class CRCAlgorithm<T> : SpanHashAlgorithm<T>
 		return val;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public override void Reset() => Value = Init;
 
 	public override void Initialize() => Reset();
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static ulong Reflect(ulong v, int width) {
 		v = ((v >> 1) & 0x5555555555555555) | ((v & 0x5555555555555555) << 1);
 		v = ((v >> 2) & 0x3333333333333333) | ((v & 0x3333333333333333) << 2);

@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace DragonLib.Hash.Algorithms;
@@ -23,7 +22,6 @@ public sealed class CRC32CAlgorithm : SpanHashAlgorithm<uint> {
 
 	public new static CRC32CAlgorithm Create() => new();
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	protected override void HashCore(byte[] array, int ibStart, int cbSize) {
 		if (X64) {
 			var span = array.AsSpan();
