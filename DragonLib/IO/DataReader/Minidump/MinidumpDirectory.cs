@@ -1,0 +1,9 @@
+using System.Runtime.InteropServices;
+
+namespace DragonLib.IO.DataReader.Minidump;
+
+[StructLayout(LayoutKind.Sequential, Pack = 4)]
+public record struct MinidumpDirectory {
+	public MinidumpStreamType Type { get; set; }
+	public MinidumpLocationDescriptor Location { get; set; }
+}
