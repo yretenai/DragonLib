@@ -163,6 +163,62 @@ public sealed partial class MinidumpHandler : IMemoryHandler {
 		}
 	}
 
+	public Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>> MapSections() {
+		var result = new Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>>();
+		foreach (var (moduleStart, moduleSize, moduleName) in EnumerateModules()) {
+			var sections = new List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>();
+			result[moduleName] = sections;
+			var currentAddress = moduleStart;
+			while (currentAddress < moduleSize) {
+				var region = GetInfo(currentAddress);
+
+				var flags = SectionFlags.NoAccess;
+				if ((region.Protect & MinidumpMemoryProtect.Execute) != 0) {
+					flags |= SectionFlags.Execute;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ExecuteRead) != 0) {
+					flags |= SectionFlags.Execute;
+					flags |= SectionFlags.Read;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ExecuteRead) != 0) {
+					flags |= SectionFlags.Execute;
+					flags |= SectionFlags.Read;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ExecuteReadWrite) != 0) {
+					flags |= SectionFlags.Execute;
+					flags |= SectionFlags.Read;
+					flags |= SectionFlags.Write;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ExecuteWrite) != 0) {
+					flags |= SectionFlags.Execute;
+					flags |= SectionFlags.Write;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.Write) != 0) {
+					flags |= SectionFlags.Write;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ReadOnly) != 0) {
+					flags |= SectionFlags.Read;
+				}
+
+				if ((region.Protect & MinidumpMemoryProtect.ReadWrite) != 0) {
+					flags |= SectionFlags.Read;
+					flags |= SectionFlags.Write;
+				}
+
+				sections.Add((region.BaseAddress, (int) region.RegionSize, flags));
+				currentAddress = region.BaseAddress + region.RegionSize;
+			}
+		}
+
+		return result;
+	}
+
 	private bool ReadBytesFromRanges(nint address, Span<byte> buffer, out int bytesRead) {
 		var read = 0;
 		foreach (var memoryRange in MemoryRanges) {
@@ -238,5 +294,17 @@ public sealed partial class MinidumpHandler : IMemoryHandler {
 		}
 
 		return 0;
+	}
+
+	public MinidumpMemoryInfo GetInfo(nint address) {
+		foreach (var memoryInfo in MemoryInfo) {
+			if (memoryInfo.BaseAddress > address || memoryInfo.BaseAddress + memoryInfo.RegionSize < address) {
+				continue;
+			}
+
+			return memoryInfo;
+		}
+
+		return default;
 	}
 }

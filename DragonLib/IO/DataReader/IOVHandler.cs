@@ -38,7 +38,6 @@ public sealed partial class IOVHandler : IMemoryHandler {
 		return true;
 	}
 
-
 	public IEnumerable<(nint ModuleStart, int ModuleSize, string ModuleName)> EnumerateModules() {
 		using var stream = new FileStream($"/proc/{Process.Id}/maps", FileMode.Open, FileAccess.Read);
 		using var reader = new StreamReader(stream);
@@ -62,6 +61,53 @@ public sealed partial class IOVHandler : IMemoryHandler {
 
 			yield return (start, (int) (end - start), moduleName);
 		}
+	}
+
+	public Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>> MapSections() {
+		using var stream = new FileStream($"/proc/{Process.Id}/maps", FileMode.Open, FileAccess.Read);
+		using var reader = new StreamReader(stream);
+
+		var lastModule = string.Empty;
+		var result = new Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>>();
+		while (reader.ReadLine() is { } line) {
+			if (line.Length == 0) {
+				continue;
+			}
+
+			var arr = line.Split(' ', 6, StringSplitOptions.RemoveEmptyEntries);
+			var index = arr[0].IndexOf('-', StringComparison.Ordinal);
+			var start = nint.Parse(arr[0][..index], NumberStyles.HexNumber);
+			var end = nint.Parse(arr[0][(index + 1)..], NumberStyles.HexNumber);
+			var perm = arr[1];
+			var moduleName = arr.ElementAtOrDefault(5);
+			if (string.IsNullOrEmpty(moduleName)) {
+				moduleName = lastModule;
+			} else {
+				lastModule = moduleName;
+			}
+
+			if (!result.TryGetValue(moduleName, out var sections)) {
+				result[moduleName] = sections = [];
+			}
+
+			var flags = SectionFlags.NoAccess;
+
+			if (perm.Length > 0 && perm[0] == 'r') {
+				flags |= SectionFlags.Read;
+			}
+
+			if (perm.Length > 1 && perm[1] == 'w') {
+				flags |= SectionFlags.Write;
+			}
+
+			if (perm.Length > 2 && perm[2] == 'x') {
+				flags |= SectionFlags.Execute;
+			}
+
+			sections.Add((start, (int) (end - start), flags));
+		}
+
+		return result;
 	}
 
 	public void Dispose() {

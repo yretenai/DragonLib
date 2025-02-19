@@ -1,5 +1,6 @@
 namespace DragonLib.IO.DataReader.Minidump;
 
+[Flags]
 public enum MinidumpMemoryProtect : uint {
 	NoAccess = 0x00000001,
 	ReadOnly = 0x00000002,
