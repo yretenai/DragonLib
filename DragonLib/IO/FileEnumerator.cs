@@ -3,7 +3,7 @@ using System.IO.Enumeration;
 namespace DragonLib.IO;
 
 public class FileEnumerator : IEnumerable<string> {
-	public FileEnumerator(string[] args, EnumerationOptions options, params string[] patterns) {
+	public FileEnumerator(IEnumerable<string> args, EnumerationOptions options, params string[] patterns) {
 		if (options.MatchType == MatchType.Win32) {
 			throw new NotSupportedException();
 		}
@@ -15,7 +15,7 @@ public class FileEnumerator : IEnumerable<string> {
 		IgnoreCase = options.MatchCasing == MatchCasing.CaseInsensitive || (options.MatchCasing == MatchCasing.PlatformDefault && SystemIsCaseInsensitive);
 	}
 
-	public FileEnumerator(string[] args, params string[] patterns) : this(args, new EnumerationOptions {
+	public FileEnumerator(IEnumerable<string> args, params string[] patterns) : this(args, new EnumerationOptions {
 		MatchType = MatchType.Simple,
 	}, patterns) { }
 
@@ -60,6 +60,10 @@ public class FileEnumerator : IEnumerable<string> {
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 	private bool IsMatch(string path) {
+		if (Expressions.Count == 0) {
+			return true;
+		}
+
 		foreach (var expression in Expressions) {
 			// thank you microsoft for not making this internal.
 			if (FileSystemName.MatchesSimpleExpression(expression.AsSpan(), path, IgnoreCase)) {
