@@ -8,4 +8,7 @@ public record CommandLineFlags {
 
 	[Flag("h", Help = "Print this help text", Aliases = ["help", "?"])]
 	public bool Help { get; set; }
+
+	[Flag("v", Help = "Print this help text", Aliases = ["version"])]
+	public bool Version { get; set; }
 }

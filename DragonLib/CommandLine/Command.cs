@@ -25,9 +25,9 @@ public static class Command {
 		}
 	}
 
-	public static void Run(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') => Run<object>(out commandName, out commandGroupName, globalFlags, printHelp, carry, args);
+	public static void Run(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineOptions? options = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') => Run<object>(out commandName, out commandGroupName, globalFlags, options, carry, args);
 
-	public static T? Run<T>(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineFlagsParser.PrintHelpDelegate? printHelp = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') {
+	public static T? Run<T>(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineOptions? options = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') {
 		LoadCommands();
 
 		commandName = null;
@@ -44,9 +44,10 @@ public static class Command {
 			}
 		}
 
-		printHelp ??= CommandLineFlagsParser.PrintHelp;
+		options ??= CommandLineOptions.Default;
 		var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions {
 			UseHelp = false,
+			UseVersion = false,
 		});
 
 		if (positionalFlags == null) {
@@ -106,12 +107,11 @@ public static class Command {
 
 		var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
 
-		var flags = command.Type == globalFlags.GetType()
-			? globalFlags
-			: CommandLineFlagsParser.ParseFlags(command.Type, printHelp, new CommandLineOptions {
+		var flags = CommandLineFlagsParser.ParseFlags(command.Type, options with {
 				Command = $"{commandGroupName} {commandName}".Trim(),
 				SkipPositionals = offset,
 			}, args);
+
 		if (flags == null) {
 			return default;
 		}

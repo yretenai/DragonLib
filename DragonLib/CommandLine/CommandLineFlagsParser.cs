@@ -5,15 +5,17 @@ using System.Text.RegularExpressions;
 
 namespace DragonLib.CommandLine;
 
-public static class CommandLineFlagsParser {
-	public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked);
+public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked);
 
-	public static void PrintHelp<T>(PrintHelpDelegate printHelp, CommandLineOptions options, bool helpInvoked) {
-		PrintHelp(typeof(T), printHelp, options, helpInvoked);
+public delegate void PrintVersionDelegate(object instance, CommandLineOptions options);
+
+public static class CommandLineFlagsParser {
+	public static void PrintHelp<T>(CommandLineOptions options, bool helpInvoked) {
+		PrintHelp(typeof(T), options, helpInvoked);
 	}
 
-	public static void PrintHelp(Type t, PrintHelpDelegate printHelp, CommandLineOptions options, bool helpInvoked) {
-		printHelp.Invoke(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
+	public static void PrintHelp(Type t, CommandLineOptions options, bool helpInvoked) {
+		options.HelpDelegate?.Invoke(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
 	}
 
 	public static void PrintHelpInvoker<T>(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
@@ -237,37 +239,25 @@ public static class CommandLineFlagsParser {
 		}
 	}
 
+	public static void PrintVersion(object instance, CommandLineOptions options) {
+		Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} version {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0"}");
+	}
+
+	public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, []) as CommandLineFlags;
+
+	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [options]) as CommandLineFlags;
+
+	public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [arguments]) as CommandLineFlags;
+
+	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [options, arguments]) as CommandLineFlags;
+
 	public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
 
 	public static T? ParseFlags<T>(CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(options, Environment.GetCommandLineArgs().Skip(1).ToArray());
 
-	public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, CommandLineOptions.Empty, arguments);
+	public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(CommandLineOptions.Default, arguments);
 
-	public static T? ParseFlags<T>(CommandLineOptions options, params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(PrintHelp, options, arguments);
-
-	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [options]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [options, arguments]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, []) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [arguments]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(PrintHelpDelegate), typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [printHelp, options, arguments]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(PrintHelpDelegate), typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [printHelp, options]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(PrintHelpDelegate), typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [printHelp, CommandLineOptions.Empty, arguments]) as CommandLineFlags;
-
-	public static CommandLineFlags? ParseFlags(Type t, PrintHelpDelegate printHelp) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(PrintHelpDelegate), typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [printHelp, CommandLineOptions.Empty]) as CommandLineFlags;
-
-	public static T? ParseFlags<T>(PrintHelpDelegate printHelp, CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(printHelp, options, Environment.GetCommandLineArgs().Skip(1).ToArray());
-
-	public static T? ParseFlags<T>(PrintHelpDelegate printHelp) where T : CommandLineFlags => ParseFlags<T>(printHelp, CommandLineOptions.Empty, Environment.GetCommandLineArgs().Skip(1).ToArray());
-
-	public static T? ParseFlags<T>(PrintHelpDelegate printHelp, params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(printHelp, CommandLineOptions.Empty, arguments);
-
-	public static T? ParseFlags<T>(PrintHelpDelegate printHelp, CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
+	public static T? ParseFlags<T>(CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
 		var shouldExit = false;
 		var instance = Activator.CreateInstance<T>();
 		var typeMap = GetFlags(typeof(T));
@@ -306,9 +296,15 @@ public static class CommandLineFlagsParser {
 
 		if (options.UseHelp && propertyNameToProperty.TryGetValue("Help", out var helpProperty) && typeMap.TryGetValue(helpProperty, out var helpEntry)) {
 			if (helpEntry.Flag.Flags.Any(flag => argMap.ContainsKey(flag))) {
-				printHelp(typeMap, instance, options, true);
-				Environment.Exit(0);
-				return null;
+				options.HelpDelegate(typeMap, instance, options, true);
+				goto exit;
+			}
+		}
+
+		if (options.UseVersion && propertyNameToProperty.TryGetValue("Version", out var versionProperty) && typeMap.TryGetValue(versionProperty, out var versionEntry)) {
+			if (versionEntry.Flag.Flags.Any(flag => argMap.ContainsKey(flag))) {
+				options.VersionDelegate(instance, options);
+				goto exit;
 			}
 		}
 
@@ -483,11 +479,21 @@ public static class CommandLineFlagsParser {
 			}
 		}
 
-		if (!options.UseHelp || (!instance.Help && !shouldExit)) {
+		if (options.UseHelp && instance.Help) {
+			options.HelpDelegate(typeMap, instance, options, instance.Help);
+			goto exit;
+		}
+
+		if (options.UseVersion && instance.Version) {
+			options.VersionDelegate(instance, options);
+			goto exit;
+		}
+
+		if (!shouldExit) {
 			return instance;
 		}
 
-		printHelp(typeMap, instance, options, instance.Help);
+	exit:
 		Environment.Exit(0);
 		return null;
 	}
