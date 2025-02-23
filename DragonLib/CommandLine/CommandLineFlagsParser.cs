@@ -15,7 +15,7 @@ public static class CommandLineFlagsParser {
 	}
 
 	public static void PrintHelp(Type t, CommandLineOptions options, bool helpInvoked) {
-		options.HelpDelegate?.Invoke(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
+		options.HelpDelegate(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
 	}
 
 	public static void PrintHelpInvoker<T>(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
