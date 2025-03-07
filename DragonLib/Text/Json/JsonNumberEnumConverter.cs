@@ -11,18 +11,11 @@ public class JsonNumberEnumConverter : JsonConverterFactory {
 public class JsonNumberEnumConverter<T> : JsonConverter<T> where T : struct, Enum {
 	public override bool HandleNull => false;
 
-	public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+	public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
 		// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
-		return reader.TokenType switch {
-			       JsonTokenType.Number => (T) Enum.ToObject(typeof(T), reader.GetInt64()),
-			       JsonTokenType.String => Enum.Parse<T>(reader.GetString() ?? string.Empty, true),
-			       _ => throw new JsonException("Unexpected token type"),
-		       };
-	}
+		reader.TokenType switch { JsonTokenType.Number => (T) Enum.ToObject(typeof(T), reader.GetInt64()), JsonTokenType.String => Enum.Parse<T>(reader.GetString() ?? string.Empty, true), _ => throw new JsonException("Unexpected token type") };
 
-	public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) {
-		writer.WriteNumberValue(Convert.ToInt64(value));
-	}
+	public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) => writer.WriteNumberValue(Convert.ToInt64(value));
 
 	public override bool CanConvert(Type typeToConvert) => typeToConvert.IsEnum;
 }

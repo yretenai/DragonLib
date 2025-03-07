@@ -16,15 +16,9 @@ public sealed partial class IOVHandler : IMemoryHandler {
 
 	public unsafe bool ReadBytes(nint address, Span<byte> buffer, out int bytesRead) {
 		fixed (byte* pin = buffer) {
-			var localIo = new IOV {
-				iov_base = (nint) pin,
-				iov_len = (nuint) buffer.Length,
-			};
+			var localIo = new IOV { iov_base = (nint) pin, iov_len = (nuint) buffer.Length };
 
-			var remoteIo = new IOV {
-				iov_base = address,
-				iov_len = (nuint) buffer.Length,
-			};
+			var remoteIo = new IOV { iov_base = address, iov_len = (nuint) buffer.Length };
 
 			nint read;
 			if ((read = NativeMethods.process_vm_readv(Process.Id, ref localIo, 1, ref remoteIo, 1, 0)) == -1) {

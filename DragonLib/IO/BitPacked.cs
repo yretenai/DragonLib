@@ -11,9 +11,9 @@ public static class BitPacked {
 			cached = [];
 			var type = typeof(T);
 			var properties = type.GetMembers()
-			                     .OfType<PropertyInfo>()
-			                     .Where(x => x.GetMethod != null && x.SetMethod != null)
-			                     .ToArray();
+								 .OfType<PropertyInfo>()
+								 .Where(x => x.GetMethod != null && x.SetMethod != null)
+								 .ToArray();
 			var offset = 0;
 			foreach (var property in properties) {
 				var info = property.GetCustomAttribute<BitFieldAttribute>();

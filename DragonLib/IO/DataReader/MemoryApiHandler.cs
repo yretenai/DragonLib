@@ -107,8 +107,7 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 	}
 
 
-	[Flags]
-	[SuppressMessage("ReSharper", "UnusedMember.Local")]
+	[Flags, SuppressMessage("ReSharper", "UnusedMember.Local")]
 	private enum AllocationType {
 		Commit = 0x1000,
 		Reserve = 0x2000,
@@ -121,8 +120,7 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 		TopDown = 0x100000,
 	}
 
-	[Flags]
-	[SuppressMessage("ReSharper", "UnusedMember.Local")]
+	[Flags, SuppressMessage("ReSharper", "UnusedMember.Local")]
 	private enum ProtectionType {
 		NoAccess = 0x01,
 		ReadOnly = 0x02,

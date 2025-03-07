@@ -31,14 +31,10 @@ public sealed partial class MinidumpHandler : IMemoryHandler {
 		foreach (var stream in streamSpan) {
 			Stream.Position = stream.Location.RVA;
 			switch (stream.Type) {
-				case MinidumpStreamType.ModuleList when Modules != null:
-					throw new InvalidOperationException("Duplicate Modules Stream");
-				case MinidumpStreamType.MemoryInfoList when MemoryInfo != null:
-					throw new InvalidOperationException("Duplicate MemoryInfo Stream");
-				case MinidumpStreamType.MemoryList when MemoryRanges != null:
-					throw new InvalidOperationException("Duplicate MemoryList Stream");
-				case MinidumpStreamType.Memory64List when MemoryRanges64 != null:
-					throw new InvalidOperationException("Duplicate Memory64List Stream");
+				case MinidumpStreamType.ModuleList when Modules != null: throw new InvalidOperationException("Duplicate Modules Stream");
+				case MinidumpStreamType.MemoryInfoList when MemoryInfo != null: throw new InvalidOperationException("Duplicate MemoryInfo Stream");
+				case MinidumpStreamType.MemoryList when MemoryRanges != null: throw new InvalidOperationException("Duplicate MemoryList Stream");
+				case MinidumpStreamType.Memory64List when MemoryRanges64 != null: throw new InvalidOperationException("Duplicate Memory64List Stream");
 				case MinidumpStreamType.ModuleList: {
 					Stream.ReadExactly(slopBuffer[..4]);
 					var count = MemoryMarshal.Read<int>(slopBuffer);

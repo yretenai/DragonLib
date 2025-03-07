@@ -53,9 +53,7 @@ public sealed class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
 	}
 
 	public void Reset(T value) => Value = value;
-
 	public override void Reset() => Reset(Basis);
-
 	public override void Initialize() => Reset(Basis);
 
 	protected override T GetValueFinal() {
@@ -63,4 +61,5 @@ public sealed class FNVInverseAlgorithm<T> : SpanHashAlgorithm<T>
 		Reset();
 		return val;
 	}
+	// ReSharper disable once InconsistentNaming
 }

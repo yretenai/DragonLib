@@ -47,9 +47,7 @@ public sealed class DJB2Algorithm<T> : SpanHashAlgorithm<T>
 	}
 
 	public void Reset(T value) => Value = value;
-
 	public override void Reset() => Value = Basis;
-
 	public override void Initialize() => Reset(Basis);
 
 	protected override T GetValueFinal() {

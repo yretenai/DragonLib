@@ -33,7 +33,5 @@ public class MemoryBufferReader(IMemoryBuffer Buffer) : IDisposable {
 		}
 	}
 
-	~MemoryBufferReader() {
-		Dispose(false);
-	}
+	~MemoryBufferReader() => Dispose(false);
 }

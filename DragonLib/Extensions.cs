@@ -150,9 +150,9 @@ public static class Extensions {
 		}
 
 		return Enumerable.Range(0, cleaned.Length)
-		                 .Where(x => x % 2 == 0)
-		                 .Select(x => cleaned.Substring(x, 2))
-		                 .ToArray();
+						 .Where(x => x % 2 == 0)
+						 .Select(x => cleaned.Substring(x, 2))
+						 .ToArray();
 	}
 
 	[Obsolete("Use Convert.ToHexString")]
@@ -199,9 +199,9 @@ public static class Extensions {
 		}
 
 		return Enumerable.Range(0, cleaned.Length)
-		                 .Where(x => x % hextetLength == 0)
-		                 .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
-		                 .ToArray();
+						 .Where(x => x % hextetLength == 0)
+						 .Select(x => byte.Parse(cleaned.Substring(x, hextetLength), NumberStyles.HexNumber))
+						 .ToArray();
 	}
 
 	public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
@@ -361,30 +361,14 @@ public static class Extensions {
 			}
 
 			switch (ch) {
-				case '\0':
-					sb.Append($"{escapeValue}0");
-					break;
-				case '\a':
-					sb.Append($"{escapeValue}a");
-					break;
-				case '\b':
-					sb.Append($"{escapeValue}b");
-					break;
-				case '\f':
-					sb.Append($"{escapeValue}f");
-					break;
-				case '\n':
-					sb.Append($"{escapeValue}n");
-					break;
-				case '\r':
-					sb.Append($"{escapeValue}r");
-					break;
-				case '\t':
-					sb.Append($"{escapeValue}t");
-					break;
-				case '\v':
-					sb.Append($"{escapeValue}v");
-					break;
+				case '\0': sb.Append($"{escapeValue}0"); break;
+				case '\a': sb.Append($"{escapeValue}a"); break;
+				case '\b': sb.Append($"{escapeValue}b"); break;
+				case '\f': sb.Append($"{escapeValue}f"); break;
+				case '\n': sb.Append($"{escapeValue}n"); break;
+				case '\r': sb.Append($"{escapeValue}r"); break;
+				case '\t': sb.Append($"{escapeValue}t"); break;
+				case '\v': sb.Append($"{escapeValue}v"); break;
 				default:
 					if ((escapeUnicode && ch is < 0x20 or > 0x7e) || CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.Control) {
 						sb.Append($"{escapeValue}u{ch:x4}");

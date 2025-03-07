@@ -56,7 +56,7 @@ internal static partial class WindowsPlatform {
 		VirtualizationAllowed = 23,
 		VirtualizationEnabled = 24,
 		IntegrityLevel = 25,
-		UIAccess = 26,
+		UiAccess = 26,
 		MandatoryPolicy = 27,
 		LogonSid = 28,
 		IsAppContainer = 29,

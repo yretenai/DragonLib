@@ -18,22 +18,22 @@ public static class DragonMarkup {
 
 	public static string? Print(object? instance, DragonMarkupSettings? settings = null) =>
 		Print(instance,
-		      new Dictionary<object, int>(),
-		      new SpaceIndentHelper(),
-		      null,
-		      settings ?? DragonMarkupSettings.Default,
-		      true);
+			  new Dictionary<object, int>(),
+			  new SpaceIndentHelper(),
+			  null,
+			  settings ?? DragonMarkupSettings.Default,
+			  true);
 
 	public static T[] UnwrapMemory<T>(Memory<T> memory) => memory.ToArray();
 
 	public static T[] UnwrapReadOnlyMemory<T>(Memory<T> memory) => memory.ToArray();
 
 	public static string? Print(object? instance,
-	                            Dictionary<object, int> visited,
-	                            IndentHelperBase indents,
-	                            string? valueName,
-	                            DragonMarkupSettings settings,
-	                            bool root = false) {
+								Dictionary<object, int> visited,
+								IndentHelperBase indents,
+								string? valueName,
+								DragonMarkupSettings settings,
+								bool root = false) {
 		if (root && settings.WriteXmlHeader) {
 			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + Print(instance, visited, indents, valueName, settings);
 		}
@@ -50,8 +50,7 @@ public static class DragonMarkup {
 		var innerIndent = indents + 1;
 
 		switch (target) {
-			case DragonMarkupType.Null:
-				return $"{indents}<{CreateNamespacedTag("null", settings.Namespace)}{hmlNameTag} />\n";
+			case DragonMarkupType.Null: return $"{indents}<{CreateNamespacedTag("null", settings.Namespace)}{hmlNameTag} />\n";
 			case DragonMarkupType.Object when type != null && customSerializer != null:
 			case DragonMarkupType.Array when type != null && customSerializer != null:
 			case DragonMarkupType.Memory when type != null && customSerializer != null:
@@ -70,9 +69,7 @@ public static class DragonMarkup {
 					var tag = $"{indents}<{CreateNamespacedTag("array", settings.Namespace)}{hmlIdTag}{hmlNameTag}>\n";
 					// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
 					switch (target) {
-						case DragonMarkupType.Enumerable when instance is IEnumerable enumerable:
-							instance = enumerable.Cast<object>().ToArray();
-							break;
+						case DragonMarkupType.Enumerable when instance is IEnumerable enumerable: instance = enumerable.Cast<object>().ToArray(); break;
 						case DragonMarkupType.Memory: {
 							var target1 = instance!.GetType().GetGenericArguments()[0];
 							instance = typeof(DragonMarkup).GetMethod(instance.GetType().GetGenericTypeDefinition() == typeof(Memory<>) ? "UnwrapMemory" : "UnwrapReadOnlyMemory")!.MakeGenericMethod(target1).Invoke(null, [instance]);
@@ -131,8 +128,8 @@ public static class DragonMarkup {
 						var valueType = value?.GetType();
 						IDragonMarkupSerializer? targetCustomSerializer = null;
 						var targetMemberTarget = GetCustomSerializer(settings,
-						                                             valueType,
-						                                             ref targetCustomSerializer);
+																	 valueType,
+																	 ref targetCustomSerializer);
 
 						if (targetMemberTarget >= DragonMarkupType.Complex) {
 							complexMembers.Add((value, member.Name, targetCustomSerializer));
@@ -172,8 +169,8 @@ public static class DragonMarkup {
 					var @base = type;
 					while (@base != null) {
 						if (@base.IsConstructedGenericType &&
-						    (@base.GetGenericTypeDefinition().IsEquivalentTo(typeof(IDictionary<,>)) ||
-						     @base.GetGenericTypeDefinition().IsEquivalentTo(typeof(Dictionary<,>)))) {
+							(@base.GetGenericTypeDefinition().IsEquivalentTo(typeof(IDictionary<,>)) ||
+								@base.GetGenericTypeDefinition().IsEquivalentTo(typeof(Dictionary<,>)))) {
 							var args = @base.GetGenericArguments();
 							if (args.Length > 1) {
 								hmlKeyTag = $" {CreateNamespacedTag("key", settings.Namespace)}=\"{args[0].Name}\"";
@@ -218,8 +215,8 @@ public static class DragonMarkup {
 						IDragonMarkupSerializer? customKeySerializer = null;
 
 						var valueTarget = GetCustomSerializer(settings,
-						                                      valueType,
-						                                      ref customValueSerializer);
+															  valueType,
+															  ref customValueSerializer);
 						var keyTarget = GetCustomSerializer(settings, keyType, ref customKeySerializer);
 
 						if (valueTarget == DragonMarkupType.Null) {
@@ -231,9 +228,7 @@ public static class DragonMarkup {
 						}
 
 						switch (keyTarget) {
-							case DragonMarkupType.Null:
-								tag += " />";
-								break;
+							case DragonMarkupType.Null: tag += " />"; break;
 							case < DragonMarkupType.Complex:
 								tag +=
 									$" {CreateNamespacedTag("key", settings.Namespace)}=\"{FormatTextValueType((customSerializer ?? DragonMarkupToStringSerializer.Default).Print(key, visited, innerIndent, valueName, settings))}\"";
@@ -251,18 +246,18 @@ public static class DragonMarkup {
 							tag += ">\n";
 							if (keyTarget >= DragonMarkupType.Complex) {
 								tag += Print(key,
-								             visited,
-								             innerInnerIndent,
-								             CreateNamespacedTag("key", settings.Namespace),
-								             settings);
+											 visited,
+											 innerInnerIndent,
+											 CreateNamespacedTag("key", settings.Namespace),
+											 settings);
 							}
 
 							if (valueTarget >= DragonMarkupType.Complex) {
 								tag += Print(value,
-								             visited,
-								             innerInnerIndent,
-								             CreateNamespacedTag("value", settings.Namespace),
-								             settings);
+											 visited,
+											 innerInnerIndent,
+											 CreateNamespacedTag("value", settings.Namespace),
+											 settings);
 							}
 
 							if (valueTarget == DragonMarkupType.Null) {
@@ -283,8 +278,7 @@ public static class DragonMarkup {
 						: string.Empty;
 					return $"{indents}<{CreateNamespacedTag("ref", settings.Namespace)}{hmlIdTag}{hmlNameTag} />\n";
 				}
-			default:
-				throw new IndexOutOfRangeException();
+			default: throw new IndexOutOfRangeException();
 		}
 	}
 
@@ -301,10 +295,12 @@ public static class DragonMarkup {
 		if (customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type))) {
 			customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type)).Value;
 			target = customSerializer.OverrideTarget;
-		} else if (type is { IsConstructedGenericType: true } &&
-		           customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition()))) {
+		} else if (type is {
+					   IsConstructedGenericType: true,
+				   } &&
+				   customTypeSerializers.Any(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition()))) {
 			customSerializer = customTypeSerializers.First(x => x.Key.IsAssignableFrom(type.GetGenericTypeDefinition()))
-			                                        .Value;
+													.Value;
 			target = customSerializer.OverrideTarget;
 		} else {
 			customSerializer = settings.TypeFactories.Select(factory => factory.GetSerializer(type)).FirstOrDefault(instance => instance != null);
@@ -318,20 +314,20 @@ public static class DragonMarkup {
 		instance == null
 			? "{null}"
 			: instance.ToString()
-			         ?.Replace("\\", "&#92;", StringComparison.Ordinal)
-			          .Replace("\r", "&#13;", StringComparison.Ordinal)
-			          .Replace("\n", "&#10;", StringComparison.Ordinal)
-			          .Replace("<", "&lt;", StringComparison.Ordinal)
-			          .Replace(">", "&gt;", StringComparison.Ordinal);
+					 ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+					  .Replace("\r", "&#13;", StringComparison.Ordinal)
+					  .Replace("\n", "&#10;", StringComparison.Ordinal)
+					  .Replace("<", "&lt;", StringComparison.Ordinal)
+					  .Replace(">", "&gt;", StringComparison.Ordinal);
 
 	public static string? FormatValueType(object? instance) =>
 		instance == null
 			? "{null}"
 			: instance.ToString()
-			         ?.Replace("\\", "&#92;", StringComparison.Ordinal)
-			          .Replace("\r", "&#10;", StringComparison.Ordinal)
-			          .Replace("\n", "&#13;", StringComparison.Ordinal)
-			          .Replace("\"", "&quot;", StringComparison.Ordinal);
+					 ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+					  .Replace("\r", "&#10;", StringComparison.Ordinal)
+					  .Replace("\n", "&#13;", StringComparison.Ordinal)
+					  .Replace("\"", "&quot;", StringComparison.Ordinal);
 
 	public static string FormatName(Type? type, string ns) {
 		if (type == null) {
@@ -346,13 +342,8 @@ public static class DragonMarkup {
 		return name.Replace('<', '_').Replace('>', '_');
 	}
 
-	private static object? GetMemberValue(object? instance, MemberInfo member) {
-		return member switch {
-			       FieldInfo field => field.GetValue(instance),
-			       PropertyInfo property => property.GetValue(instance),
-			       _ => null,
-		       };
-	}
+	private static object? GetMemberValue(object? instance, MemberInfo member) =>
+		member switch { FieldInfo field => field.GetValue(instance), PropertyInfo property => property.GetValue(instance), _ => null };
 
 	private static bool IsGenericTypePair(Type t, Type a, Type b) {
 		if (!t.IsConstructedGenericType) {

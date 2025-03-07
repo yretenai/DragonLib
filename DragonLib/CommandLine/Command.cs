@@ -4,9 +4,7 @@ namespace DragonLib.CommandLine;
 
 public static class Command {
 	//                        group,             name
-	public static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>> Commands { get; } = new() {
-		{ string.Empty, new Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>() },
-	};
+	public static Dictionary<string, Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>> Commands { get; } = new() { { string.Empty, new Dictionary<string, (string Description, Type Type, Type Command, bool Hide)>() } };
 
 	private static void LoadCommands() {
 		var types = Assembly.GetEntryAssembly()?.GetTypes() ?? Type.EmptyTypes;
@@ -45,10 +43,7 @@ public static class Command {
 		}
 
 		options ??= CommandLineOptions.Default;
-		var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions {
-			UseHelp = false,
-			UseVersion = false,
-		});
+		var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions { UseHelp = false, UseVersion = false });
 
 		if (positionalFlags == null) {
 			return default;
@@ -107,10 +102,7 @@ public static class Command {
 
 		var offset = string.IsNullOrEmpty(commandGroupName) ? 1 : 2;
 
-		var flags = CommandLineFlagsParser.ParseFlags(command.Type, options with {
-				Command = $"{commandGroupName} {commandName}".Trim(),
-				SkipPositionals = offset,
-			}, args);
+		var flags = CommandLineFlagsParser.ParseFlags(command.Type, options with { Command = $"{commandGroupName} {commandName}".Trim(), SkipPositionals = offset }, args);
 
 		if (flags == null) {
 			return default;

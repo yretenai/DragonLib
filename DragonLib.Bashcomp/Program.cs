@@ -7,11 +7,7 @@ if (args.Length < 2) {
 	Console.Error.WriteLine("DragonLib.Bashcomp path/to/program.dll zsh/bash");
 }
 
-ITemplate template = args[1].ToLowerInvariant() switch {
-	                     "zsh" => new Zsh(),
-	                     "bash" => new Bash(),
-	                     _ => throw new NotSupportedException(args[1]),
-                     };
+ITemplate template = args[1].ToLowerInvariant() switch { "zsh" => new Zsh(), "bash" => new Bash(), _ => throw new NotSupportedException(args[1]) };
 
 var asm = Assembly.LoadFrom(args[0]);
 var types = asm.GetTypes();

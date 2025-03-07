@@ -53,9 +53,9 @@ public sealed class FlagAttribute(string flag) : Attribute {
 
 	public override int GetHashCode() =>
 		HashCode.Combine(base.GetHashCode(),
-		                 Flag,
-		                 HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
-		                 IsRequired,
-		                 Positional,
-		                 HashCode.Combine(ValidValues, Aliases, EnumPrefix, ReplaceDashes));
+						 Flag,
+						 HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
+						 IsRequired,
+						 Positional,
+						 HashCode.Combine(ValidValues, Aliases, EnumPrefix, ReplaceDashes));
 }

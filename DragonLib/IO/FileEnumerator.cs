@@ -15,15 +15,11 @@ public class FileEnumerator : IEnumerable<string> {
 		IgnoreCase = options.MatchCasing == MatchCasing.CaseInsensitive || (options.MatchCasing == MatchCasing.PlatformDefault && SystemIsCaseInsensitive);
 	}
 
-	public FileEnumerator(IEnumerable<string> args, params string[] patterns) : this(args, new EnumerationOptions {
-		MatchType = MatchType.Simple,
-	}, patterns) { }
+	public FileEnumerator(IEnumerable<string> args, params string[] patterns) : this(args, new EnumerationOptions { MatchType = MatchType.Simple }, patterns) { }
 
 	public FileEnumerator(string path, EnumerationOptions options, params string[] patterns) : this([path], options, patterns) { }
 
-	public FileEnumerator(string path, params string[] patterns) : this([path], new EnumerationOptions {
-		MatchType = MatchType.Simple,
-	}, patterns) { }
+	public FileEnumerator(string path, params string[] patterns) : this([path], new EnumerationOptions { MatchType = MatchType.Simple }, patterns) { }
 
 	private HashSet<string> Paths { get; }
 	private HashSet<string> Expressions { get; }

@@ -10,17 +10,11 @@ public delegate void PrintHelpDelegate(Dictionary<PropertyInfo, (FlagAttribute F
 public delegate void PrintVersionDelegate(object instance, CommandLineOptions options);
 
 public static class CommandLineFlagsParser {
-	public static void PrintHelp<T>(CommandLineOptions options, bool helpInvoked) {
-		PrintHelp(typeof(T), options, helpInvoked);
-	}
+	public static void PrintHelp<T>(CommandLineOptions options, bool helpInvoked) => PrintHelp(typeof(T), options, helpInvoked);
 
-	public static void PrintHelp(Type t, CommandLineOptions options, bool helpInvoked) {
-		options.HelpDelegate(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
-	}
+	public static void PrintHelp(Type t, CommandLineOptions options, bool helpInvoked) => options.HelpDelegate(GetFlags(t), Activator.CreateInstance(t)!, options, helpInvoked);
 
-	public static void PrintHelpInvoker<T>(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
-		PrintHelp(GetFlags(typeof(T)), instance, options, helpInvoked);
-	}
+	public static void PrintHelpInvoker<T>(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) => PrintHelp(GetFlags(typeof(T)), instance, options, helpInvoked);
 
 	public static Dictionary<PropertyInfo, (FlagAttribute Flag, Type PropertyType)> GetFlags(Type t) {
 		var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
@@ -30,7 +24,7 @@ public static class CommandLineFlagsParser {
 			var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
 			foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
 				if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) ||
-				    !typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
+					!typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
 					continue;
 				}
 
@@ -210,10 +204,10 @@ public static class CommandLineFlagsParser {
 					var names = Enum.GetNames(type);
 					if (flag.EnumPrefix?.Length > 0) {
 						names = names.Select(x => {
-							              var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
-							              return prefix != null ? x[prefix.Length..] : x;
-						              })
-						             .ToArray();
+										  var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
+										  return prefix != null ? x[prefix.Length..] : x;
+									  })
+									 .ToArray();
 					}
 
 					requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
@@ -239,9 +233,7 @@ public static class CommandLineFlagsParser {
 		}
 	}
 
-	public static void PrintVersion(object instance, CommandLineOptions options) {
-		Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} version {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0"}");
-	}
+	public static void PrintVersion(object instance, CommandLineOptions options) => Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} version {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0"}");
 
 	public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, []) as CommandLineFlags;
 
@@ -562,33 +554,33 @@ public static class CommandLineFlagsParser {
 		} else {
 			try {
 				value = type.FullName switch {
-					        "System.Int64" => long.Parse(textValue, NumberStyles.Any),
-					        "System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
-					        "System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
-					        "System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
-					        "System.Int32" => int.Parse(textValue, NumberStyles.Any),
-					        "System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
-					        "System.Int16" => short.Parse(textValue, NumberStyles.Any),
-					        "System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
-					        "System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
-					        "System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
-					        "System.Double" => double.Parse(textValue),
-					        "System.Single" => float.Parse(textValue),
-					        "System.Half" => Half.Parse(textValue),
-					        "System.String" => sterilizedValue,
-					        "System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
-					        "DragonLib.Numerics.Half" => Half.Parse(textValue),
-					        "System.TimeSpan" => TimeSpan.Parse(textValue),
-					        "System.DateTime" => DateTime.Parse(textValue),
-					        "System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
-					        "System.Guid" => Guid.Parse(textValue),
-					        "System.Uri" => new Uri(textValue),
-					        "System.Version" => Version.Parse(textValue),
-					        "System.Numerics.BigInteger" => BigInteger.Parse(textValue),
-					        "System.IO.DirectoryInfo" => new DirectoryInfo(textValue),
-					        "System.IO.FileInfo" => new FileInfo(textValue),
-					        _ => InvokeVisitor<T>(flag, type, textValue),
-				        };
+							"System.Int64" => long.Parse(textValue, NumberStyles.Any),
+							"System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
+							"System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
+							"System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
+							"System.Int32" => int.Parse(textValue, NumberStyles.Any),
+							"System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
+							"System.Int16" => short.Parse(textValue, NumberStyles.Any),
+							"System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
+							"System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
+							"System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
+							"System.Double" => double.Parse(textValue),
+							"System.Single" => float.Parse(textValue),
+							"System.Half" => Half.Parse(textValue),
+							"System.String" => sterilizedValue,
+							"System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
+							"DragonLib.Numerics.Half" => Half.Parse(textValue),
+							"System.TimeSpan" => TimeSpan.Parse(textValue),
+							"System.DateTime" => DateTime.Parse(textValue),
+							"System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
+							"System.Guid" => Guid.Parse(textValue),
+							"System.Uri" => new Uri(textValue),
+							"System.Version" => Version.Parse(textValue),
+							"System.Numerics.BigInteger" => BigInteger.Parse(textValue),
+							"System.IO.DirectoryInfo" => new DirectoryInfo(textValue),
+							"System.IO.FileInfo" => new FileInfo(textValue),
+							_ => InvokeVisitor<T>(flag, type, textValue),
+						};
 			} catch (Exception e) {
 				Console.WriteLine(e.ToString());
 				Console.WriteLine($"{flag.Flag} failed to parse {textValue} as a {type.Name}");
@@ -604,7 +596,9 @@ public static class CommandLineFlagsParser {
 			return true;
 		}
 
-		if (flag.EnumPrefix is { Length: > 0 }) {
+		if (flag.EnumPrefix is {
+			Length: > 0,
+		}) {
 			foreach (var prefix in flag.EnumPrefix) {
 				if (Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
 					return true;

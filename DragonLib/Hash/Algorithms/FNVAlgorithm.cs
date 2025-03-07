@@ -53,13 +53,9 @@ public sealed class FNVAlgorithm<T> : SpanHashAlgorithm<T>
 	}
 
 	public void Reset(T value) => Value = value;
-
 	public override void Reset() => Reset(Basis);
-
 	public override void Initialize() => Reset(Basis);
 
-	// there's some math behind the theory on selecting FNV primes, read more on it on either linked pages.
-	// the IETF page also has sample C code for 128 and higher bit spaces.
 	public static T CalculateBasis(string text = FNV1_IV, T prime = default) {
 		using var hasher = new FNVAlgorithm<T>(default, prime);
 		return hasher.ComputeHashValue(Encoding.ASCII.GetBytes(text));
@@ -70,4 +66,8 @@ public sealed class FNVAlgorithm<T> : SpanHashAlgorithm<T>
 		Reset();
 		return val;
 	}
+	// ReSharper disable once InconsistentNaming
+
+	// there's some math behind the theory on selecting FNV primes, read more on it on either linked pages.
+	// the IETF page also has sample C code for 128 and higher bit spaces.
 }

@@ -64,7 +64,7 @@ public static partial class LempelZiv {
 			}
 
 			var back = (cmp[cmpPos++] << 0) |
-			           (cmp[cmpPos++] << 8);
+				(cmp[cmpPos++] << 8);
 
 			encCount = GetLength(encCount, cmp) + 4;
 
@@ -96,7 +96,7 @@ public static partial class LempelZiv {
 				}
 			}
 		} while (cmpPos < cmp.Length &&
-		         decPos < dec.Length);
+				 decPos < dec.Length);
 
 		return (cmpPos, decPos);
 

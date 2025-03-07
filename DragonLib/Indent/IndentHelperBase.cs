@@ -33,9 +33,7 @@ public class IndentHelperBase {
 	public static bool operator !=(IndentHelperBase a, int c) => a.TabSize != c;
 
 	protected virtual IndentHelperBase Clone() =>
-		new() {
-			TabSize = TabSize,
-		};
+		new() { TabSize = TabSize };
 
 	public string Compile() => string.Join(string.Empty, Enumerable.Repeat(TabCharacter, TabSize));
 

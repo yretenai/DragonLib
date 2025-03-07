@@ -123,13 +123,13 @@ public class NaturalStringComparer : IComparer<string> {
 				var maxLength = Math.Max(rangeLength1, rangeLength2);
 
 				// both spans will get padded by zeroes on the left to be the same length
-				const char paddingChar = '0';
+				const char PADDING_CHAR = '0';
 				var paddingLength1 = maxLength - rangeLength1;
 				var paddingLength2 = maxLength - rangeLength2;
 
 				for (var i = 0; i < maxLength; i++) {
-					var digit1 = i < paddingLength1 ? paddingChar : str1[startIndex1 + i - paddingLength1];
-					var digit2 = i < paddingLength2 ? paddingChar : str2[startIndex2 + i - paddingLength2];
+					var digit1 = i < paddingLength1 ? PADDING_CHAR : str1[startIndex1 + i - paddingLength1];
+					var digit2 = i < paddingLength2 ? PADDING_CHAR : str2[startIndex2 + i - paddingLength2];
 
 					if (NumberDirectionDescending) {
 						(digit1, digit2) = (digit2, digit1);

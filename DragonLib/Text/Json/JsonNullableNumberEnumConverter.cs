@@ -11,15 +11,9 @@ public class JsonNullableNumberEnumConverter : JsonConverterFactory {
 public class JsonNullableNumberEnumConverter<T> : JsonConverter<T?> where T : struct, Enum {
 	public override bool HandleNull => true;
 
-	public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+	public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
 		// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
-		return reader.TokenType switch {
-			       JsonTokenType.Number => (T) Enum.ToObject(typeof(T), reader.GetInt64()),
-			       JsonTokenType.String => Enum.Parse<T>(reader.GetString() ?? string.Empty, true),
-			       JsonTokenType.Null => null,
-			       _ => throw new JsonException("Unexpected token type"),
-		       };
-	}
+		reader.TokenType switch { JsonTokenType.Number => (T) Enum.ToObject(typeof(T), reader.GetInt64()), JsonTokenType.String => Enum.Parse<T>(reader.GetString() ?? string.Empty, true), JsonTokenType.Null => null, _ => throw new JsonException("Unexpected token type") };
 
 	public override void Write(Utf8JsonWriter writer, T? value, JsonSerializerOptions options) {
 		if (value == null) {

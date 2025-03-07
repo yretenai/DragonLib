@@ -26,9 +26,7 @@ public sealed class DownloadAccelerator : IDisposable {
 	public int MinimumSizePerThread { get; set; } = 0x1000000; // 16MB
 	public int Retries { get; set; } = 3;
 
-	public void Dispose() {
-		Client.Dispose();
-	}
+	public void Dispose() => Client.Dispose();
 
 	public Uri CombineUri(string text, Uri? baseUri = null) {
 		if (string.IsNullOrEmpty(text)) {
@@ -73,9 +71,7 @@ public sealed class DownloadAccelerator : IDisposable {
 		return new RequestInfo(uri, true, supportsRange, length);
 	}
 
-	public async Task DownloadFileThreaded(Uri uri, string path, int threads = -1) {
-		await DownloadFileThreaded(await GetInfo(uri).ConfigureAwait(false), path, threads).ConfigureAwait(false);
-	}
+	public async Task DownloadFileThreaded(Uri uri, string path, int threads = -1) => await DownloadFileThreaded(await GetInfo(uri).ConfigureAwait(false), path, threads).ConfigureAwait(false);
 
 	public async Task DownloadFileThreaded(RequestInfo info, string path, int threads = -1) {
 		var (uri, exists, supportsThreading, length) = info;

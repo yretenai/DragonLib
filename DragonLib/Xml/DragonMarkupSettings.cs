@@ -14,14 +14,10 @@ public sealed record DragonMarkupSettings {
 
 	public string Namespace { get; init; } = "dragon";
 
-	public Dictionary<string, string> Namespaces { get; init; } = new() {
-		{ "dragon", "https://ns.vore.ink/dml/v1" },
-	};
+	public Dictionary<string, string> Namespaces { get; init; } = new() { { "dragon", "https://ns.vore.ink/dml/v1" } };
 
 	public static DragonMarkupSettings Default => new();
 
 	public static DragonMarkupSettings Slim =>
-		Default with {
-			UseRefId = false,
-		};
+		Default with { UseRefId = false };
 }

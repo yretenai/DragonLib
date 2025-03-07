@@ -8,7 +8,5 @@ public sealed class MemoryBuffer(IMemoryOwner<byte> Memory, int Size) : IMemoryB
 	public ReadOnlySpan<byte> Span => WritableSpan;
 	public byte this[int offset] => Span[offset];
 
-	public void Dispose() {
-		Memory.Dispose();
-	}
+	public void Dispose() => Memory.Dispose();
 }
