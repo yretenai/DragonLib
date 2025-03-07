@@ -165,7 +165,7 @@ public sealed partial class MinidumpHandler : IMemoryHandler {
 			var sections = new List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>();
 			result[moduleName] = sections;
 			var currentAddress = moduleStart;
-			while (currentAddress < moduleSize) {
+			while (currentAddress < moduleStart + moduleSize) {
 				var region = GetInfo(currentAddress);
 
 				var flags = SectionFlags.NoAccess;
@@ -294,7 +294,7 @@ public sealed partial class MinidumpHandler : IMemoryHandler {
 
 	public MinidumpMemoryInfo GetInfo(nint address) {
 		foreach (var memoryInfo in MemoryInfo) {
-			if (memoryInfo.BaseAddress > address || memoryInfo.BaseAddress + memoryInfo.RegionSize < address) {
+			if (memoryInfo.BaseAddress > address || memoryInfo.BaseAddress + memoryInfo.RegionSize <= address) {
 				continue;
 			}
 
