@@ -46,7 +46,7 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 			var sections = new List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>();
 			result[moduleName] = sections;
 			var currentAddress = moduleStart;
-			while (currentAddress < moduleSize) {
+			while (currentAddress < moduleStart + moduleSize) {
 				if (NativeMethods.VirtualQueryEx(Process.SafeHandle, currentAddress, out var region, Unsafe.SizeOf<MemoryBasicInformation64>()) == 0) {
 					if (Marshal.GetLastPInvokeError() == 0x57) {
 						break;

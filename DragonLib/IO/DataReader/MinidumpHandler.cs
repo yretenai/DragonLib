@@ -5,7 +5,7 @@ using DragonLib.IO.DataReader.Minidump;
 
 namespace DragonLib.IO.DataReader;
 
-public sealed partial class MinidumpHandler : IMemoryHandler {
+public sealed class MinidumpHandler : IMemoryHandler {
 	public MinidumpHandler(string path) {
 		Stream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
