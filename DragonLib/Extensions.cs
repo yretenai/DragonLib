@@ -204,7 +204,8 @@ public static class Extensions {
 						 .ToArray();
 	}
 
-	public static int DivideByRoundUp(this int value, int divisor) => (int) Math.Ceiling((double) value / divisor);
+	public static T DivideByRoundUp<T>(this T left, T right) where T : IBinaryNumber<T>, IAdditionOperators<T, T, T> =>
+		(left - T.One) / right + T.One;
 
 	public static T Clamp<T, V>(this V value) where T : struct, INumberBase<T> where V : struct, INumberBase<V> => T.CreateSaturating(value);
 
