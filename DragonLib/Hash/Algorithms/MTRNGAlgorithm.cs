@@ -5,7 +5,7 @@ using CS = System.Runtime.CompilerServices;
 namespace DragonLib.Hash.Algorithms;
 
 // modified https://github.com/lineplay/mt19937_64_cs/blob/master/mt19937_64.cs to take mt parameters.
-public record struct MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBinaryInteger<T>, IMinMaxValue<T> {
+public sealed class MTRNGAlgorithm<T> where T : struct, IUnsignedNumber<T>, IBinaryInteger<T>, IMinMaxValue<T> {
 	private readonly T A;
 	private readonly T B;
 	private readonly T C;
