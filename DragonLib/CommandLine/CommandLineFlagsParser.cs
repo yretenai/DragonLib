@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -235,21 +236,21 @@ public static class CommandLineFlagsParser {
 
 	public static void PrintVersion(object instance, CommandLineOptions options) => Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} version {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0"}");
 
-	public static CommandLineFlags? ParseFlags(Type t) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, []) as CommandLineFlags;
+	public static CommandLineFlags ParseFlags(Type t) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, [])!;
 
-	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [options]) as CommandLineFlags;
+	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [options])!;
 
-	public static CommandLineFlags? ParseFlags(Type t, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [arguments]) as CommandLineFlags;
+	public static CommandLineFlags ParseFlags(Type t, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [arguments])!;
 
-	public static CommandLineFlags? ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [options, arguments]) as CommandLineFlags;
+	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [options, arguments])!;
 
-	public static T? ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
+	public static T ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
 
-	public static T? ParseFlags<T>(CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(options, Environment.GetCommandLineArgs().Skip(1).ToArray());
+	public static T ParseFlags<T>(CommandLineOptions options) where T : CommandLineFlags => ParseFlags<T>(options, Environment.GetCommandLineArgs().Skip(1).ToArray());
 
-	public static T? ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(CommandLineOptions.Default, arguments);
+	public static T ParseFlags<T>(params string[] arguments) where T : CommandLineFlags => ParseFlags<T>(CommandLineOptions.Default, arguments);
 
-	public static T? ParseFlags<T>(CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
+	public static T ParseFlags<T>(CommandLineOptions options, params string[] arguments) where T : CommandLineFlags {
 		var shouldExit = false;
 		var instance = Activator.CreateInstance<T>();
 		var typeMap = GetFlags(typeof(T));
@@ -350,7 +351,8 @@ public static class CommandLineFlagsParser {
 							case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)): {
 								var listValue = default(object?);
 								if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref listValue)) {
-									return null;
+									shouldExit = true;
+									goto fail;
 								}
 
 								value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
@@ -363,12 +365,14 @@ public static class CommandLineFlagsParser {
 
 								var keyValue = default(object?);
 								if (VisitFlagValue<T>(type.GetGenericArguments()[0], parts[0], flag, ref keyValue)) {
-									return null;
+									shouldExit = true;
+									goto fail;
 								}
 
 								var valueValue = default(object?);
 								if (VisitFlagValue<T>(type.GetGenericArguments()[1], parts[1], flag, ref valueValue)) {
-									return null;
+									shouldExit = true;
+									goto fail;
 								}
 
 								value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
@@ -380,7 +384,8 @@ public static class CommandLineFlagsParser {
 								if (type.IsAssignableTo(typeof(IList))) {
 									var listValue = default(object?);
 									if (VisitFlagValue<T>(typeof(string), textValue, flag, ref listValue)) {
-										return null;
+										shouldExit = true;
+										goto fail;
 									}
 
 									value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
@@ -391,19 +396,22 @@ public static class CommandLineFlagsParser {
 
 									var keyValue = default(object?);
 									if (VisitFlagValue<T>(typeof(string), parts[0], flag, ref keyValue)) {
-										return null;
+										shouldExit = true;
+										goto fail;
 									}
 
 									var valueValue = default(object?);
 									if (VisitFlagValue<T>(typeof(string), parts[1], flag, ref valueValue)) {
-										return null;
+										shouldExit = true;
+										goto fail;
 									}
 
 									value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
 									type.GetMethod("Add")?.Invoke(value, [keyValue, valueValue]);
 									shouldSet = false;
 								} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
-									return null;
+									shouldExit = true;
+									goto fail;
 								}
 
 								break;
@@ -445,7 +453,8 @@ public static class CommandLineFlagsParser {
 				value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
 				foreach (var textValue in positionals.Skip(flag.Positional)) {
 					if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
-						return null;
+						shouldExit = true;
+						goto fail;
 					}
 
 					type.GetMethod("Add")?.Invoke(value, [temp]);
@@ -470,7 +479,8 @@ public static class CommandLineFlagsParser {
 				property.SetValue(instance, value);
 			}
 		}
-
+		
+	fail:
 		if (options.UseHelp && instance.Help) {
 			options.HelpDelegate(typeMap, instance, options, instance.Help);
 			goto exit;
@@ -487,7 +497,7 @@ public static class CommandLineFlagsParser {
 
 	exit:
 		Environment.Exit(0);
-		return null;
+		throw new UnreachableException();
 	}
 
 	private static object? GetDefaultValue(PropertyInfo property, object instance) {
