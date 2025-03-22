@@ -207,7 +207,7 @@ public static class Extensions {
 	public static T DivideByRoundUp<T>(this T left, T right) where T : IBinaryNumber<T>, IAdditionOperators<T, T, T> =>
 		(left - T.One) / right + T.One;
 
-	public static T Clamp<T, V>(this V value) where T : struct, INumberBase<T> where V : struct, INumberBase<V> => T.CreateSaturating(value);
+	public static T Clamp<T, TValue>(this TValue value) where T : struct, INumberBase<T> where TValue : struct, INumberBase<TValue> => T.CreateSaturating(value);
 
 	public static byte GetHighNibble(this byte value) => (byte) ((value >> 4) & 0xF);
 
@@ -409,5 +409,11 @@ public static class Extensions {
 		var gcd = value.GreatestCommonDivisor(multiple);
 		var k = multiple / gcd;
 		return value * k;
+	}
+
+	public static T AsMagicConstant<T>(this string value) where T : unmanaged {
+		Span<T> test = stackalloc T[1];
+		Encoding.UTF8.GetBytes(value, MemoryMarshal.AsBytes(test));
+		return test[0];
 	}
 }
