@@ -23,6 +23,18 @@ public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
 
 	public string ReadUTF8String() => ReadUTF8String(Buffer, Offset);
 
+	public string ReadString(int length) {
+		var text = Encoding.ASCII.GetString(Buffer.Slice(Offset, length));
+		Offset += length;
+		return text;
+	}
+
+	public string ReadUTF8String(int length) {
+		var text = Encoding.UTF8.GetString(Buffer.Slice(Offset, length));
+		Offset += length;
+		return text;
+	}
+
 	public static string ReadString(ReadOnlySpan<byte> strings, int index) {
 		strings = strings[index..];
 		var nul = strings.IndexOf((byte) 0);
