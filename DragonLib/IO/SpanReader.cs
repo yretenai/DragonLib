@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace DragonLib.IO;
 
-public ref struct SpanReader(ReadOnlySpan<byte> Buffer) {
-	public ReadOnlySpan<byte> Buffer = Buffer;
+public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
+	public ReadOnlySpan<byte> Buffer { get; } = buffer;
 	public int Offset { get; set; }
 
 	public T Read<T>() where T : struct {
