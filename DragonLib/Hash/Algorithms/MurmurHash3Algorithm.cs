@@ -42,7 +42,7 @@ public static class MurmurHash3Algorithm {
 		k1 = 0u;
 
 		var tail = key[(blocks.Length << 2)..];
-		switch (key.Length) {
+		switch (tail.Length) {
 			case 3:
 				k1 ^= (uint) tail[2] << 16;
 				goto case 2;
@@ -123,7 +123,7 @@ public static class MurmurHash3Algorithm {
 		k4 = 0u;
 
 		var tail = key[(blocks.Length << 4)..];
-		switch (key.Length) {
+		switch (tail.Length) {
 			case 15:
 				k4 ^= (uint) tail[14] << 16;
 				goto case 15;
@@ -218,7 +218,6 @@ public static class MurmurHash3Algorithm {
 		return (h1, h2, h3, h4);
 	}
 
-
 	public static (ulong, ulong) Hash64_128(ReadOnlySpan<byte> key, ulong seed = 0,
 		ulong c1 = 0x87c37b91114253d5, ulong c2 = 0x4cf5ad432745937f,
 		ulong e1 = 0x52dce729, ulong e2 = 0x38495ab5) {
@@ -255,7 +254,7 @@ public static class MurmurHash3Algorithm {
 		k2 = 0;
 
 		var tail = key[(blocks.Length << 4)..];
-		switch (key.Length) {
+		switch (tail.Length) {
 			case 15:
 				k2 ^= (ulong) tail[14] << 48;
 				goto case 14;
