@@ -29,9 +29,9 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 		return value;
 	}
 
-	public CastMemoryBuffer<T> Partition<T>(int count) where T : struct {
+	public CastMemoryBuffer<T, byte> Partition<T>(int count) where T : struct {
 		var value = Partition(count * Unsafe.SizeOf<T>());
-		return new CastMemoryBuffer<T>(value, 0);
+		return new CastMemoryBuffer<T, byte>(value, 0);
 	}
 
 	public string ReadString() => SpanReader.ReadString(Buffer.Span, Offset);

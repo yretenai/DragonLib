@@ -31,7 +31,7 @@ public class MemoryTypeManager<TTo, TFrom>(Memory<TFrom> buffer) : MemoryManager
 		}
 
 		RefCount++;
-		Handle ??= Memory.Pin();
+		Handle ??= Buffer.Pin();
 
 		unsafe {
 			return new MemoryHandle(((nint) Handle.Value.Pointer + byteIndex).ToPointer(), default, this);
