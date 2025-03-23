@@ -19,6 +19,10 @@ public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
 		return MemoryMarshal.Cast<byte, T>(value);
 	}
 
+	public void Read<T>(Span<T> storage) where T : struct => Read<T>(storage.Length).CopyTo(storage);
+
+	public void ReadMemory<T>(Memory<T> storage) where T : struct => Read<T>(storage.Length).CopyTo(storage.Span);
+
 	public string ReadString() => ReadString(Buffer, Offset);
 
 	public string ReadUTF8String() => ReadUTF8String(Buffer, Offset);

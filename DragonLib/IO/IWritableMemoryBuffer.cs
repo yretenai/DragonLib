@@ -2,7 +2,8 @@ using System.Buffers;
 
 namespace DragonLib.IO;
 
-public interface IWritableMemoryBuffer : IMemoryBuffer, IMemoryOwner<byte> {
-	public new Span<byte> Span { get; }
-	public new Memory<byte> Memory { get; }
+public interface IWritableMemoryBuffer<T> : IMemoryBuffer<T>, IMemoryOwner<T> where T : struct {
+	public new Span<T> Span { get; }
+	public new Memory<T> Memory { get; }
+	public new T this[int offset] { get; set; }
 }
