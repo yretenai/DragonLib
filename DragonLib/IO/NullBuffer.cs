@@ -5,6 +5,7 @@ public sealed class NullBuffer<T> : IMemoryBuffer<T> where T : struct {
 	public Memory<T> Memory => Memory<T>.Empty;
 
 	public int Length => 0;
+
 	public T this[int offset] {
 		get => Span[offset];
 		set => Span[offset] = value;

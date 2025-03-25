@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace DragonLib.IO;
 
 public class MemoryTypeManager<TTo, TFrom>(Memory<TFrom> buffer) : MemoryManager<TTo> where TTo : struct
-                                                                                      where TFrom : struct {
+																					  where TFrom : struct {
 	private static readonly int ToSize = Unsafe.SizeOf<TTo>();
 	private static readonly int FromSize = Unsafe.SizeOf<TFrom>();
 	private MemoryHandle? Handle { get; set; }

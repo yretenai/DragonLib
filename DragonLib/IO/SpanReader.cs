@@ -35,7 +35,7 @@ public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
 		if (length == 0) {
 			return string.Empty;
 		}
-		
+
 		var text = Encoding.ASCII.GetString(Buffer.Slice(Offset, length));
 		Offset += length;
 		return text;

@@ -479,7 +479,7 @@ public static class CommandLineFlagsParser {
 				property.SetValue(instance, value);
 			}
 		}
-		
+
 	fail:
 		if (options.UseHelp && instance.Help) {
 			options.HelpDelegate(typeMap, instance, options, instance.Help);

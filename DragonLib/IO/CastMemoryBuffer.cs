@@ -3,14 +3,12 @@ using System.Runtime.CompilerServices;
 namespace DragonLib.IO;
 
 public sealed class CastMemoryBuffer<T, TBase>(IMemoryBuffer<TBase> underlyingOwner, int byteOffset, int length) :
-	IMemoryBuffer<T> where T : struct where TBase : struct{
+	IMemoryBuffer<T> where T : struct where TBase : struct {
 	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner, int offset) :
 		this(underlyingOwner, offset, (underlyingOwner.Length - offset) / Unsafe.SizeOf<T>()) { }
 
 	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner) :
 		this(underlyingOwner, 0, underlyingOwner.Length / Unsafe.SizeOf<T>()) { }
-
-	~CastMemoryBuffer() => Dispose(false);
 
 	public MemoryTypeManager<T, TBase>? Manager { get; private set; } =
 		new(underlyingOwner.Memory.Slice(byteOffset, length * Unsafe.SizeOf<T>()));
@@ -32,6 +30,8 @@ public sealed class CastMemoryBuffer<T, TBase>(IMemoryBuffer<TBase> underlyingOw
 	public Memory<T> Memory => Length <= 0 ? Memory<T>.Empty : Manager!.Memory;
 
 	public Span<T> Span => Memory.Span;
+
+	~CastMemoryBuffer() => Dispose(false);
 
 
 	private void Dispose(bool _) {

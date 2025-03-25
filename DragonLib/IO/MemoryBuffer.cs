@@ -10,6 +10,7 @@ public sealed class MemoryBuffer<T>(IMemoryOwner<T> buffer, int length) : IMemor
 	public Span<T> Span => Memory.Span;
 
 	public int Length { get; } = length;
+
 	public T this[int offset] {
 		get => Span[offset];
 		set => Span[offset] = value;

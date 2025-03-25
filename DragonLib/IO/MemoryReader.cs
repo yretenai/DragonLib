@@ -7,6 +7,11 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 	public int Offset { get; set; }
 	public IMemoryBuffer<byte> Buffer { get; } = buffer;
 
+	public void Dispose() {
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
 	public T Read<T>() where T : struct {
 		var value = MemoryMarshal.Read<T>(Buffer.Memory[Offset..].Span);
 		Offset += Unsafe.SizeOf<T>();
@@ -76,10 +81,5 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 				Buffer.Dispose();
 			}
 		}
-	}
-
-	public void Dispose() {
-		Dispose(true);
-		GC.SuppressFinalize(this);
 	}
 }
