@@ -18,22 +18,22 @@ public static class DragonMarkup {
 
 	public static string? Print(object? instance, DragonMarkupSettings? settings = null) =>
 		Print(instance,
-			  new Dictionary<object, int>(),
-			  new SpaceIndentHelper(),
-			  null,
-			  settings ?? DragonMarkupSettings.Default,
-			  true);
+			new Dictionary<object, int>(),
+			new SpaceIndentHelper(),
+			null,
+			settings ?? DragonMarkupSettings.Default,
+			true);
 
 	public static T[] UnwrapMemory<T>(Memory<T> memory) => memory.ToArray();
 
 	public static T[] UnwrapReadOnlyMemory<T>(Memory<T> memory) => memory.ToArray();
 
 	public static string? Print(object? instance,
-								Dictionary<object, int> visited,
-								IndentHelperBase indents,
-								string? valueName,
-								DragonMarkupSettings settings,
-								bool root = false) {
+		Dictionary<object, int> visited,
+		IndentHelperBase indents,
+		string? valueName,
+		DragonMarkupSettings settings,
+		bool root = false) {
 		if (root && settings.WriteXmlHeader) {
 			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + Print(instance, visited, indents, valueName, settings);
 		}
@@ -128,8 +128,8 @@ public static class DragonMarkup {
 						var valueType = value?.GetType();
 						IDragonMarkupSerializer? targetCustomSerializer = null;
 						var targetMemberTarget = GetCustomSerializer(settings,
-																	 valueType,
-																	 ref targetCustomSerializer);
+							valueType,
+							ref targetCustomSerializer);
 
 						if (targetMemberTarget >= DragonMarkupType.Complex) {
 							complexMembers.Add((value, member.Name, targetCustomSerializer));
@@ -215,8 +215,8 @@ public static class DragonMarkup {
 						IDragonMarkupSerializer? customKeySerializer = null;
 
 						var valueTarget = GetCustomSerializer(settings,
-															  valueType,
-															  ref customValueSerializer);
+							valueType,
+							ref customValueSerializer);
 						var keyTarget = GetCustomSerializer(settings, keyType, ref customKeySerializer);
 
 						if (valueTarget == DragonMarkupType.Null) {
@@ -246,18 +246,18 @@ public static class DragonMarkup {
 							tag += ">\n";
 							if (keyTarget >= DragonMarkupType.Complex) {
 								tag += Print(key,
-											 visited,
-											 innerInnerIndent,
-											 CreateNamespacedTag("key", settings.Namespace),
-											 settings);
+									visited,
+									innerInnerIndent,
+									CreateNamespacedTag("key", settings.Namespace),
+									settings);
 							}
 
 							if (valueTarget >= DragonMarkupType.Complex) {
 								tag += Print(value,
-											 visited,
-											 innerInnerIndent,
-											 CreateNamespacedTag("value", settings.Namespace),
-											 settings);
+									visited,
+									innerInnerIndent,
+									CreateNamespacedTag("value", settings.Namespace),
+									settings);
 							}
 
 							if (valueTarget == DragonMarkupType.Null) {
@@ -314,7 +314,7 @@ public static class DragonMarkup {
 		instance == null
 			? "{null}"
 			: instance.ToString()
-					 ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+					  ?.Replace("\\", "&#92;", StringComparison.Ordinal)
 					  .Replace("\r", "&#13;", StringComparison.Ordinal)
 					  .Replace("\n", "&#10;", StringComparison.Ordinal)
 					  .Replace("<", "&lt;", StringComparison.Ordinal)
@@ -324,7 +324,7 @@ public static class DragonMarkup {
 		instance == null
 			? "{null}"
 			: instance.ToString()
-					 ?.Replace("\\", "&#92;", StringComparison.Ordinal)
+					  ?.Replace("\\", "&#92;", StringComparison.Ordinal)
 					  .Replace("\r", "&#10;", StringComparison.Ordinal)
 					  .Replace("\n", "&#13;", StringComparison.Ordinal)
 					  .Replace("\"", "&quot;", StringComparison.Ordinal);

@@ -205,9 +205,9 @@ public static class CommandLineFlagsParser {
 					var names = Enum.GetNames(type);
 					if (flag.EnumPrefix?.Length > 0) {
 						names = names.Select(x => {
-										  var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
-										  return prefix != null ? x[prefix.Length..] : x;
-									  })
+										 var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
+										 return prefix != null ? x[prefix.Length..] : x;
+									 })
 									 .ToArray();
 					}
 
@@ -564,33 +564,33 @@ public static class CommandLineFlagsParser {
 		} else {
 			try {
 				value = type.FullName switch {
-							"System.Int64" => long.Parse(textValue, NumberStyles.Any),
-							"System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
-							"System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
-							"System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
-							"System.Int32" => int.Parse(textValue, NumberStyles.Any),
-							"System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
-							"System.Int16" => short.Parse(textValue, NumberStyles.Any),
-							"System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
-							"System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
-							"System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
-							"System.Double" => double.Parse(textValue),
-							"System.Single" => float.Parse(textValue),
-							"System.Half" => Half.Parse(textValue),
-							"System.String" => sterilizedValue,
-							"System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
-							"DragonLib.Numerics.Half" => Half.Parse(textValue),
-							"System.TimeSpan" => TimeSpan.Parse(textValue),
-							"System.DateTime" => DateTime.Parse(textValue),
-							"System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
-							"System.Guid" => Guid.Parse(textValue),
-							"System.Uri" => new Uri(textValue),
-							"System.Version" => Version.Parse(textValue),
-							"System.Numerics.BigInteger" => BigInteger.Parse(textValue),
-							"System.IO.DirectoryInfo" => new DirectoryInfo(textValue),
-							"System.IO.FileInfo" => new FileInfo(textValue),
-							_ => InvokeVisitor<T>(flag, type, textValue),
-						};
+					"System.Int64" => long.Parse(textValue, NumberStyles.Any),
+					"System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
+					"System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
+					"System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
+					"System.Int32" => int.Parse(textValue, NumberStyles.Any),
+					"System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
+					"System.Int16" => short.Parse(textValue, NumberStyles.Any),
+					"System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
+					"System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
+					"System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
+					"System.Double" => double.Parse(textValue),
+					"System.Single" => float.Parse(textValue),
+					"System.Half" => Half.Parse(textValue),
+					"System.String" => sterilizedValue,
+					"System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
+					"DragonLib.Numerics.Half" => Half.Parse(textValue),
+					"System.TimeSpan" => TimeSpan.Parse(textValue),
+					"System.DateTime" => DateTime.Parse(textValue),
+					"System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
+					"System.Guid" => Guid.Parse(textValue),
+					"System.Uri" => new Uri(textValue),
+					"System.Version" => Version.Parse(textValue),
+					"System.Numerics.BigInteger" => BigInteger.Parse(textValue),
+					"System.IO.DirectoryInfo" => new DirectoryInfo(textValue),
+					"System.IO.FileInfo" => new FileInfo(textValue),
+					_ => InvokeVisitor<T>(flag, type, textValue),
+				};
 			} catch (Exception e) {
 				Console.WriteLine(e.ToString());
 				Console.WriteLine($"{flag.Flag} failed to parse {textValue} as a {type.Name}");
