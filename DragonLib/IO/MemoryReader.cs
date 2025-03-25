@@ -14,6 +14,10 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 	}
 
 	public ReadOnlySpan<T> Read<T>(int count) where T : struct {
+		if (count == 0) {
+			return ReadOnlySpan<T>.Empty;
+		}
+
 		var value = Buffer.Span.Slice(Offset, count * Unsafe.SizeOf<T>());
 		Offset += value.Length;
 		return MemoryMarshal.Cast<byte, T>(value);
@@ -23,13 +27,21 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 
 	public void ReadMemory<T>(Memory<T> storage) where T : struct => Read<T>(storage.Length).CopyTo(storage.Span);
 
-	public BorrowedMemoryBuffer<byte> Partition(int count) {
-		var value = new BorrowedMemoryBuffer<byte>(Buffer, Offset, count);
+	public IMemoryBuffer<byte> Partition(int count) {
+		if (count == 0) {
+			return IMemoryBuffer<byte>.Empty;
+		}
+
+		var value = new BorrowedMemoryBuffer<byte>(Buffer, count, Offset);
 		Offset += value.Length;
 		return value;
 	}
 
-	public CastMemoryBuffer<T, byte> Partition<T>(int count) where T : struct {
+	public IMemoryBuffer<T> Partition<T>(int count) where T : struct {
+		if (count == 0) {
+			return IMemoryBuffer<T>.Empty;
+		}
+
 		var value = Partition(count * Unsafe.SizeOf<T>());
 		return new CastMemoryBuffer<T, byte>(value, 0);
 	}
@@ -39,12 +51,20 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 	public string ReadUTF8String() => SpanReader.ReadUTF8String(Buffer.Span, Offset);
 
 	public string ReadString(int length) {
+		if (length == 0) {
+			return string.Empty;
+		}
+
 		var text = Encoding.ASCII.GetString(Buffer.Span.Slice(Offset, length));
 		Offset += length;
 		return text;
 	}
 
 	public string ReadUTF8String(int length) {
+		if (length == 0) {
+			return string.Empty;
+		}
+
 		var text = Encoding.UTF8.GetString(Buffer.Span.Slice(Offset, length));
 		Offset += length;
 		return text;

@@ -14,6 +14,10 @@ public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
 	}
 
 	public ReadOnlySpan<T> Read<T>(int count) where T : struct {
+		if (count == 0) {
+			return ReadOnlySpan<T>.Empty;
+		}
+
 		var value = Buffer.Slice(Offset, count * Unsafe.SizeOf<T>());
 		Offset += value.Length;
 		return MemoryMarshal.Cast<byte, T>(value);
@@ -28,12 +32,20 @@ public ref struct SpanReader(ReadOnlySpan<byte> buffer) {
 	public string ReadUTF8String() => ReadUTF8String(Buffer, Offset);
 
 	public string ReadString(int length) {
+		if (length == 0) {
+			return string.Empty;
+		}
+		
 		var text = Encoding.ASCII.GetString(Buffer.Slice(Offset, length));
 		Offset += length;
 		return text;
 	}
 
 	public string ReadUTF8String(int length) {
+		if (length == 0) {
+			return string.Empty;
+		}
+
 		var text = Encoding.UTF8.GetString(Buffer.Slice(Offset, length));
 		Offset += length;
 		return text;
