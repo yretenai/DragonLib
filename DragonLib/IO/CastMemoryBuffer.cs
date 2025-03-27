@@ -2,12 +2,12 @@ using System.Runtime.CompilerServices;
 
 namespace DragonLib.IO;
 
-public sealed class CastMemoryBuffer<T, TBase>(IMemoryBuffer<TBase> underlyingOwner, int byteOffset, int length) :
+public sealed class CastMemoryBuffer<T, TBase>(IMemoryBuffer<TBase> underlyingOwner, int byteOffset, int length, bool leaveOpen = false) :
 	IMemoryBuffer<T> where T : struct where TBase : struct {
-	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner, int offset) :
+	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner, int offset, bool leaveOpen = false) :
 		this(underlyingOwner, offset, (underlyingOwner.Length - offset) / Unsafe.SizeOf<T>()) { }
 
-	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner) :
+	public CastMemoryBuffer(IMemoryBuffer<TBase> underlyingOwner, bool leaveOpen = false) :
 		this(underlyingOwner, 0, underlyingOwner.Length / Unsafe.SizeOf<T>()) { }
 
 	public MemoryTypeManager<T, TBase>? Manager { get; private set; } =
@@ -33,9 +33,12 @@ public sealed class CastMemoryBuffer<T, TBase>(IMemoryBuffer<TBase> underlyingOw
 
 	~CastMemoryBuffer() => Dispose(false);
 
-
 	private void Dispose(bool _) {
 		(Manager as IDisposable)?.Dispose();
 		Manager = null;
+
+		if (!leaveOpen) {
+			underlyingOwner.Dispose();
+		}
 	}
 }

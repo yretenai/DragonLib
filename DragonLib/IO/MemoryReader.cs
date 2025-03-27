@@ -42,13 +42,13 @@ public class MemoryReader(IMemoryBuffer<byte> buffer, bool leaveOpen = false) : 
 		return value;
 	}
 
-	public IMemoryBuffer<T> Partition<T>(int count) where T : struct {
+	public IMemoryBuffer<T> Partition<T>(int count, bool leaveBufferOpen = false) where T : struct {
 		if (count == 0) {
 			return IMemoryBuffer<T>.Empty;
 		}
 
 		var value = Partition(count * Unsafe.SizeOf<T>());
-		return new CastMemoryBuffer<T, byte>(value, 0);
+		return new CastMemoryBuffer<T, byte>(value, 0, leaveBufferOpen);
 	}
 
 	public string ReadString() => SpanReader.ReadString(Buffer.Span, Offset);
