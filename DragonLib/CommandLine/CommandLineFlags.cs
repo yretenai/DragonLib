@@ -6,9 +6,9 @@ public record CommandLineFlags {
 	[Flag("positionals", Positional = 0, Hidden = true)]
 	public Collection<string> Positionals { get; set; } = [];
 
-	[Flag("h", Help = "Print this help text", Aliases = ["help", "?"])]
+	[Flag("h", Help = "Print this help text and exit", Aliases = ["help", "?"])]
 	public bool Help { get; set; }
 
-	[Flag("v", Help = "Print this help text", Aliases = ["version"])]
+	[Flag("v", Help = "Print the program version and exit", Aliases = ["version"])]
 	public bool Version { get; set; }
 }
