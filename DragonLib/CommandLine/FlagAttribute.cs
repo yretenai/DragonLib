@@ -5,23 +5,23 @@ namespace DragonLib.CommandLine;
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class FlagAttribute(string flag) : Attribute {
-	[JsonIgnore] public string Flag { get; set; } = flag;
-	public string? Help { get; set; }
-	public string? Category { get; set; }
-	public string? Visitor { get; set; }
-	public bool Hidden { get; set; }
-	[JsonIgnore] public Assembly? VisitorAssembly { get; set; }
-	public bool IsRequired { get; set; }
-	public int Positional { get; set; } = -1;
-	public string[]? ValidValues { get; set; } = [];
-	[JsonIgnore] public string[]? Aliases { get; set; } = [];
-	public string[]? EnumPrefix { get; set; }
-	public char ReplaceDashes { get; set; }
-	public char ReplaceDots { get; set; }
+	[JsonIgnore] public string Flag { get; init; } = flag;
+	public string? Help { get; init; }
+	public string? Category { get; init; }
+	public string? Visitor { get; init; }
+	public bool Hidden { get; init; }
+	[JsonIgnore] public Assembly? VisitorAssembly { get; init; }
+	public bool IsRequired { get; init; }
+	public int Positional { get; init; } = -1;
+	public string[]? ValidValues { get; init; } = [];
+	[JsonIgnore] public string[]? Aliases { get; init; } = [];
+	public string[]? EnumPrefix { get; init; }
+	public char ReplaceDashes { get; init; }
+	public char ReplaceDots { get; init; }
 
-	public string? Env { get; set; }
-	public string? EnvSeparator { get; set; }
-	public object? Extra { get; set; }
+	public string? Env { get; init; }
+	public string? EnvSeparator { get; init; }
+	public object? Extra { get; init; }
 	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
 	[JsonIgnore] public override object TypeId => Flag;
 
