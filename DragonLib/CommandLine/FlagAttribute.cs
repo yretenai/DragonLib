@@ -18,6 +18,9 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public string[]? EnumPrefix { get; set; }
 	public char ReplaceDashes { get; set; }
 	public char ReplaceDots { get; set; }
+
+	public string? Env { get; set; }
+	public string? EnvSeparator { get; set; }
 	public object? Extra { get; set; }
 	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
 	[JsonIgnore] public override object TypeId => Flag;

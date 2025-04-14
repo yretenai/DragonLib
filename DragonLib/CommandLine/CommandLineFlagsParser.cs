@@ -301,6 +301,55 @@ public static class CommandLineFlagsParser {
 			}
 		}
 
+		foreach (var (property, (flag, originalType)) in typeMap.Where(x => !string.IsNullOrEmpty(x.Value.Flag.Env))) {
+			var textValue = Environment.GetEnvironmentVariable(flag.Env!);
+			if (string.IsNullOrEmpty(textValue)) {
+				continue;
+			}
+
+			var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
+			var isNullable = type != originalType;
+			var value = GetDefaultValue(property, instance);
+			var shouldSet = true;
+			if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
+				var temp = default(object?);
+				value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
+				var values = new List<string>();
+				if (!string.IsNullOrEmpty(flag.EnvSeparator)) {
+					values.AddRange(textValue.Split(flag.EnvSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+				} else {
+					values.Add(textValue);
+				}
+
+				foreach (var splitValue in values) {
+					if (VisitFlagValue<T>(type.GetGenericArguments()[0], splitValue, flag, ref temp)) {
+						shouldExit = true;
+						goto fail;
+					}
+
+					type.GetMethod("Add")?.Invoke(value, [temp]);
+				}
+
+				shouldSet = false;
+			} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
+				shouldExit = true;
+			}
+
+			if (shouldSet) {
+				if (isNullable) {
+					value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+				} else if (type != typeof(string)) {
+					try {
+						value ??= Activator.CreateInstance(type);
+					} catch {
+						// ignored
+					}
+				}
+
+				property.SetValue(instance, value);
+			}
+		}
+
 		foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Flag.Positional == -1)) {
 			var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
 			var isNullable = type != originalType;
