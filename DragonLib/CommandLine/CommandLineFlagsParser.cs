@@ -618,12 +618,14 @@ public static class CommandLineFlagsParser {
 				}
 			}
 
-			if (ulong.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValue)) {
+			var style = flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.AllowHexSpecifier | NumberStyles.Number;
+
+			if (ulong.TryParse(sterilizedValue, style, CultureInfo.InvariantCulture, out var tempValue)) {
 				value = Enum.ToObject(type, tempValue);
 				return true;
 			}
 
-			if (long.TryParse(sterilizedValue, NumberStyles.AllowHexSpecifier | NumberStyles.Number, CultureInfo.InvariantCulture, out var tempValueSigned)) {
+			if (long.TryParse(sterilizedValue, style, CultureInfo.InvariantCulture, out var tempValueSigned)) {
 				value = Enum.ToObject(type, tempValueSigned);
 				return true;
 			}
@@ -632,16 +634,16 @@ public static class CommandLineFlagsParser {
 		} else {
 			try {
 				value = type.FullName switch {
-					"System.Int64" => long.Parse(textValue, NumberStyles.Any),
-					"System.UInt64" => ulong.Parse(textValue, NumberStyles.HexNumber),
-					"System.IntPtr" => nint.Parse(textValue, NumberStyles.HexNumber),
-					"System.UIntPtr" => nuint.Parse(textValue, NumberStyles.HexNumber),
-					"System.Int32" => int.Parse(textValue, NumberStyles.Any),
-					"System.UInt32" => uint.Parse(textValue, NumberStyles.HexNumber),
-					"System.Int16" => short.Parse(textValue, NumberStyles.Any),
-					"System.UInt16" => ushort.Parse(textValue, NumberStyles.HexNumber),
-					"System.SByte" => sbyte.Parse(textValue, NumberStyles.Any),
-					"System.Byte" => byte.Parse(textValue, NumberStyles.HexNumber),
+					"System.Int64" => long.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.UInt64" => ulong.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.IntPtr" => nint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.UIntPtr" => nuint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.Int32" => int.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.UInt32" => uint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.Int16" => short.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.UInt16" => ushort.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.SByte" => sbyte.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.Byte" => byte.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
 					"System.Double" => double.Parse(textValue),
 					"System.Single" => float.Parse(textValue),
 					"System.Half" => Half.Parse(textValue),
