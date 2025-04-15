@@ -634,6 +634,7 @@ public static class CommandLineFlagsParser {
 		} else {
 			try {
 				value = type.FullName switch {
+					"System.Boolean" => textValue.Length > 0 && char.ToLowerInvariant(textValue[0]) is 't' or '1' or 'y',
 					"System.Int64" => long.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
 					"System.UInt64" => ulong.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
 					"System.IntPtr" => nint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
