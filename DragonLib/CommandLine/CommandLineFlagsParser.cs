@@ -321,8 +321,8 @@ public static class CommandLineFlagsParser {
 		}
 
 		foreach (var (property, (flag, originalType)) in typeMap.Where(x => !string.IsNullOrEmpty(x.Value.Flag.Env))) {
-			var textValue = Environment.GetEnvironmentVariable(flag.Env!);
-			if (string.IsNullOrEmpty(textValue)) {
+			var textValueRaw = Environment.GetEnvironmentVariable(flag.Env!);
+			if (string.IsNullOrEmpty(textValueRaw)) {
 				continue;
 			}
 
@@ -330,43 +330,47 @@ public static class CommandLineFlagsParser {
 			var isNullable = type != originalType;
 			var value = GetDefaultValue(property, instance);
 			var shouldSet = true;
-			if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
-				var temp = default(object?);
-				value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
-				var values = new List<string>();
-				if (flag.EnvSeparator != 0) {
-					values.AddRange(SplitEscaping(textValue, flag.EnvSeparator).Select(x => x.Trim()).Where(x => x.Length > 0));
-				} else {
-					values.Add(textValue);
-				}
-
-				foreach (var splitValue in values) {
-					if (VisitFlagValue<T>(type.GetGenericArguments()[0], splitValue, flag, ref temp)) {
-						shouldExit = true;
-						goto fail;
+			foreach (var textValue in ParseTextValues(flag, textValueRaw)) {
+				if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
+					var temp = default(object?);
+					value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
+					var values = new List<string>();
+					if (flag.EnvSeparator != 0) {
+						values.AddRange(SplitEscaping(textValue, flag.EnvSeparator).Select(x => x.Trim()).Where(x => x.Length > 0));
+					} else {
+						values.Add(textValue);
 					}
 
-					type.GetMethod("Add")?.Invoke(value, [temp]);
-				}
+					foreach (var splitValue in values) {
+						if (VisitFlagValue<T>(type.GetGenericArguments()[0], splitValue, flag, ref temp)) {
+							shouldExit = true;
+							goto fail;
+						}
 
-				shouldSet = false;
-			} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
-				shouldExit = true;
-			}
-
-			if (shouldSet) {
-				if (isNullable) {
-					value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
-				} else if (type != typeof(string)) {
-					try {
-						value ??= Activator.CreateInstance(type);
-					} catch {
-						// ignored
+						type.GetMethod("Add")?.Invoke(value, [temp]);
 					}
-				}
 
-				property.SetValue(instance, value);
+					shouldSet = false;
+				} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
+					shouldExit = true;
+				}
 			}
+
+			if (!shouldSet) {
+				continue;
+			}
+
+			if (isNullable) {
+				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+			} else if (type != typeof(string)) {
+				try {
+					value ??= Activator.CreateInstance(type);
+				} catch {
+					// ignored
+				}
+			}
+
+			property.SetValue(instance, value);
 		}
 
 		foreach (var (property, (flag, originalType)) in typeMap.Where(x => x.Value.Flag.Positional == -1)) {
@@ -398,10 +402,10 @@ public static class CommandLineFlagsParser {
 					} else {
 						var argument = arguments[index];
 						var hasInnateValue = argument.Contains('=', StringComparison.Ordinal);
-						string textValue;
+						string textValueRaw;
 						if (hasInnateValue) {
-							textValue = argument[(argument.IndexOf('=', StringComparison.Ordinal) + 1)..];
-							if (string.IsNullOrWhiteSpace(textValue)) {
+							textValueRaw = argument[(argument.IndexOf('=', StringComparison.Ordinal) + 1)..];
+							if (string.IsNullOrWhiteSpace(textValueRaw)) {
 								Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
 								shouldExit = true;
 							}
@@ -411,47 +415,15 @@ public static class CommandLineFlagsParser {
 								shouldExit = true;
 							}
 
-							textValue = arguments[index + 1];
+							textValueRaw = arguments[index + 1];
 							positionalMap.Remove(index + 1);
 						}
 
-						switch (type.IsConstructedGenericType) {
-							case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)): {
-								var listValue = default(object?);
-								if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref listValue)) {
-									shouldExit = true;
-									goto fail;
-								}
-
-								value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
-								type.GetMethod("Add")?.Invoke(value, [listValue]);
-								shouldSet = false;
-								break;
-							}
-							case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Dictionary<,>)): {
-								var parts = textValue.Split('=', 2, StringSplitOptions.TrimEntries | StringSplitOptions.None);
-
-								var keyValue = default(object?);
-								if (VisitFlagValue<T>(type.GetGenericArguments()[0], parts[0], flag, ref keyValue)) {
-									shouldExit = true;
-									goto fail;
-								}
-
-								var valueValue = default(object?);
-								if (VisitFlagValue<T>(type.GetGenericArguments()[1], parts[1], flag, ref valueValue)) {
-									shouldExit = true;
-									goto fail;
-								}
-
-								value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
-								type.GetMethod("Add")?.Invoke(value, [keyValue, valueValue]);
-								shouldSet = false;
-								break;
-							}
-							default: {
-								if (type.IsAssignableTo(typeof(IList))) {
+						foreach (var textValue in ParseTextValues(flag, textValueRaw)) {
+							switch (type.IsConstructedGenericType) {
+								case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)): {
 									var listValue = default(object?);
-									if (VisitFlagValue<T>(typeof(string), textValue, flag, ref listValue)) {
+									if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref listValue)) {
 										shouldExit = true;
 										goto fail;
 									}
@@ -459,17 +431,19 @@ public static class CommandLineFlagsParser {
 									value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
 									type.GetMethod("Add")?.Invoke(value, [listValue]);
 									shouldSet = false;
-								} else if (type.IsAssignableTo(typeof(IDictionary))) {
+									break;
+								}
+								case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Dictionary<,>)): {
 									var parts = textValue.Split('=', 2, StringSplitOptions.TrimEntries | StringSplitOptions.None);
 
 									var keyValue = default(object?);
-									if (VisitFlagValue<T>(typeof(string), parts[0], flag, ref keyValue)) {
+									if (VisitFlagValue<T>(type.GetGenericArguments()[0], parts[0], flag, ref keyValue)) {
 										shouldExit = true;
 										goto fail;
 									}
 
 									var valueValue = default(object?);
-									if (VisitFlagValue<T>(typeof(string), parts[1], flag, ref valueValue)) {
+									if (VisitFlagValue<T>(type.GetGenericArguments()[1], parts[1], flag, ref valueValue)) {
 										shouldExit = true;
 										goto fail;
 									}
@@ -477,31 +451,65 @@ public static class CommandLineFlagsParser {
 									value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
 									type.GetMethod("Add")?.Invoke(value, [keyValue, valueValue]);
 									shouldSet = false;
-								} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
-									shouldExit = true;
-									goto fail;
+									break;
 								}
+								default: {
+									if (type.IsAssignableTo(typeof(IList))) {
+										var listValue = default(object?);
+										if (VisitFlagValue<T>(typeof(string), textValue, flag, ref listValue)) {
+											shouldExit = true;
+											goto fail;
+										}
 
-								break;
+										value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
+										type.GetMethod("Add")?.Invoke(value, [listValue]);
+										shouldSet = false;
+									} else if (type.IsAssignableTo(typeof(IDictionary))) {
+										var parts = textValue.Split('=', 2, StringSplitOptions.TrimEntries | StringSplitOptions.None);
+
+										var keyValue = default(object?);
+										if (VisitFlagValue<T>(typeof(string), parts[0], flag, ref keyValue)) {
+											shouldExit = true;
+											goto fail;
+										}
+
+										var valueValue = default(object?);
+										if (VisitFlagValue<T>(typeof(string), parts[1], flag, ref valueValue)) {
+											shouldExit = true;
+											goto fail;
+										}
+
+										value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
+										type.GetMethod("Add")?.Invoke(value, [keyValue, valueValue]);
+										shouldSet = false;
+									} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
+										shouldExit = true;
+										goto fail;
+									}
+
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
 
-			if (shouldSet) {
-				if (isNullable) {
-					value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
-				} else if (type != typeof(string)) {
-					try {
-						value ??= Activator.CreateInstance(type);
-					} catch {
-						// ignored
-					}
-				}
-
-				property.SetValue(instance, value);
+			if (!shouldSet) {
+				continue;
 			}
+
+			if (isNullable) {
+				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+			} else if (type != typeof(string)) {
+				try {
+					value ??= Activator.CreateInstance(type);
+				} catch {
+					// ignored
+				}
+			}
+
+			property.SetValue(instance, value);
 		}
 
 		var positionals = positionalMap.Select(x => arguments[x]).ToList();
@@ -519,33 +527,44 @@ public static class CommandLineFlagsParser {
 			if (type.IsConstructedGenericType && (type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)))) {
 				var temp = default(object?);
 				value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
-				foreach (var textValue in positionals.Skip(flag.Positional)) {
-					if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
-						shouldExit = true;
-						goto fail;
-					}
+				foreach (var textValueRaw in positionals.Skip(flag.Positional)) {
+					foreach (var textValue in ParseTextValues(flag, textValueRaw)) {
+						if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
+							shouldExit = true;
+							goto fail;
+						}
 
-					type.GetMethod("Add")?.Invoke(value, [temp]);
+						type.GetMethod("Add")?.Invoke(value, [temp]);
+					}
 				}
 
 				shouldSet = false;
-			} else if (positionals.Count > flag.Positional && VisitFlagValue<T>(type, positionals[flag.Positional], flag, ref value)) {
-				shouldExit = true;
-			}
-
-			if (shouldSet) {
-				if (isNullable) {
-					value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
-				} else if (type != typeof(string)) {
-					try {
-						value ??= Activator.CreateInstance(type);
-					} catch {
-						// ignored
+			} else if (positionals.Count > flag.Positional) {
+				foreach (var textValue in ParseTextValues(flag, positionals[flag.Positional])) {
+					if (!VisitFlagValue<T>(type, textValue, flag, ref value)) {
+						continue;
 					}
-				}
 
-				property.SetValue(instance, value);
+					shouldExit = true;
+					goto fail;
+				}
 			}
+
+			if (!shouldSet) {
+				continue;
+			}
+
+			if (isNullable) {
+				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+			} else if (type != typeof(string)) {
+				try {
+					value ??= Activator.CreateInstance(type);
+				} catch {
+					// ignored
+				}
+			}
+
+			property.SetValue(instance, value);
 		}
 
 	fail:
@@ -566,6 +585,16 @@ public static class CommandLineFlagsParser {
 	exit:
 		Environment.Exit(0);
 		throw new UnreachableException();
+	}
+
+	private static IEnumerable<string> ParseTextValues(FlagAttribute flag, string textValueRaw) {
+		if (flag.FileListPrefix != 0 && textValueRaw.StartsWith(flag.FileListPrefix) && File.Exists(textValueRaw[1..])) {
+			foreach (var line in File.ReadAllLines(textValueRaw[1..])) {
+				yield return line;
+			}
+		} else {
+			yield return textValueRaw;
+		}
 	}
 
 	private static IEnumerable<string> SplitEscaping(string str, char split) {
