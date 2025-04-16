@@ -20,7 +20,7 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public char ReplaceDots { get; init; }
 
 	public string? Env { get; init; }
-	public string? EnvSeparator { get; init; }
+	public char EnvSeparator { get; init; } = (char) 0;
 	public object? Extra { get; init; }
 	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
 	[JsonIgnore] public override object TypeId => Flag;

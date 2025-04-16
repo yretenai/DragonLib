@@ -225,7 +225,7 @@ public static class CommandLineFlagsParser {
 					if (sizes[2] > 0) {
 						if (!string.IsNullOrEmpty(flag.Env)) {
 							te += flag.Env;
-							if (!string.IsNullOrEmpty(flag.EnvSeparator)) {
+							if (flag.EnvSeparator != 0) {
 								requiredParts.Add($"Env Separator: '{flag.EnvSeparator}'");
 							}
 						}
@@ -334,8 +334,8 @@ public static class CommandLineFlagsParser {
 				var temp = default(object?);
 				value = property.GetValue(instance) ?? value ?? Activator.CreateInstance(type);
 				var values = new List<string>();
-				if (!string.IsNullOrEmpty(flag.EnvSeparator)) {
-					values.AddRange(textValue.Split(flag.EnvSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+				if (flag.EnvSeparator != 0) {
+					values.AddRange(SplitEscaping(textValue, flag.EnvSeparator).Select(x => x.Trim()).Where(x => x.Length > 0));
 				} else {
 					values.Add(textValue);
 				}
@@ -566,6 +566,23 @@ public static class CommandLineFlagsParser {
 	exit:
 		Environment.Exit(0);
 		throw new UnreachableException();
+	}
+
+	private static IEnumerable<string> SplitEscaping(string str, char split) {
+		var sb = new StringBuilder(str.Length);
+
+		for (var i = 0; i < str.Length; ++i) {
+			var ch = str[i];
+
+			if (ch == split) {
+				yield return sb.ToString();
+				sb.Clear();
+			}
+
+			sb.Append(ch == '\\' ? str[++i] : ch);
+		}
+
+		yield return sb.ToString();
 	}
 
 	private static object? GetDefaultValue(PropertyInfo property, object instance) {
