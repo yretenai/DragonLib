@@ -7,6 +7,7 @@ namespace DragonLib.CommandLine;
 public sealed class FlagAttribute(string flag) : Attribute {
 	[JsonIgnore] public string Flag { get; init; } = flag;
 	public string? Help { get; init; }
+	[Obsolete("Not used anymore")]
 	public string? Category { get; init; }
 	public string? Visitor { get; init; }
 	public bool Hidden { get; init; }
@@ -35,7 +36,7 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	}
 
 	public bool Equals(FlagAttribute other) =>
-		base.Equals(other) && Flag == other.Flag && Help == other.Help && Category == other.Category &&
+		base.Equals(other) && Flag == other.Flag && Help == other.Help &&
 		Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly &&
 		IsRequired == other.IsRequired && Positional == other.Positional &&
 		ValidValues?.Equals(other.ValidValues) == true &&
@@ -58,7 +59,7 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public override int GetHashCode() =>
 		HashCode.Combine(base.GetHashCode(),
 			Flag,
-			HashCode.Combine(Help, Category, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
+			HashCode.Combine(Help, Visitor, VisitorAssembly?.GetHashCode() ?? 0, Hidden),
 			IsRequired,
 			Positional,
 			HashCode.Combine(ValidValues, Aliases, EnumPrefix, ReplaceDashes));

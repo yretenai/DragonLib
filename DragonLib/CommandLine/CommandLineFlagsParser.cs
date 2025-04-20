@@ -170,85 +170,73 @@ public static class CommandLineFlagsParser {
 			"help");
 
 		foreach (var positionalGroup in flags.GroupBy(x => x.Value.Flag.Positional > -1).OrderByDescending(x => x.Key)) {
-			var grouped = positionalGroup.GroupBy(x => x.Value.Flag.Category ?? string.Empty).Select(x => (x.Key, x)).ToList();
-			var doNewline = grouped.Count > 1;
-			foreach (var (group, attributes) in grouped) {
-				if (!string.IsNullOrEmpty(group)) {
-					Console.WriteLine($"{group}: ");
+			foreach (var (property, (flag, originalType)) in positionalGroup) {
+				var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
+				var hasValue = type.FullName != "System.Boolean";
+				var tn = type.Name;
+				if (type.IsConstructedGenericType) {
+					var parameters = type.GetGenericArguments().Select(x => x.Name);
+					tn = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)] + $"<{string.Join(", ", parameters)}>";
 				}
 
-				foreach (var (property, (flag, originalType)) in attributes) {
-					var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
-					var hasValue = type.FullName != "System.Boolean";
-					var tn = type.Name;
-					if (type.IsConstructedGenericType) {
-						var parameters = type.GetGenericArguments().Select(x => x.Name);
-						tn = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)] + $"<{string.Join(", ", parameters)}>";
-					}
+				tn = tn.PadRight(sizes[1]);
 
-					tn = tn.PadRight(sizes[1]);
-
-					var requiredParts = new List<string>();
-					object? def = null;
-					if (type.IsValueType) {
-						def = Activator.CreateInstance(type);
-					}
-
-					var defaultValue = GetDefaultValue(property, instance);
-					if (defaultValue != null && !defaultValue.Equals(def) && (type.IsValueType || type.FullName == "System.String")) {
-						requiredParts.Add($"Default: {(type.IsEnum ? ((Enum) defaultValue).ToString("F") : defaultValue.ToString())}");
-					}
-
-					if (flag.IsRequired) {
-						requiredParts.Add("Required");
-					}
-
-					if (flag.ValidValues?.Length > 0) {
-						requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
-					} else if (type.IsEnum) {
-						var names = Enum.GetNames(type);
-						if (flag.EnumPrefix?.Length > 0) {
-							names = names.Select(x => {
-											 var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
-											 return prefix != null ? x[prefix.Length..] : x;
-										 })
-										 .ToArray();
-						}
-
-						requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
-						if (!helpInvoked && names.Length > 3) {
-							requiredParts[^1] += $", and {names.Length - 3} more";
-						}
-					}
-
-					var te = string.Empty;
-					if (sizes[2] > 0) {
-						if (!string.IsNullOrEmpty(flag.Env)) {
-							te += flag.Env;
-							if (flag.EnvSeparator != 0) {
-								requiredParts.Add($"Env Separator: '{flag.EnvSeparator}'");
-							}
-						}
-
-						te = te.PadRight(sizes[2]);
-					}
-
-					var required = string.Join(", ", requiredParts);
-					if (required.Length > 0) {
-						required = $"({required})";
-					}
-
-					var flagStr = flag.Flag;
-					if (flag.Positional == -1) {
-						flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
-					}
-
-					Console.WriteLine("{0} {1} {2}{3} {4}", flagStr.PadRight(sizes[0]), tn, te, flag.Help?.Trim() ?? string.Empty, required.Trim());
+				var requiredParts = new List<string>();
+				object? def = null;
+				if (type.IsValueType) {
+					def = Activator.CreateInstance(type);
 				}
 
-				if (doNewline) {
-					Console.WriteLine(string.Empty);
+				var defaultValue = GetDefaultValue(property, instance);
+				if (defaultValue != null && !defaultValue.Equals(def) && (type.IsValueType || type.FullName == "System.String")) {
+					requiredParts.Add($"Default: {(type.IsEnum ? ((Enum) defaultValue).ToString("F") : defaultValue.ToString())}");
 				}
+
+				if (flag.IsRequired) {
+					requiredParts.Add("Required");
+				}
+
+				if (flag.ValidValues?.Length > 0) {
+					requiredParts.Add("Values: " + string.Join(", ", flag.ValidValues));
+				} else if (type.IsEnum) {
+					var names = Enum.GetNames(type);
+					if (flag.EnumPrefix?.Length > 0) {
+						names = names.Select(x => {
+										 var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
+										 return prefix != null ? x[prefix.Length..] : x;
+									 })
+									 .ToArray();
+					}
+
+					requiredParts.Add("Values: " + string.Join(", ", helpInvoked ? names : names.Take(3)));
+					if (!helpInvoked && names.Length > 3) {
+						requiredParts[^1] += $", and {names.Length - 3} more";
+					}
+				}
+
+				var te = string.Empty;
+				if (sizes[2] > 0) {
+					if (!string.IsNullOrEmpty(flag.Env)) {
+						te += flag.Env;
+						if (flag.EnvSeparator != 0) {
+							requiredParts.Add($"Env Separator: '{flag.EnvSeparator}'");
+						}
+					}
+
+					te = te.PadRight(sizes[2]);
+				}
+
+				var required = string.Join(", ", requiredParts);
+				if (required.Length > 0) {
+					required = $"({required})";
+				}
+
+				var flagStr = flag.Flag;
+				if (flag.Positional == -1) {
+					flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
+				}
+
+				Console.WriteLine("{0} {1} {2}{3} {4}", flagStr.PadRight(sizes[0]), tn, te, flag.Help?.Trim() ?? string.Empty, required.Trim());
 			}
 		}
 	}
