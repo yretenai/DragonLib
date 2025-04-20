@@ -343,7 +343,6 @@ public static class CommandLineFlagsParser {
 
 					foreach (var splitValue in values) {
 						if (VisitFlagValue<T>(type.GetGenericArguments()[0], splitValue, flag, ref temp)) {
-							shouldExit = true;
 							goto fail;
 						}
 
@@ -352,7 +351,7 @@ public static class CommandLineFlagsParser {
 
 					shouldSet = false;
 				} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
-					shouldExit = true;
+					goto fail;
 				}
 			}
 
@@ -386,7 +385,7 @@ public static class CommandLineFlagsParser {
 
 			if (indexList == null && flag.IsRequired) {
 				Console.WriteLine($"{flag.Flag} needs a value");
-				shouldExit = true;
+				goto fail;
 			}
 
 			var value = GetDefaultValue(property, instance);
@@ -407,12 +406,12 @@ public static class CommandLineFlagsParser {
 							textValueRaw = argument[(argument.IndexOf('=', StringComparison.Ordinal) + 1)..];
 							if (string.IsNullOrWhiteSpace(textValueRaw)) {
 								Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
-								shouldExit = true;
+								goto fail;
 							}
 						} else {
 							if (!positionalMap.Contains(index + 1)) {
 								Console.WriteLine($"{flag.Flag} needs a value", flag.Flag);
-								shouldExit = true;
+								goto fail;
 							}
 
 							textValueRaw = arguments[index + 1];
@@ -424,7 +423,6 @@ public static class CommandLineFlagsParser {
 								case true when type.GetGenericTypeDefinition().IsEquivalentTo(typeof(List<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(Collection<>)) || type.GetGenericTypeDefinition().IsEquivalentTo(typeof(HashSet<>)): {
 									var listValue = default(object?);
 									if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref listValue)) {
-										shouldExit = true;
 										goto fail;
 									}
 
@@ -438,13 +436,11 @@ public static class CommandLineFlagsParser {
 
 									var keyValue = default(object?);
 									if (VisitFlagValue<T>(type.GetGenericArguments()[0], parts[0], flag, ref keyValue)) {
-										shouldExit = true;
 										goto fail;
 									}
 
 									var valueValue = default(object?);
 									if (VisitFlagValue<T>(type.GetGenericArguments()[1], parts[1], flag, ref valueValue)) {
-										shouldExit = true;
 										goto fail;
 									}
 
@@ -457,7 +453,6 @@ public static class CommandLineFlagsParser {
 									if (type.IsAssignableTo(typeof(IList))) {
 										var listValue = default(object?);
 										if (VisitFlagValue<T>(typeof(string), textValue, flag, ref listValue)) {
-											shouldExit = true;
 											goto fail;
 										}
 
@@ -469,13 +464,11 @@ public static class CommandLineFlagsParser {
 
 										var keyValue = default(object?);
 										if (VisitFlagValue<T>(typeof(string), parts[0], flag, ref keyValue)) {
-											shouldExit = true;
 											goto fail;
 										}
 
 										var valueValue = default(object?);
 										if (VisitFlagValue<T>(typeof(string), parts[1], flag, ref valueValue)) {
-											shouldExit = true;
 											goto fail;
 										}
 
@@ -483,7 +476,6 @@ public static class CommandLineFlagsParser {
 										type.GetMethod("Add")?.Invoke(value, [keyValue, valueValue]);
 										shouldSet = false;
 									} else if (VisitFlagValue<T>(type, textValue, flag, ref value)) {
-										shouldExit = true;
 										goto fail;
 									}
 
@@ -519,7 +511,7 @@ public static class CommandLineFlagsParser {
 
 			if (flag.IsRequired && flag.Positional >= positionalMap.Count) {
 				Console.WriteLine($"Positional {flag.Flag} needs a value");
-				shouldExit = true;
+				goto fail;
 			}
 
 			var value = GetDefaultValue(property, instance);
@@ -530,7 +522,6 @@ public static class CommandLineFlagsParser {
 				foreach (var textValueRaw in positionals.Skip(flag.Positional)) {
 					foreach (var textValue in ParseTextValues(flag, textValueRaw)) {
 						if (VisitFlagValue<T>(type.GetGenericArguments()[0], textValue, flag, ref temp)) {
-							shouldExit = true;
 							goto fail;
 						}
 
@@ -545,7 +536,6 @@ public static class CommandLineFlagsParser {
 						continue;
 					}
 
-					shouldExit = true;
 					goto fail;
 				}
 			}
@@ -567,7 +557,7 @@ public static class CommandLineFlagsParser {
 			property.SetValue(instance, value);
 		}
 
-	fail:
+	end:
 		if (options.UseHelp && instance.Help) {
 			options.HelpDelegate(typeMap, instance, options, instance.Help);
 			goto exit;
@@ -585,6 +575,10 @@ public static class CommandLineFlagsParser {
 	exit:
 		Environment.Exit(0);
 		throw new UnreachableException();
+
+	fail:
+		shouldExit = true;
+		goto end;
 	}
 
 	private static IEnumerable<string> ParseTextValues(FlagAttribute flag, string textValueRaw) {
