@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="DragonLib.Bashcomp/DragonLib.Bashcomp.csproj" />
-  <Project Path="DragonLib.Tests/DragonLib.Tests.csproj" />
-  <Project Path="DragonLib/DragonLib.csproj" />
+	<Project Path="DragonLib.Tests/DragonLib.Tests.csproj"/>
+	<Project Path="DragonLib/DragonLib.csproj"/>
 </Solution>

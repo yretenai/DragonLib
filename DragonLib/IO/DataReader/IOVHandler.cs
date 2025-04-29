@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Legiayayana
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -110,12 +114,15 @@ public sealed partial class IOVHandler : IMemoryHandler {
 
 	[StructLayout(LayoutKind.Explicit, Size = 16)]
 	private record struct IOV {
-		[FieldOffset(0)] public nint iov_base;
-		[FieldOffset(8)] public nuint iov_len;
+		[FieldOffset(0)]
+		public nint iov_base;
+
+		[FieldOffset(8)]
+		public nuint iov_len;
 	}
 
 	private static partial class NativeMethods {
-		[LibraryImport("libc"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("libc")] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		internal static unsafe partial nint process_vm_readv(int pid, ref IOV localIov, nuint localIovCount, ref IOV remoteIov, nuint remoteIovCount, nuint flags);
 	}
 }

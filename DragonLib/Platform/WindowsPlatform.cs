@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Legiayayana
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -135,15 +139,15 @@ internal static partial class WindowsPlatform {
 	}
 
 	private static partial class NativeMethods {
-		[LibraryImport("advapi32", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("advapi32", SetLastError = true)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static partial bool OpenProcessToken(nint handle, TokenAccessMask desiredAccess, out nint tokenHandle);
 
-		[LibraryImport("advapi32", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("advapi32", SetLastError = true)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static partial bool GetTokenInformation(nint tokenHandle, TokenInformationClass tokenInformationClass, nint tokenInformation, int tokenInformationLength, out int returnLength);
 
-		[LibraryImport("advapi32", SetLastError = true, StringMarshalling = StringMarshalling.Utf16), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("advapi32", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static partial bool LookupPrivilegeValueW(string? systemName, string name, out LUID luid);
 	}

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Legiayayana
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -5,17 +9,27 @@ namespace DragonLib.CommandLine;
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class FlagAttribute(string flag) : Attribute {
-	[JsonIgnore] public string Flag { get; init; } = flag;
+	[JsonIgnore]
+	public string Flag { get; init; } = flag;
+
 	public string? Help { get; init; }
+
 	[Obsolete("Not used anymore")]
 	public string? Category { get; init; }
+
 	public string? Visitor { get; init; }
 	public bool Hidden { get; init; }
-	[JsonIgnore] public Assembly? VisitorAssembly { get; init; }
+
+	[JsonIgnore]
+	public Assembly? VisitorAssembly { get; init; }
+
 	public bool IsRequired { get; init; }
 	public int Positional { get; init; } = -1;
 	public string[]? ValidValues { get; init; } = [];
-	[JsonIgnore] public string[]? Aliases { get; init; } = [];
+
+	[JsonIgnore]
+	public string[]? Aliases { get; init; } = [];
+
 	public string[]? EnumPrefix { get; init; }
 	public char ReplaceDashes { get; init; }
 	public char ReplaceDots { get; init; }
@@ -25,7 +39,9 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public char FileListPrefix { get; init; } = (char) 0;
 	public object? Extra { get; init; }
 	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
-	[JsonIgnore] public override object TypeId => Flag;
+
+	[JsonIgnore]
+	public override object TypeId => Flag;
 
 	public override bool Equals(object? obj) {
 		if (obj is FlagAttribute attribute) {

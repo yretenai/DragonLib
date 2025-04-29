@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Legiayayana
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -107,7 +111,7 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 	}
 
 
-	[Flags, SuppressMessage("ReSharper", "UnusedMember.Local")]
+	[Flags] [SuppressMessage("ReSharper", "UnusedMember.Local")]
 	private enum AllocationType {
 		Commit = 0x1000,
 		Reserve = 0x2000,
@@ -120,7 +124,7 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 		TopDown = 0x100000,
 	}
 
-	[Flags, SuppressMessage("ReSharper", "UnusedMember.Local")]
+	[Flags] [SuppressMessage("ReSharper", "UnusedMember.Local")]
 	private enum ProtectionType {
 		NoAccess = 0x01,
 		ReadOnly = 0x02,
@@ -136,14 +140,22 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 
 	[StructLayout(LayoutKind.Explicit, Size = 48)]
 	// ReSharper disable once NotAccessedPositionalProperty.Local
-	private readonly record struct MemoryBasicInformation64([field: FieldOffset(0x0)] nint BaseAddress, [field: FieldOffset(0x18)] nint RegionSize, [field: FieldOffset(0x20)] AllocationType State, [field: FieldOffset(0x24)] ProtectionType Protect);
+	private readonly record struct MemoryBasicInformation64(
+		[field: FieldOffset(0x0)]
+		nint BaseAddress,
+		[field: FieldOffset(0x18)]
+		nint RegionSize,
+		[field: FieldOffset(0x20)]
+		AllocationType State,
+		[field: FieldOffset(0x24)]
+		ProtectionType Protect);
 
 	private static partial class NativeMethods {
-		[LibraryImport("kernel32", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("kernel32", SetLastError = true)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static partial bool ReadProcessMemory(SafeProcessHandle processHandle, nint address, nint bytes, nint size, ref nint bytesReadCount);
 
-		[LibraryImport("kernel32", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+		[LibraryImport("kernel32", SetLastError = true)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		internal static partial nint VirtualQueryEx(SafeProcessHandle processHandle, nint address, out MemoryBasicInformation64 memoryInformation, nint size);
 	}
 }
