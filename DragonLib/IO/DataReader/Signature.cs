@@ -165,6 +165,12 @@ public static class Signature {
 		return signature;
 	}
 
+	public static void CreateSignature(ReadOnlySpan<byte> bytes, ref Span<SignatureByte> signature) {
+		for (var i = 0; i < bytes.Length; ++i) {
+			signature[i] = bytes[i];
+		}
+	}
+
 	public static int FindSignature(ReadOnlySpan<byte> buffer, string signatureTemplate) {
 		var signature = CreateSignature(signatureTemplate);
 		return FindSignature(buffer, signature);
