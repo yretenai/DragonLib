@@ -26,7 +26,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 
 	public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new()) {
 		while (true) {
-			var item = await ReadItemAsync(cancellationToken).ConfigureAwait(false);
+			var item = await ReadItemAsync(cancellationToken);
 			if (item == null) {
 				yield break;
 			}
@@ -60,30 +60,30 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 			throw new InvalidOperationException("Stream is not writable");
 		}
 
-		await Writer.WriteLineAsync(JsonSerializer.Serialize(item, Options).AsMemory(), cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+		await Writer.WriteLineAsync(JsonSerializer.Serialize(item, Options).AsMemory(), cancellationToken ?? CancellationToken.None);
 	}
 
 	public async Task WriteItemsAsync(IEnumerable<T> items, CancellationToken? cancellationToken = null) {
 		foreach (var item in items) {
-			await WriteItemAsync(item, cancellationToken).ConfigureAwait(false);
+			await WriteItemAsync(item, cancellationToken);
 		}
 	}
 
 	public async Task WriteItemsAsync(IEnumerator<T> items, CancellationToken? cancellationToken = null) {
 		while (items.MoveNext()) {
-			await WriteItemAsync(items.Current, cancellationToken).ConfigureAwait(false);
+			await WriteItemAsync(items.Current, cancellationToken);
 		}
 	}
 
 	public async Task WriteItemsAsync(IAsyncEnumerable<T> items, CancellationToken? cancellationToken = null) {
 		await foreach (var item in items.WithCancellation(cancellationToken ?? CancellationToken.None)) {
-			await WriteItemAsync(item, cancellationToken).ConfigureAwait(false);
+			await WriteItemAsync(item, cancellationToken);
 		}
 	}
 
 	public async Task WriteItemsAsync(IAsyncEnumerator<T> items, CancellationToken? cancellationToken = null) {
 		while (await items.MoveNextAsync().ConfigureAwait(false)) {
-			await WriteItemAsync(items.Current, cancellationToken).ConfigureAwait(false);
+			await WriteItemAsync(items.Current, cancellationToken);
 		}
 	}
 
@@ -92,14 +92,14 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 			throw new InvalidOperationException("Stream is not readable");
 		}
 
-		var line = await Reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+		var line = await Reader.ReadLineAsync(cancellationToken);
 		return string.IsNullOrEmpty(line) ? default : JsonSerializer.Deserialize<T>(line);
 	}
 
 	public async Task<IEnumerable<T>> ReadItemsAsync(int count, CancellationToken cancellationToken = new()) {
 		var items = new List<T>();
 		for (var i = 0; i < count; i++) {
-			var item = await ReadItemAsync(cancellationToken).ConfigureAwait(false);
+			var item = await ReadItemAsync(cancellationToken);
 			if (item == null) {
 				break;
 			}
