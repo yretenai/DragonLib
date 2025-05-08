@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace DragonLib.CommandLine;
@@ -666,30 +667,34 @@ public static class CommandLineFlagsParser {
 		} else {
 			try {
 				value = type.FullName switch {
-					"System.Boolean" => textValue.Length > 0 && char.ToLowerInvariant(textValue[0]) is 't' or '1' or 'y',
-					"System.Int64" => long.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.String" => sterilizedValue,
+					"System.Uri" => new Uri(textValue, flag.Extra is UriKind uriKind ? uriKind : UriKind.Absolute),
+					"System.Int128" => Int128.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer),
+					"System.UInt128" => UInt128.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
+					"System.Int64" => long.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer),
 					"System.UInt64" => ulong.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
 					"System.IntPtr" => nint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
 					"System.UIntPtr" => nuint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
-					"System.Int32" => int.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.Int32" => int.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer),
 					"System.UInt32" => uint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
-					"System.Int16" => short.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.Int16" => short.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer),
 					"System.UInt16" => ushort.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
-					"System.SByte" => sbyte.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Any),
+					"System.SByte" => sbyte.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer),
 					"System.Byte" => byte.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber),
-					"System.Double" => double.Parse(textValue),
-					"System.Single" => float.Parse(textValue),
-					"System.Half" => Half.Parse(textValue),
-					"System.String" => sterilizedValue,
-					"System.Text.RegularExpressions.Regex" => new Regex(textValue, (RegexOptions) (flag.Extra ?? RegexOptions.Compiled)),
-					"DragonLib.Numerics.Half" => Half.Parse(textValue),
+					"System.Runtime.InteropServices.CLong" => new CLong(nint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Integer)),
+					"System.Runtime.InteropServices.CULong" => new CULong(nuint.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.HexNumber)),
+					"System.Runtime.InteropServices.NFloat" => NFloat.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Float | NumberStyles.AllowThousands),
+					"System.Numerics.BigInteger" => BigInteger.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Float | NumberStyles.AllowThousands),
+					"System.Double" => double.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Float | NumberStyles.AllowThousands),
+					"System.Single" => float.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Float | NumberStyles.AllowThousands),
+					"System.Half" => Half.Parse(textValue, flag.Extra is NumberStyles numberStyles ? numberStyles : NumberStyles.Float | NumberStyles.AllowThousands),
+					"System.Text.RegularExpressions.Regex" => new Regex(textValue, flag.Extra is RegexOptions regexOptions ? regexOptions : RegexOptions.Compiled),
+					"System.Boolean" => textValue.Length > 0 && char.ToLowerInvariant(textValue[0]) is 't' or '1' or 'y',
 					"System.TimeSpan" => TimeSpan.Parse(textValue),
 					"System.DateTime" => DateTime.Parse(textValue),
 					"System.DateTimeOffset" => DateTimeOffset.Parse(textValue),
 					"System.Guid" => Guid.Parse(textValue),
-					"System.Uri" => new Uri(textValue),
 					"System.Version" => Version.Parse(textValue),
-					"System.Numerics.BigInteger" => BigInteger.Parse(textValue),
 					"System.IO.DirectoryInfo" => new DirectoryInfo(textValue),
 					"System.IO.FileInfo" => new FileInfo(textValue),
 					_ => InvokeVisitor<T>(flag, type, textValue),
