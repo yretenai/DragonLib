@@ -103,7 +103,8 @@ public abstract class BufferBinaryWriter : IDisposable {
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
 	/// <typeparam name="T">Type of a single char</typeparam>
 	public virtual void WriteCString<T>(string text, Encoding? encoding = null, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
-		Span<T> buffer = stackalloc T[bufferSize];
+		// ReSharper disable once ArrangeRedundantParentheses
+		var buffer = (stackalloc T[bufferSize]);
 		buffer.Clear();
 
 		encoding ??= GuessEncoding(encoding, Unsafe.SizeOf<T>());
@@ -132,7 +133,8 @@ public abstract class BufferBinaryWriter : IDisposable {
 			return;
 		}
 
-		Span<byte> buffer = stackalloc byte[length];
+		// ReSharper disable once ArrangeRedundantParentheses
+		var buffer = (stackalloc byte[length]);
 		encoding.GetBytes(text, buffer);
 		Write(buffer);
 	}

@@ -352,8 +352,8 @@ public static class Extensions {
 		var escape = keyValues[1];
 		// ReSharper disable twice ArrangeRedundantParentheses
 		var charBuffer = (stackalloc char[5]);
-		var chBuffer32 = (stackalloc int[1]);
-		ReadOnlySpan<byte> chBuffer = chBuffer32.AsBytes();
+		var chBuffer32 = 0;
+		ReadOnlySpan<byte> chBuffer = MemoryMarshal.AsBytes(new Span<int>(ref chBuffer32));
 		foreach (var ch in text) {
 			if (ch == quote) {
 				sb.Append($"{escapeValue}{quoteValue}");
@@ -380,7 +380,7 @@ public static class Extensions {
 						continue;
 					}
 
-					chBuffer32[0] = ch;
+					chBuffer32 = ch;
 					var n = utf32.GetChars(chBuffer, charBuffer);
 					for (var i = 0; i < n; ++i) {
 						sb.Append(charBuffer[i]);
@@ -416,8 +416,8 @@ public static class Extensions {
 	}
 
 	public static T AsMagicConstant<T>(this string value) where T : unmanaged {
-		Span<T> test = stackalloc T[1];
-		Encoding.UTF8.GetBytes(value, MemoryMarshal.AsBytes(test));
-		return test[0];
+		var test = new T();
+		Encoding.UTF8.GetBytes(value, MemoryMarshal.AsBytes(new Span<T>(ref test)));
+		return test;
 	}
 }

@@ -30,7 +30,8 @@ public sealed class MinidumpHandler : IMemoryHandler {
 		var streamSpan = Streams.AsSpan(0, header.NumberOfStreams);
 		Stream.ReadExactly(MemoryMarshal.AsBytes(streamSpan));
 
-		Span<byte> slopBuffer = stackalloc byte[0x400];
+		// ReSharper disable once ArrangeRedundantParentheses
+		var slopBuffer = (stackalloc byte[0x400]);
 
 		foreach (var stream in streamSpan) {
 			Stream.Position = stream.Location.RVA;

@@ -188,7 +188,8 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="T">Type of a single char</typeparam>
 	/// <returns></returns>
 	public virtual string ReadCString<T>(Encoding? encoding = null, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
-		Span<T> buffer = stackalloc T[bufferSize];
+		// ReSharper disable once ArrangeRedundantParentheses
+		var buffer = (stackalloc T[bufferSize]);
 		var start = Position;
 		Read(buffer);
 		var length = buffer.IndexOf(T.Zero);
@@ -242,7 +243,8 @@ public abstract class BufferBinaryReader : IDisposable {
 			return string.Empty;
 		}
 
-		Span<TElement> buffer = stackalloc TElement[intLength];
+		// ReSharper disable once ArrangeRedundantParentheses
+		var buffer = (stackalloc TElement[intLength]);
 		Read(buffer);
 		return GuessEncoding(encoding, Unsafe.SizeOf<TElement>()).GetString(MemoryMarshal.AsBytes(buffer[..(intLength - trim)]));
 	}
