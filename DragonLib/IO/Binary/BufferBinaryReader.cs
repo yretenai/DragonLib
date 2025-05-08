@@ -173,21 +173,21 @@ public abstract class BufferBinaryReader : IDisposable {
 	protected virtual Encoding GuessEncoding(Encoding? encoding, int size) =>
 		encoding switch {
 			not null => encoding,
-			null when size == 4 => Encoding.UTF32,
-			null when size == 2 => Encoding.Unicode,
-			null when size == 1 => Encoding.UTF8,
+			_ when size == 4 => Encoding.UTF32,
+			_ when size == 2 => Encoding.Unicode,
+			_ when size == 1 => Encoding.UTF8,
 			_ => throw new InvalidOperationException(),
 		};
 
 	/// <summary>
-	///     Reads a C-String (null-terminated string) with char type <typeparamref name="T" />
+	///     Reads a C-String (nul-terminated string) with char type <typeparamref name="T" />
 	/// </summary>
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="bufferSize">Size of the read buffer, must be at least as much as the string size</param>
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
 	/// <typeparam name="T">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string ReadCString<T>(Encoding? encoding = null, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
+	public virtual string ReadCString<T>(Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
 		// ReSharper disable once ArrangeRedundantParentheses
 		var buffer = (stackalloc T[bufferSize]);
 		var start = Position;
@@ -216,7 +216,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
 	/// <typeparam name="T">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string PeekCString<T>(Encoding? encoding = null, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
+	public virtual string PeekCString<T>(Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
 		var pos = Position;
 		var value = ReadCString<T>(encoding, bufferSize, fixedSize);
 		Position = pos;
@@ -231,7 +231,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string ReadPString<TSize, TElement>(Encoding? encoding = null, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
+	public virtual string ReadPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
 		var length = Read<TSize>();
 		if (length == TSize.Zero) {
 			return string.Empty;
@@ -257,7 +257,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string PeekPString<TSize, TElement>(Encoding? encoding = null, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
+	public virtual string PeekPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
 		var pos = Position;
 		var value = ReadPString<TSize, TElement>(encoding, trim);
 		Position = pos;

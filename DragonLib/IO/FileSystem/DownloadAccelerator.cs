@@ -34,7 +34,7 @@ public sealed class DownloadAccelerator : IDisposable {
 
 	public void Dispose() => Client.Dispose();
 
-	public Uri CombineUri(string text, Uri? baseUri = null) {
+	public Uri CombineUri(string text, Uri? baseUri = default) {
 		if (string.IsNullOrEmpty(text)) {
 			return baseUri ?? throw new InvalidOperationException("Base URI is null");
 		}
@@ -44,14 +44,14 @@ public sealed class DownloadAccelerator : IDisposable {
 		return CombineUri(uri, baseUri);
 	}
 
-	public Uri CombineUri(Uri uri, Uri? baseUri = null) {
+	public Uri CombineUri(Uri uri, Uri? baseUri = default) {
 		if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Host)) {
 			return uri;
 		}
 
 		baseUri ??= BaseAddress;
 
-		if (baseUri == null || !baseUri.IsAbsoluteUri) {
+		if (baseUri is null || !baseUri.IsAbsoluteUri) {
 			throw new InvalidOperationException("Relative URI cannot be resolved without a base address");
 		}
 
@@ -135,7 +135,7 @@ public sealed class DownloadAccelerator : IDisposable {
 
 	private static void ValidateFileExists(bool exists) {
 		if (!exists) {
-			throw new WebException("File does not exist", new FileNotFoundException(), WebExceptionStatus.ReceiveFailure, null);
+			throw new WebException("File does not exist", new FileNotFoundException(), WebExceptionStatus.ReceiveFailure, default);
 		}
 	}
 
@@ -222,40 +222,40 @@ public sealed class DownloadAccelerator : IDisposable {
 		}
 	}
 
-	public async Task<string?> FetchString(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) => await FetchString(method, CombineUri(url), body, headers, encoding);
+	public async Task<string?> FetchString(HttpMethod method, string url, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default, Encoding? encoding = default) => await FetchString(method, CombineUri(url), body, headers, encoding);
 
-	public async Task<string?> FetchString(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, Encoding? encoding = null) {
+	public async Task<string?> FetchString(HttpMethod method, Uri uri, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default, Encoding? encoding = default) {
 		uri = CombineUri(uri);
 
 		var data = await FetchBytes(method, uri, body, headers);
-		if (data == null) {
-			return null;
+		if (data is null) {
+			return default;
 		}
 
 		return encoding?.GetString(data) ?? Encoding.UTF8.GetString(data);
 	}
 
-	public async Task<T?> FetchJson<T>(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) => await FetchJson<T>(method, CombineUri(url), body, headers, options);
+	public async Task<T?> FetchJson<T>(HttpMethod method, string url, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default, JsonSerializerOptions? options = default) => await FetchJson<T>(method, CombineUri(url), body, headers, options);
 
-	public async Task<T?> FetchJson<T>(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null, JsonSerializerOptions? options = null) {
+	public async Task<T?> FetchJson<T>(HttpMethod method, Uri uri, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default, JsonSerializerOptions? options = default) {
 		uri = CombineUri(uri);
 		var data = await FetchBytes(method, uri, body, headers);
-		return data == null ? default : JsonSerializer.Deserialize<T>(data, options ?? JsonSerializerOptions.Default);
+		return data is null ? default : JsonSerializer.Deserialize<T>(data, options ?? JsonSerializerOptions.Default);
 	}
 
-	public async Task<byte[]?> FetchBytes(HttpMethod method, string url, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) => await FetchBytes(method, CombineUri(url), body, headers);
+	public async Task<byte[]?> FetchBytes(HttpMethod method, string url, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default) => await FetchBytes(method, CombineUri(url), body, headers);
 
-	public async Task<byte[]?> FetchBytes(HttpMethod method, Uri uri, byte[]? body = null, ReadOnlyDictionary<string, string>? headers = null) {
+	public async Task<byte[]?> FetchBytes(HttpMethod method, Uri uri, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default) {
 		uri = CombineUri(uri);
 		using var request = new HttpRequestMessage(method, uri);
 		request.Version = HttpVersion.Version11;
 		request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
 
-		if (body != null) {
+		if (body is not null) {
 			request.Content = new ByteArrayContent(body);
 		}
 
-		if (headers != null) {
+		if (headers is not null) {
 			foreach (var (key, value) in headers) {
 				try {
 					request.Headers.Add(key, value);

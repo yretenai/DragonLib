@@ -27,15 +27,15 @@ public static class Command {
 		}
 	}
 
-	public static void Run(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineOptions? options = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') => Run<object>(out commandName, out commandGroupName, globalFlags, options, carry, args);
+	public static void Run(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = default, CommandLineOptions? options = default, object[]? carry = default, string[]? args = default, char suffixSeparator = '\0') => Run<object>(out commandName, out commandGroupName, globalFlags, options, carry, args);
 
-	public static T? Run<T>(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = null, CommandLineOptions? options = null, object[]? carry = null, string[]? args = null, char suffixSeparator = '\0') {
+	public static T? Run<T>(out string? commandName, out string? commandGroupName, CommandLineFlags? globalFlags = default, CommandLineOptions? options = default, object[]? carry = default, string[]? args = default, char suffixSeparator = '\0') {
 		LoadCommands();
 
-		commandName = null;
-		commandGroupName = null;
+		commandName = default;
+		commandGroupName = default;
 
-		if (args == null) {
+		if (args is null) {
 			var envArgs = Environment.GetCommandLineArgs();
 			var procName = Path.GetFileNameWithoutExtension(envArgs[0]);
 			if (suffixSeparator != '\0' && procName.Contains(suffixSeparator, StringComparison.Ordinal)) {
@@ -48,10 +48,6 @@ public static class Command {
 
 		options ??= CommandLineOptions.Default;
 		var positionalFlags = CommandLineFlagsParser.ParseFlags<CommandLineFlags>(new CommandLineOptions { UseHelp = false, UseVersion = false });
-
-		if (positionalFlags == null) {
-			return default;
-		}
 
 		globalFlags ??= positionalFlags;
 
@@ -108,14 +104,10 @@ public static class Command {
 
 		var flags = CommandLineFlagsParser.ParseFlags(command.Type, options with { Command = $"{commandGroupName} {commandName}".Trim(), SkipPositionals = offset }, args);
 
-		if (flags == null) {
-			return default;
-		}
-
 		var stack = new object[2 + (carry?.Length ?? 0)];
 		stack[0] = globalFlags;
 		stack[1] = flags;
-		if (carry != null) {
+		if (carry is not null) {
 			Array.Copy(carry, 0, stack, 2, carry.Length);
 		}
 
@@ -123,28 +115,28 @@ public static class Command {
 
 		// all types + global flags + command flags
 		var constructor = command.Command.GetConstructor(stackTypes);
-		if (constructor != null) {
+		if (constructor is not null) {
 			var instance = constructor.Invoke(stack.ToArray());
 			return instance is T tInstance ? tInstance : default;
 		}
 
 		// all types + command flags
 		constructor = command.Command.GetConstructor(stackTypes.Skip(1).ToArray());
-		if (constructor != null) {
+		if (constructor is not null) {
 			var instance = constructor.Invoke(stack.Skip(1).ToArray());
 			return instance is T tInstance ? tInstance : default;
 		}
 
 		// global flags + command flags
 		constructor = command.Command.GetConstructor(stackTypes.Take(2).ToArray());
-		if (constructor != null) {
+		if (constructor is not null) {
 			var instance = constructor.Invoke(stack.Take(2).ToArray());
 			return instance is T tInstance ? tInstance : default;
 		}
 
 		// command flags
 		constructor = command.Command.GetConstructor(stackTypes.Take(1).ToArray());
-		if (constructor != null) {
+		if (constructor is not null) {
 			var instance = constructor.Invoke(stack.Take(1).ToArray());
 			return instance is T tInstance ? tInstance : default;
 		}

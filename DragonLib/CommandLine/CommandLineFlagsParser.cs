@@ -28,9 +28,9 @@ public static class CommandLineFlagsParser {
 		var propertyNameToProperty = properties.ToDictionary(x => x.Name, y => y);
 		foreach (var @interface in t.GetInterfaces()) {
 			var interfaceProperties = @interface.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
-			foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 != null)) {
+			foreach (var (prop, info) in interfaceProperties.Select(x => (x, x.GetCustomAttribute<FlagAttribute>(true))).Where(x => x.Item2 is not null)) {
 				if (!propertyNameToProperty.TryGetValue(prop.Name, out var propertyImplementation) ||
-					!typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 == null) {
+					!typeMap.TryGetValue(propertyImplementation, out var propertySet) || propertySet.Item1 is null) {
 					continue;
 				}
 
@@ -39,7 +39,7 @@ public static class CommandLineFlagsParser {
 			}
 		}
 
-		typeMap = typeMap.Where(x => x.Value.Item1 != null).ToDictionary(x => x.Key, y => y.Value);
+		typeMap = typeMap.Where(x => x.Value.Item1 is not null).ToDictionary(x => x.Key, y => y.Value);
 		return typeMap!;
 	}
 
@@ -47,7 +47,7 @@ public static class CommandLineFlagsParser {
 		flags = flags.Where(x => x.Value.Flag.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
 		var entry = Assembly.GetEntryAssembly()?.GetName();
 		var usageSlim = "Usage: ";
-		if (entry != null) {
+		if (entry is not null) {
 			usageSlim += $"{entry.Name} ";
 		}
 
@@ -93,37 +93,37 @@ public static class CommandLineFlagsParser {
 				var flagTwo = flag.Flags.FirstOrDefault(x => x.Length > 1);
 				if (type.FullName == "System.Boolean") {
 					if (flag.IsRequired) {
-						if (flagOne != null) {
+						if (flagOne is not null) {
 							usageSlimOneCh += flagOne;
 						}
 
-						if (flagTwo != null) {
+						if (flagTwo is not null) {
 							usageSlimMultiCh += $"--{flagTwo} ";
 						}
 					} else {
-						if (flagOne != null) {
+						if (flagOne is not null) {
 							usageSlimOneChOptional += flagOne;
 						}
 
-						if (flagTwo != null) {
+						if (flagTwo is not null) {
 							usageSlimMultiCh += $"[--{flagTwo}] ";
 						}
 					}
 				} else {
 					if (flag.IsRequired) {
-						if (flagOne != null) {
+						if (flagOne is not null) {
 							usageSlimOneChValue += $"-{flagOne} value ";
 						}
 
-						if (flagTwo != null) {
+						if (flagTwo is not null) {
 							usageSlimMultiCh += $"--{flagTwo} value ";
 						}
 					} else {
-						if (flagOne != null) {
+						if (flagOne is not null) {
 							usageSlimOneChValueOptional += $"[-{flagOne} value] ";
 						}
 
-						if (flagTwo != null) {
+						if (flagTwo is not null) {
 							usageSlimMultiCh += $"[--{flagTwo} value] ";
 						}
 					}
@@ -187,13 +187,13 @@ public static class CommandLineFlagsParser {
 				tn = tn.PadRight(sizes[1]);
 
 				var requiredParts = new List<string>();
-				object? def = null;
+				object? def = default;
 				if (type.IsValueType) {
 					def = Activator.CreateInstance(type);
 				}
 
 				var defaultValue = GetDefaultValue(property, instance);
-				if (defaultValue != null && !defaultValue.Equals(def) && (type.IsValueType || type.FullName == "System.String")) {
+				if (defaultValue is not null && !defaultValue.Equals(def) && (type.IsValueType || type.FullName == "System.String")) {
 					requiredParts.Add($"Default: {(type.IsEnum ? ((Enum) defaultValue).ToString("F") : defaultValue.ToString())}");
 				}
 
@@ -208,7 +208,7 @@ public static class CommandLineFlagsParser {
 					if (flag.EnumPrefix?.Length > 0) {
 						names = names.Select(x => {
 										 var prefix = flag.EnumPrefix.FirstOrDefault(y => x.StartsWith(y, StringComparison.OrdinalIgnoreCase));
-										 return prefix != null ? x[prefix.Length..] : x;
+										 return prefix is not null ? x[prefix.Length..] : x;
 									 })
 									 .ToArray();
 					}
@@ -248,13 +248,13 @@ public static class CommandLineFlagsParser {
 
 	public static void PrintVersion(object instance, CommandLineOptions options) => Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} version {Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0"}");
 
-	public static CommandLineFlags ParseFlags(Type t) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(null, [])!;
+	public static CommandLineFlags ParseFlags(Type t) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [])?.MakeGenericMethod(t).Invoke(default, [])!;
 
-	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(null, [options])!;
+	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions)])?.MakeGenericMethod(t).Invoke(default, [options])!;
 
-	public static CommandLineFlags ParseFlags(Type t, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [arguments])!;
+	public static CommandLineFlags ParseFlags(Type t, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(string[])])?.MakeGenericMethod(t).Invoke(default, [arguments])!;
 
-	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(null, [options, arguments])!;
+	public static CommandLineFlags ParseFlags(Type t, CommandLineOptions options, params string[] arguments) => (CommandLineFlags) typeof(CommandLineFlagsParser).GetMethod(nameof(ParseFlags), [typeof(CommandLineOptions), typeof(string[])])?.MakeGenericMethod(t).Invoke(default, [options, arguments])!;
 
 	public static T ParseFlags<T>() where T : CommandLineFlags => ParseFlags<T>(Environment.GetCommandLineArgs().Skip(1).ToArray());
 
@@ -353,7 +353,7 @@ public static class CommandLineFlagsParser {
 			}
 
 			if (isNullable) {
-				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+				value = value is null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
 			} else if (type != typeof(string)) {
 				try {
 					value ??= Activator.CreateInstance(type);
@@ -376,14 +376,14 @@ public static class CommandLineFlagsParser {
 				}
 			}
 
-			if (indexList == null && flag.IsRequired) {
+			if (indexList is null && flag.IsRequired) {
 				Console.WriteLine($"{flag.Flag} needs a value");
 				goto fail;
 			}
 
 			var value = GetDefaultValue(property, instance);
 			var shouldSet = true;
-			if (indexList != null) {
+			if (indexList is not null) {
 				foreach (var index in indexList) {
 					if (type.FullName == "System.Boolean") {
 						if (value is not bool b) {
@@ -485,7 +485,7 @@ public static class CommandLineFlagsParser {
 			}
 
 			if (isNullable) {
-				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+				value = value is null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
 			} else if (type != typeof(string)) {
 				try {
 					value ??= Activator.CreateInstance(type);
@@ -538,7 +538,7 @@ public static class CommandLineFlagsParser {
 			}
 
 			if (isNullable) {
-				value = value == null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
+				value = value is null ? Activator.CreateInstance(originalType) : Activator.CreateInstance(originalType, value);
 			} else if (type != typeof(string)) {
 				try {
 					value ??= Activator.CreateInstance(type);
@@ -604,15 +604,15 @@ public static class CommandLineFlagsParser {
 	private static object? GetDefaultValue(PropertyInfo property, object instance) {
 		var value = property.GetValue(instance);
 
-		if (value == null) {
-			return null;
+		if (value is null) {
+			return default;
 		}
 
 		var originalType = value.GetType();
 		var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
 		var isNullable = type != originalType;
 		if (isNullable) {
-			return type.GetProperty("HasValue")?.GetValue(value) as bool? != true ? null : type.GetProperty("Value")?.GetValue(value);
+			return type.GetProperty("HasValue")?.GetValue(value) as bool? != true ? default : type.GetProperty("Value")?.GetValue(value);
 		}
 
 		return value;
@@ -728,7 +728,7 @@ public static class CommandLineFlagsParser {
 	}
 
 	private static object? InvokeVisitor<T>(FlagAttribute flag, Type type, string textValue) where T : CommandLineFlags {
-		if (flag.Visitor == null) {
+		if (flag.Visitor is null) {
 			throw new InvalidCastException($"Cannot process {type.FullName}");
 		}
 
@@ -736,12 +736,12 @@ public static class CommandLineFlagsParser {
 		var visitorMethodName = flag.Visitor[flag.Visitor.LastIndexOf('.')..];
 		var visitorAssembly = flag.VisitorAssembly ?? typeof(T).Assembly;
 		var visitorClass = visitorAssembly.GetType(visitorClassName);
-		if (visitorClass == null) {
+		if (visitorClass is null) {
 			throw new InvalidDataException($"Cannot find visitor class {visitorClassName}");
 		}
 
 		var visitorMethod = visitorClass.GetMethod(visitorMethodName, BindingFlags.Static);
-		if (visitorMethod == null) {
+		if (visitorMethod is null) {
 			throw new InvalidDataException($"Cannot find visitor method {visitorMethodName}");
 		}
 
@@ -750,7 +750,7 @@ public static class CommandLineFlagsParser {
 			throw new InvalidDataException($"Visitor method {visitorClassName}.{visitorMethodName} does not match delegate template Func<in string, out object>");
 		}
 
-		return visitorMethod.Invoke(null, [textValue]);
+		return visitorMethod.Invoke(default, [textValue]);
 	}
 
 	public static string ReconstructArgs(CommandLineFlags inst) {
@@ -763,7 +763,7 @@ public static class CommandLineFlagsParser {
 		var flags = typeMap.Where(x => x.Value?.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
 
 		foreach (var (prop, flag) in flags) {
-			if (flag == null || flag.Positional > -1) {
+			if (flag is null || flag.Positional > -1) {
 				continue;
 			}
 
@@ -776,7 +776,7 @@ public static class CommandLineFlagsParser {
 			sb.Append(flag.Flag);
 			sb.Append(' ');
 
-			var strValue = !prop.PropertyType.IsEnum ? value.ToString()! : ((Enum) value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() != null ? "F" : "G");
+			var strValue = !prop.PropertyType.IsEnum ? value.ToString()! : ((Enum) value).ToString(prop.PropertyType.GetCustomAttribute<FlagsAttribute>() is not null ? "F" : "G");
 
 			if (strValue.Contains(' ', StringComparison.Ordinal)) {
 				sb.Append('"');

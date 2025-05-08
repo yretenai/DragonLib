@@ -16,12 +16,12 @@ public static class BitPacked {
 			var type = typeof(T);
 			var properties = type.GetMembers()
 								 .OfType<PropertyInfo>()
-								 .Where(x => x.GetMethod != null && x.SetMethod != null)
+								 .Where(x => x.GetMethod is not null && x.SetMethod is not null)
 								 .ToArray();
 			var offset = 0;
 			foreach (var property in properties) {
 				var info = property.GetCustomAttribute<BitFieldAttribute>();
-				if (info == null || info.Length == 0) {
+				if (info is null || info.Length == 0) {
 					continue;
 				}
 
@@ -42,7 +42,7 @@ public static class BitPacked {
 		object boxed = instance;
 		foreach (var (property, offset, _) in properties) {
 			var propertyValue = property.GetMethod?.Invoke(boxed, []);
-			if (propertyValue == null) {
+			if (propertyValue is null) {
 				continue;
 			}
 
@@ -69,7 +69,7 @@ public static class BitPacked {
 				intValue = Enum.ToObject(property.PropertyType, intValue);
 			}
 
-			property.SetValue(instance, intValue, null);
+			property.SetValue(instance, intValue, default);
 		}
 
 		return instance;

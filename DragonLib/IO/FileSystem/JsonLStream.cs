@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DragonLib.IO.FileSystem;
 
 public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDisposable {
-	public JsonLStream(Stream stream, JsonSerializerOptions? options = null, Encoding? encoding = null, bool leaveOpen = false) {
+	public JsonLStream(Stream stream, JsonSerializerOptions? options = default, Encoding? encoding = default, bool leaveOpen = false) {
 		Options = options ?? JsonSerializerOptions.Default;
 		if (stream.CanRead) {
 			Reader = new StreamReader(stream, encoding ?? Encoding.UTF8, false, 4096, leaveOpen);
@@ -27,7 +27,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 	public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new()) {
 		while (true) {
 			var item = await ReadItemAsync(cancellationToken);
-			if (item == null) {
+			if (item is null) {
 				yield break;
 			}
 
@@ -38,14 +38,14 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 	public void Dispose() {
 		Reader?.Dispose();
 		Writer?.Dispose();
-		Reader = null;
-		Writer = null;
+		Reader = default;
+		Writer = default;
 	}
 
 	public IEnumerator<T> GetEnumerator() {
 		while (true) {
 			var item = ReadItem();
-			if (item == null) {
+			if (item is null) {
 				yield break;
 			}
 
@@ -55,40 +55,40 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-	public async Task WriteItemAsync(T item, CancellationToken? cancellationToken = null) {
-		if (Writer == null) {
+	public async Task WriteItemAsync(T item, CancellationToken? cancellationToken = default) {
+		if (Writer is null) {
 			throw new InvalidOperationException("Stream is not writable");
 		}
 
 		await Writer.WriteLineAsync(JsonSerializer.Serialize(item, Options).AsMemory(), cancellationToken ?? CancellationToken.None);
 	}
 
-	public async Task WriteItemsAsync(IEnumerable<T> items, CancellationToken? cancellationToken = null) {
+	public async Task WriteItemsAsync(IEnumerable<T> items, CancellationToken? cancellationToken = default) {
 		foreach (var item in items) {
 			await WriteItemAsync(item, cancellationToken);
 		}
 	}
 
-	public async Task WriteItemsAsync(IEnumerator<T> items, CancellationToken? cancellationToken = null) {
+	public async Task WriteItemsAsync(IEnumerator<T> items, CancellationToken? cancellationToken = default) {
 		while (items.MoveNext()) {
 			await WriteItemAsync(items.Current, cancellationToken);
 		}
 	}
 
-	public async Task WriteItemsAsync(IAsyncEnumerable<T> items, CancellationToken? cancellationToken = null) {
+	public async Task WriteItemsAsync(IAsyncEnumerable<T> items, CancellationToken? cancellationToken = default) {
 		await foreach (var item in items.WithCancellation(cancellationToken ?? CancellationToken.None)) {
 			await WriteItemAsync(item, cancellationToken);
 		}
 	}
 
-	public async Task WriteItemsAsync(IAsyncEnumerator<T> items, CancellationToken? cancellationToken = null) {
+	public async Task WriteItemsAsync(IAsyncEnumerator<T> items, CancellationToken? cancellationToken = default) {
 		while (await items.MoveNextAsync().ConfigureAwait(false)) {
 			await WriteItemAsync(items.Current, cancellationToken);
 		}
 	}
 
 	public async Task<T?> ReadItemAsync(CancellationToken cancellationToken = new()) {
-		if (Reader == null) {
+		if (Reader is null) {
 			throw new InvalidOperationException("Stream is not readable");
 		}
 
@@ -100,7 +100,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 		var items = new List<T>();
 		for (var i = 0; i < count; i++) {
 			var item = await ReadItemAsync(cancellationToken);
-			if (item == null) {
+			if (item is null) {
 				break;
 			}
 
@@ -111,7 +111,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 	}
 
 	public void WriteItem(T item) {
-		if (Writer == null) {
+		if (Writer is null) {
 			throw new InvalidOperationException("Stream is not writable");
 		}
 
@@ -131,7 +131,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 	}
 
 	public T? ReadItem() {
-		if (Reader == null) {
+		if (Reader is null) {
 			throw new InvalidOperationException("Stream is not readable");
 		}
 
@@ -143,7 +143,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 		var items = new List<T>();
 		for (var i = 0; i < count; i++) {
 			var item = ReadItem();
-			if (item == null) {
+			if (item is null) {
 				break;
 			}
 
@@ -157,7 +157,7 @@ public sealed class JsonLStream<T> : IEnumerable<T>, IAsyncEnumerable<T>, IDispo
 		var items = new List<T>();
 		while (true) {
 			var item = ReadItem();
-			if (item == null) {
+			if (item is null) {
 				break;
 			}
 

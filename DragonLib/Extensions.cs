@@ -100,7 +100,7 @@ public static class Extensions {
 
 		if (data.Length == 0 || data[0].Equals(terminator)) {
 			length = 0;
-			return null;
+			return default;
 		}
 
 		length = data.IndexOf(terminator);
@@ -173,7 +173,7 @@ public static class Extensions {
 				sb.Append(prefix);
 			}
 
-			sb.Append(b.ToUInt64(null).ToString(formatter));
+			sb.Append(b.ToUInt64(default).ToString(formatter));
 
 			if (separator.Length > 0 && index < input.Length - 1) {
 				sb.Append(separator);

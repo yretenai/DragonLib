@@ -110,7 +110,7 @@ public class RentedMemoryStream : Stream {
 				offset = Length + offset;
 				break;
 			}
-			default: throw new ArgumentOutOfRangeException(nameof(origin), origin, null);
+			default: throw new ArgumentOutOfRangeException(nameof(origin), origin, default);
 		}
 
 		ArgumentOutOfRangeException.ThrowIfNegative(offset);

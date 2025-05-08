@@ -97,7 +97,7 @@ internal static partial class WindowsPlatform {
 			return true;
 		}
 
-		if (!NativeMethods.LookupPrivilegeValueW(null, "SeCreateSymbolicLinkPrivilege", out var symlinkLUID)) {
+		if (!NativeMethods.LookupPrivilegeValueW(default, "SeCreateSymbolicLinkPrivilege", out var symlinkLUID)) {
 			return false;
 		}
 

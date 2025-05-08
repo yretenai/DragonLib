@@ -102,7 +102,7 @@ public abstract class BufferBinaryWriter : IDisposable {
 	/// <param name="bufferSize">Size of the write buffer, must be at least as much as the string size</param>
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
 	/// <typeparam name="T">Type of a single char</typeparam>
-	public virtual void WriteCString<T>(string text, Encoding? encoding = null, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
+	public virtual void WriteCString<T>(string text, Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
 		// ReSharper disable once ArrangeRedundantParentheses
 		var buffer = (stackalloc T[bufferSize]);
 		buffer.Clear();
@@ -125,7 +125,7 @@ public abstract class BufferBinaryWriter : IDisposable {
 	/// <param name="encoding">Encoding to encode as</param>
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type of a single char</typeparam>
-	public virtual void WritePString<TSize, TElement>(string text, Encoding? encoding = null) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
+	public virtual void WritePString<TSize, TElement>(string text, Encoding? encoding = default) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
 		encoding ??= GuessEncoding(encoding, Unsafe.SizeOf<TElement>());
 		var length = encoding.GetByteCount(text);
 		Write(TSize.CreateChecked(length));
