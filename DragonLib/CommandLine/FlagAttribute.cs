@@ -40,6 +40,8 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public object? Extra { get; init; }
 	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
 
+	public T GetExtraOrDefault<T>(T defaultValue) => Extra is T t ? t : defaultValue;
+
 	[JsonIgnore]
 	public override object TypeId => Flag;
 
