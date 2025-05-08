@@ -4,8 +4,8 @@
 
 namespace DragonLib.IO.Binary;
 
-public class StreamBinaryReader : BufferBinaryReader {
-	public StreamBinaryReader(Stream stream, bool leaveOpen = false) {
+public class StreamBinaryWriter : BufferBinaryWriter {
+	public StreamBinaryWriter(Stream stream, bool leaveOpen = false) {
 		BaseStream = stream;
 		LeaveOpen = leaveOpen;
 	}
@@ -13,9 +13,21 @@ public class StreamBinaryReader : BufferBinaryReader {
 	public Stream BaseStream { get; }
 	public bool LeaveOpen { get; }
 	public override int Position { get => (int) BaseStream.Position; set => BaseStream.Position = value; }
-	public override int Length => (int) BaseStream.Length;
 
-	public override void ReadBytes(Span<byte> span) => BaseStream.ReadExactly(span);
+	public override int Length {
+		get => (int) BaseStream.Length;
+		protected set { }
+	}
+
+	public override int Capacity => (int) BaseStream.Length;
+
+	public override void EnsureCapacity(int length) {
+		if (length > Capacity) {
+			BaseStream.SetLength(length);
+		}
+	}
+
+	public override void WriteBytes(ReadOnlySpan<byte> span) => BaseStream.Write(span);
 
 	protected override void Dispose(bool disposing) {
 		if (LeaveOpen) {

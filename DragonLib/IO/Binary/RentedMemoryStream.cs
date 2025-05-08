@@ -24,6 +24,27 @@ public class RentedMemoryStream : Stream {
 	}
 
 	public RentedArray<byte> Buffer { get; }
+
+	public bool IsOpen { get; private set; }
+	private bool LeaveOpen { get; } = true;
+
+	public override bool CanRead => true;
+	public override bool CanSeek => true;
+	public override bool CanWrite { get; }
+	public override long Length => Buffer.Length;
+
+	public override long Position {
+		get {
+			EnsureNotClosed();
+			return field;
+		}
+		set {
+			EnsureNotClosed();
+			ArgumentOutOfRangeException.ThrowIfGreaterThan(value, Length);
+			field = value;
+		}
+	}
+
 	public override void Flush() { }
 
 	public override void Close() {
@@ -33,9 +54,6 @@ public class RentedMemoryStream : Stream {
 
 		IsOpen = false;
 	}
-
-	public bool IsOpen { get; private set; }
-	private bool LeaveOpen { get; } = true;
 
 	private void EnsureNotClosed() {
 		if (IsOpen) {
@@ -149,22 +167,5 @@ public class RentedMemoryStream : Stream {
 	public override void CopyTo(Stream destination, int bufferSize) {
 		EnsureNotClosed();
 		destination.Write(Buffer.Array.AsSpan((int) Position));
-	}
-
-	public override bool CanRead => true;
-	public override bool CanSeek => true;
-	public override bool CanWrite { get; }
-	public override long Length => Buffer.Length;
-
-	public override long Position {
-		get {
-			EnsureNotClosed();
-			return field;
-		}
-		set {
-			EnsureNotClosed();
-			ArgumentOutOfRangeException.ThrowIfGreaterThan(value, Length);
-			field = value;
-		}
 	}
 }

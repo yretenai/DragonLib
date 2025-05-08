@@ -9,8 +9,12 @@ public class ArrayBinaryReader : BufferBinaryReader {
 
 	public byte[] Array { get; }
 	public override int Position { get; set; }
+	public override int Length => Array.Length;
 
-	public override void ReadBytes(Span<byte> span) => Array.AsSpan(Position, span.Length).CopyTo(span);
+	public override void ReadBytes(Span<byte> span) {
+		Array.AsSpan(Position, span.Length).CopyTo(span);
+		Position += span.Length;
+	}
 
 	protected override void Dispose(bool disposing) { }
 }

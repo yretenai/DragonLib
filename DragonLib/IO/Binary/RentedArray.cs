@@ -23,6 +23,11 @@ public sealed class RentedArray<T> : IDisposable {
 	public int Length { get; private set; }
 	public Span<T> Span => Length == 0 ? Span<T>.Empty : Array.AsSpan(0, Length);
 
+	public T this[int index] {
+		get => Array[index];
+		set => Array[index] = value;
+	}
+
 	public void Dispose() {
 		if (Length == 0) {
 			return;

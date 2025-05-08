@@ -7,9 +7,7 @@ using System.Buffers;
 namespace DragonLib.IO.Binary;
 
 public class ArrayPoolBinaryReader : ArrayBinaryReader {
-	public ArrayPoolBinaryReader(byte[] array, bool leaveOpen = false) : base(array) {
-		LeaveOpen = leaveOpen;
-	}
+	public ArrayPoolBinaryReader(byte[] array, bool leaveOpen = false) : base(array) => LeaveOpen = leaveOpen;
 
 	public bool LeaveOpen { get; }
 

@@ -10,6 +10,11 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// </summary>
 	public abstract int Position { get; set; }
 
+	/// <summary>
+	///     Length of the data stream
+	/// </summary>
+	public abstract int Length { get; }
+
 	/// <inheritdoc cref="IDisposable.Dispose" />
 	public void Dispose() {
 		Dispose(true);
@@ -23,7 +28,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <returns></returns>
 	public virtual RentedArray<byte> ReadBytes(int length) {
 		var arr = new RentedArray<byte>(length);
-		Read(arr.Span);
+		ReadBytes(arr.Span);
 		return arr;
 	}
 
@@ -274,7 +279,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	///     Align the buffer to the specified width
 	/// </summary>
 	/// <param name="n">Width to align to</param>
-	public virtual void Align(int n = 4) => Position = unchecked(Position + (n - 1)) & ~(n - 1);
+	public virtual void Align(int n = 4) => Position = Position.Align(n);
 
 	protected abstract void Dispose(bool disposing);
 }
