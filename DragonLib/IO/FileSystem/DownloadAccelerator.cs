@@ -65,9 +65,10 @@ public sealed class DownloadAccelerator : IDisposable {
 		ranges = new (long start, long end)[threads];
 		var blockSize = length / threads;
 		for (var i = 0; i < threads; i++) {
-			ranges[i] = (i * blockSize, (i + 1) * blockSize - 1);
+			ranges[i] = (i * blockSize - 1, (i + 1) * blockSize - 1);
 		}
 
+		ranges[0] = (0, ranges[0].end);
 		ranges[^1] = (ranges[^1].start, length);
 		return tasks;
 	}
