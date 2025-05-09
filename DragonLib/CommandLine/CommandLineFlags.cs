@@ -7,6 +7,19 @@ using System.Collections.ObjectModel;
 namespace DragonLib.CommandLine;
 
 public record CommandLineFlags {
+	public record Singleton<T> : CommandLineFlags where T : CommandLineFlags {
+		public static T Instance {
+			get {
+				if ((T?) field is null) {
+					field = CommandLineFlagsParser.ParseFlags<T>();
+				}
+
+				return field;
+			}
+			set;
+		} = null!;
+	}
+
 	[Flag("positionals", Positional = 0, Hidden = true)]
 	public Collection<string> Positionals { get; set; } = [];
 
