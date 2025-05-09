@@ -118,7 +118,7 @@ public sealed class DownloadAccelerator : IDisposable {
 		var tasks = CalculateDownloadRanges(threads, length, out var ranges);
 
 		fileStream.SetLength(length);
-		using var mmap = MemoryMappedFile.CreateFromFile(fileStream, path, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
+		using var mmap = MemoryMappedFile.CreateFromFile(fileStream, null, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
 
 		for (var i = 0; i < threads; i++) {
 			var range = ranges[i];
@@ -159,9 +159,9 @@ public sealed class DownloadAccelerator : IDisposable {
 		}
 	}
 
-	public async Task<RentedArray<byte>> FetchFileThreaded(Uri uri, string path, int threads = -1) => await FetchFileThreaded(await GetInfo(uri).ConfigureAwait(false), path, threads);
+	public async Task<RentedArray<byte>> FetchFileThreaded(Uri uri, int threads = -1) => await FetchFileThreaded(await GetInfo(uri).ConfigureAwait(false), threads);
 
-	public async Task<RentedArray<byte>> FetchFileThreaded(RequestInfo info, string path, int threads = -1) {
+	public async Task<RentedArray<byte>> FetchFileThreaded(RequestInfo info, int threads = -1) {
 		var (uri, exists, supportsThreading, length) = info;
 		uri = CombineUri(uri);
 
@@ -169,7 +169,7 @@ public sealed class DownloadAccelerator : IDisposable {
 
 		if (ShouldFallback(threads, supportsThreading, length)) {
 			await using var stream = await Client.GetStreamAsync(uri);
-			var buffer = new RentedArray<byte>((int) stream.Length);
+			var buffer = new RentedArray<byte>((int) info.Size);
 			await stream.ReadExactlyAsync(buffer.Array, 0, buffer.Length);
 			return buffer;
 		}
@@ -197,7 +197,7 @@ public sealed class DownloadAccelerator : IDisposable {
 			} catch {
 				buffer.Dispose();
 				// fallback to single thread.
-				return await FetchFileThreaded(uri, path, 1);
+				return await FetchFileThreaded(uri, 1);
 			}
 
 			return buffer;
@@ -278,5 +278,42 @@ public sealed class DownloadAccelerator : IDisposable {
 		}
 
 		return await response.Content.ReadAsByteArrayAsync();
+	}
+
+	public async Task<Stream?> FetchStream(HttpMethod method, string url, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default) => await FetchStream(method, CombineUri(url), body, headers);
+
+	public async Task<Stream?> FetchStream(HttpMethod method, Uri uri, byte[]? body = default, ReadOnlyDictionary<string, string>? headers = default) {
+		uri = CombineUri(uri);
+		using var request = new HttpRequestMessage(method, uri);
+		request.Version = HttpVersion.Version11;
+		request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+
+		if (body is not null) {
+			request.Content = new ByteArrayContent(body);
+		}
+
+		if (headers is not null) {
+			foreach (var (key, value) in headers) {
+				try {
+					request.Headers.Add(key, value);
+				} catch {
+					// ignored
+				}
+
+				try {
+					request.Content?.Headers.Add(key, value);
+				} catch {
+					// ignored
+				}
+			}
+		}
+
+		var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+		if (!response.IsSuccessStatusCode) {
+			return default;
+		}
+
+		return await response.Content.ReadAsStreamAsync();
 	}
 }

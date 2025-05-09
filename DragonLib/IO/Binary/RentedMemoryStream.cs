@@ -25,7 +25,7 @@ public class RentedMemoryStream : Stream {
 
 	public RentedArray<byte> Buffer { get; }
 
-	public bool IsOpen { get; private set; }
+	public bool IsOpen { get; private set; } = true;
 	private bool LeaveOpen { get; } = true;
 
 	public override bool CanRead => true;
