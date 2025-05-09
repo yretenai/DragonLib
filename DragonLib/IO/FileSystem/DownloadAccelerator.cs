@@ -60,10 +60,10 @@ public sealed class DownloadAccelerator : IDisposable {
 
 	private bool ShouldFallback(int threads, bool supportsThreading, long length) => !supportsThreading || threads == 1 || length < MinimumSizePerThread;
 
-	private static Task[] CalculateDownloadRanges(int threads, long length, out (long start, long end)[] ranges) {
+	private Task[] CalculateDownloadRanges(int threads, long length, out (long start, long end)[] ranges) {
 		var tasks = new Task[threads];
 		ranges = new (long start, long end)[threads];
-		var blockSize = length / threads;
+		var blockSize = Math.Max(MinimumSizePerThread, length / threads);
 		for (var i = 0; i < threads; i++) {
 			ranges[i] = (i * blockSize - 1, (i + 1) * blockSize - 1);
 		}
