@@ -10,6 +10,10 @@ public class StreamBinaryWriter : BufferBinaryWriter {
 		LeaveOpen = leaveOpen;
 	}
 
+	public StreamBinaryWriter(string path, FileMode mode = FileMode.OpenOrCreate, FileShare share = FileShare.ReadWrite, bool leaveOpen = false) : this(new FileStream(path, mode, FileAccess.ReadWrite, share), leaveOpen) { }
+
+	public StreamBinaryWriter(FileInfo fileInfo, FileMode mode = FileMode.OpenOrCreate, FileShare share = FileShare.ReadWrite, bool leaveOpen = false) : this(new FileStream(fileInfo.FullName, mode, FileAccess.ReadWrite, share), leaveOpen) { }
+
 	public Stream BaseStream { get; }
 	public bool LeaveOpen { get; }
 	public override int Position { get => (int) BaseStream.Position; set => BaseStream.Position = value; }
