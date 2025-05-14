@@ -23,6 +23,8 @@ public sealed class RentedArray<T> : IDisposable where T : struct {
 
 	public T[] Array { get; private set; }
 	public int Length { get; private set; }
+	public ArraySegment<T> Segment => Length == 0 ? ArraySegment<T>.Empty : new ArraySegment<T>(Array, 0, Length);
+	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Array.AsMemory(0, Length);
 	public Span<T> Span => Length == 0 ? Span<T>.Empty : Array.AsSpan(0, Length);
 
 	public T this[int index] {

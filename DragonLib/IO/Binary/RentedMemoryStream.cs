@@ -78,7 +78,7 @@ public class RentedMemoryStream : Stream {
 			return 0;
 		}
 
-		Buffer.Array.AsSpan((int) Position, n).CopyTo(buffer.AsSpan(offset));
+		Buffer.Span.Slice((int) Position, n).CopyTo(buffer.AsSpan(offset));
 		Position += n;
 		return n;
 	}
@@ -90,7 +90,7 @@ public class RentedMemoryStream : Stream {
 			return 0;
 		}
 
-		Buffer.Array.AsSpan((int) Position, n).CopyTo(buffer);
+		Buffer.Span.Slice((int) Position, n).CopyTo(buffer);
 		Position += n;
 		return n;
 	}
@@ -136,7 +136,7 @@ public class RentedMemoryStream : Stream {
 			return;
 		}
 
-		buffer.AsSpan(offset, count).CopyTo(Buffer.Array.AsSpan((int) Position, n));
+		buffer.AsSpan(offset, count).CopyTo(Buffer.Span.Slice((int) Position, n));
 		Position += n;
 	}
 
@@ -149,23 +149,33 @@ public class RentedMemoryStream : Stream {
 			return;
 		}
 
-		buffer.CopyTo(Buffer.Array.AsSpan((int) Position, n));
+		buffer.CopyTo(Buffer.Span.Slice((int) Position, n));
 		Position += n;
 	}
 
 	public override int ReadByte() {
 		EnsureNotClosed();
+
+		if (Position >= Buffer.Length) {
+			throw new IndexOutOfRangeException();
+		}
+
 		return Buffer.Array[Position++];
 	}
 
 	public override void WriteByte(byte value) {
 		EnsureNotClosed();
 		EnsureWriteable();
+
+		if (Position >= Buffer.Length) {
+			throw new IndexOutOfRangeException();
+		}
+
 		Buffer.Array[Position++] = value;
 	}
 
 	public override void CopyTo(Stream destination, int bufferSize) {
 		EnsureNotClosed();
-		destination.Write(Buffer.Array.AsSpan((int) Position));
+		destination.Write(Buffer.Span[(int) Position..]);
 	}
 }

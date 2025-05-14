@@ -206,6 +206,10 @@ public sealed class DownloadAccelerator : IDisposable {
 	}
 
 	private async Task FetchFileThread(Uri uri, RentedArray<byte> buffer, long rangeStart, long rangeEnd) {
+		if (rangeEnd > buffer.Length) {
+			throw new IndexOutOfRangeException();
+		}
+
 		for (var i = 0; i < Retries; ++i) {
 			try {
 				using var request = new HttpRequestMessage(HttpMethod.Get, uri);
