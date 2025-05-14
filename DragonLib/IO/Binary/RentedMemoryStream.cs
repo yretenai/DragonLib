@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Legiayayana
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 namespace DragonLib.IO.Binary;
 
 public class RentedMemoryStream : Stream {
@@ -65,7 +69,7 @@ public class RentedMemoryStream : Stream {
 
 	private void EnsureWriteable() {
 		if (!CanWrite) {
-			throw new NotSupportedException("Unwritable stream");
+			throw new IOException("Unwritable stream");
 		}
 	}
 
