@@ -12,7 +12,7 @@ public sealed class AsyncQuantumDisposable<T> : IDisposable, IAsyncDisposable wh
 	public T? Disposable { get; set; }
 
 	public async ValueTask DisposeAsync() {
-		if (Disposable != null) {
+		if (Disposable is not null) {
 			await Disposable.DisposeAsync();
 		}
 	}
