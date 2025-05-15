@@ -14,7 +14,7 @@ public sealed class RentedArray<T> : IDisposable where T : struct {
 		Length = length;
 	}
 
-	public RentedArray(int length) : this(ArrayPool<T>.Shared.Rent(length), length) { }
+	public RentedArray(int length) : this(length == 0 ? [] : ArrayPool<T>.Shared.Rent(length), length) { }
 
 	public RentedArray() {
 		Length = 0;
