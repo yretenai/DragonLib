@@ -192,9 +192,20 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="T">Type of a single char</typeparam>
 	/// <returns></returns>
 	public virtual string ReadCString<T>(Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
-		switch (bufferSize) {
-			case 0: return string.Empty;
-			case < 0: bufferSize = 1024; break;
+		if (bufferSize < 0) {
+			bufferSize = 1024;
+		}
+
+		if (bufferSize > Length - Position) {
+			bufferSize = Length - Position;
+
+			if (bufferSize < 0) {
+				return string.Empty;
+			}
+		}
+
+		if (bufferSize == 0) {
+			return string.Empty;
 		}
 
 		// ReSharper disable once ArrangeRedundantParentheses
