@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DragonLib.CommandLine;
 
@@ -17,15 +18,10 @@ public record CommandLineFlags {
 	public bool Version { get; set; }
 
 	public record Singleton<T> : CommandLineFlags where T : CommandLineFlags {
+		[field: AllowNull, MaybeNull]
 		public static T Instance {
-			get {
-				if ((T?) field is null) {
-					field = CommandLineFlagsParser.ParseFlags<T>();
-				}
-
-				return field;
-			}
+			get => field ??= CommandLineFlagsParser.ParseFlags<T>();
 			set;
-		} = null!;
+		}
 	}
 }

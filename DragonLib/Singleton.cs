@@ -2,17 +2,14 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace DragonLib;
 
 public static class Singleton<T> where T : class, new() {
+	[field: AllowNull, MaybeNull]
 	public static T Instance {
-		get {
-			if ((T?) field is null) {
-				field = new T();
-			}
-
-			return field;
-		}
+		get => field ??= new T();
 		set;
-	} = null!;
+	}
 }
