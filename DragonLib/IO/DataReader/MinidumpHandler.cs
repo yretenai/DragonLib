@@ -124,6 +124,7 @@ public sealed class MinidumpHandler : IMemoryHandler {
 
 	public MinidumpHeader Header { get; }
 	public Stream Stream { get; }
+	private object Lock { get; } = new();
 	public MinidumpDirectory[] Streams { get; }
 	public MinidumpModule[] Modules { get; }
 	public MinidumpMemoryDescriptor[] MemoryRanges { get; }
@@ -265,8 +266,12 @@ public sealed class MinidumpHandler : IMemoryHandler {
 			}
 
 			var shift = address - memoryRange.StartOfMemoryRange;
-			Stream.Position = rva + shift;
-			Stream.ReadExactly(buffer[..readFromPage]);
+
+			lock (Lock) {
+				Stream.Position = rva + shift;
+				Stream.ReadExactly(buffer[..readFromPage]);
+			}
+
 			read += readFromPage;
 			buffer = buffer[readFromPage..];
 			if (buffer.IsEmpty) {
