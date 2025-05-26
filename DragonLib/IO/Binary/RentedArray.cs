@@ -46,7 +46,7 @@ public sealed class RentedArray<T> : IDisposable where T : struct {
 
 	private static RentedArray<T> FromStream(Stream stream, bool leaveOpen) {
 		try {
-			var buffer = new RentedArray<T>((int) (stream.Length - stream.Position) * Unsafe.SizeOf<T>());
+			var buffer = new RentedArray<T>((int) (stream.Length - stream.Position) / Unsafe.SizeOf<T>());
 			stream.ReadExactly(MemoryMarshal.AsBytes(buffer.Span));
 			return buffer;
 		} finally {
