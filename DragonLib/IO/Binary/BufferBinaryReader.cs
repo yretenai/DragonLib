@@ -101,6 +101,17 @@ public abstract class BufferBinaryReader : IDisposable {
 	}
 
 	/// <summary>
+	///     Reads an array of type <typeparamref name="T" /> with a specified count into a List
+	/// </summary>
+	/// <param name="length">Number of elements to read</param>
+	/// <param name="into">List to read into</param>
+	/// <typeparam name="T">Type to read</typeparam>
+	public virtual void Read<T>(int length, List<T> into) where T : struct {
+		using var arr = Read<T>(length);
+		into.AddRange(arr.Span);
+	}
+
+	/// <summary>
 	///     Reads an array of type <typeparamref name="T" /> with a specified count without advancing the buffer
 	/// </summary>
 	/// <param name="length">Number of elements to read</param>
@@ -111,6 +122,17 @@ public abstract class BufferBinaryReader : IDisposable {
 		var elems = Read<T>(length);
 		Position = pos;
 		return elems;
+	}
+
+	/// <summary>
+	///     Reads an array of type <typeparamref name="T" /> with a specified count into a List without advancing the buffer
+	/// </summary>
+	/// <param name="length">Number of elements to read</param>
+	/// <param name="into">List to read into</param>
+	/// <typeparam name="T">Type to read</typeparam>
+	public virtual void Peek<T>(int length, List<T> into) where T : struct {
+		using var arr = Peek<T>(length);
+		into.AddRange(arr.Span);
 	}
 
 	/// <summary>
