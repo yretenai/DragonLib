@@ -95,42 +95,54 @@ public sealed class DownloadAccelerator : IDisposable {
 	public async Task DownloadFileThreaded(Uri uri, string path, int threads = -1) => await DownloadFileThreaded(await GetInfo(uri).ConfigureAwait(false), path, threads);
 
 	public async Task DownloadFileThreaded(RequestInfo info, string path, int threads = -1) {
-		var (uri, exists, supportsThreading, length) = info;
-		uri = CombineUri(uri);
-
-		ValidateFileExists(exists);
-
-		await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-		if (ShouldFallback(threads, supportsThreading, length)) {
-			await using var stream = await Client.GetStreamAsync(uri);
-			await stream.CopyToAsync(fileStream);
-			return;
+		if (!await DownloadFileThreadedCore(info, path, threads)) {
+			// retry single threaded.
+			await DownloadFileThreadedCore(info, path, 1);
 		}
+	}
 
-		if (threads == -1) {
-			if (ThreadCount > 0) {
-				threads = ThreadCount;
-			} else {
-				threads = (int) Math.Min(length / MinimumSizePerThread + 1, Environment.ProcessorCount);
-			}
-		}
-
-		var tasks = CalculateDownloadRanges(threads, length, out var ranges);
-
-		fileStream.SetLength(length);
-		using var mmap = MemoryMappedFile.CreateFromFile(fileStream, null, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
-
-		for (var i = 0; i < threads; i++) {
-			var range = ranges[i];
-			tasks[i] = DownloadFileThread(uri, mmap, range.start, range.end);
-		}
-
+	private async Task<bool> DownloadFileThreadedCore(RequestInfo info, string path, int threads = -1) {
 		try {
+			var (uri, exists, supportsThreading, length) = info;
+			uri = CombineUri(uri);
+
+			ValidateFileExists(exists);
+
+			await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+			if (ShouldFallback(threads, supportsThreading, length)) {
+				threads = 1;
+				await using var stream = await Client.GetStreamAsync(uri);
+				await stream.CopyToAsync(fileStream);
+				return true;
+			}
+
+			if (threads == -1) {
+				if (ThreadCount > 0) {
+					threads = ThreadCount;
+				} else {
+					threads = (int) Math.Min(length / MinimumSizePerThread + 1, Environment.ProcessorCount);
+				}
+			}
+
+			var tasks = CalculateDownloadRanges(threads, length, out var ranges);
+
+			fileStream.SetLength(length);
+			using var mmap = MemoryMappedFile.CreateFromFile(fileStream, null, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
+
+			for (var i = 0; i < threads; i++) {
+				var range = ranges[i];
+				tasks[i] = DownloadFileThread(uri, mmap, range.start, range.end);
+			}
+
 			await Task.WhenAll(tasks);
+			return true;
 		} catch {
-			// fallback to single thread.
-			await DownloadFileThreaded(uri, path, 1);
+			if (threads == 1) {
+				throw;
+			}
+
+			return false;
 		}
 	}
 
