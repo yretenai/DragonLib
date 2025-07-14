@@ -64,12 +64,18 @@ public sealed class DownloadAccelerator : IDisposable {
 		var tasks = new Task[threads];
 		ranges = new (long start, long end)[threads];
 		var blockSize = Math.Max(MinimumSizePerThread, length / threads);
-		for (var i = 0; i < threads; i++) {
-			ranges[i] = (i * blockSize - 1, (i + 1) * blockSize - 1);
+		int i;
+		for (i = 0; i < threads; i++) {
+			var start = Math.Max(0, i * blockSize - 1);
+			var end = (i + 1) * blockSize - 1;
+			if (end >= length) {
+				ranges[i] = (start, length);
+				break;
+			}
+			ranges[i] = (start, end);
 		}
 
-		ranges[0] = (0, ranges[0].end);
-		ranges[^1] = (ranges[^1].start, length);
+		ranges[i] = (ranges[i].start, length);
 		return tasks;
 	}
 
@@ -153,6 +159,10 @@ public sealed class DownloadAccelerator : IDisposable {
 	}
 
 	private async Task DownloadFileThread(Uri uri, MemoryMappedFile mmap, long rangeStart, long rangeEnd) {
+		if (rangeEnd == 0) {
+			return;
+		}
+
 		await using var view = mmap.CreateViewStream(rangeStart, rangeEnd);
 
 		for (var i = 0; i < Retries; ++i) {
@@ -218,6 +228,10 @@ public sealed class DownloadAccelerator : IDisposable {
 	}
 
 	private async Task FetchFileThread(Uri uri, RentedArray<byte> buffer, long rangeStart, long rangeEnd) {
+		if (rangeEnd == 0) {
+			return;
+		}
+
 		if (rangeEnd > buffer.Length) {
 			throw new IndexOutOfRangeException();
 		}
