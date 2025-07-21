@@ -270,9 +270,15 @@ public static class CommandLineFlagsParser {
 		var argMap = new Dictionary<string, HashSet<int>>();
 		var positionalMap = new HashSet<int>();
 		var skipped = options.SkipPositionals;
+		var ignoreFlags = false;
 		for (var index = 0; index < arguments.Length; index++) {
 			var argument = arguments[index];
-			if (argument.StartsWith('-')) {
+			if (argument.StartsWith('-') && !ignoreFlags) {
+				if (argument == "--") {
+					ignoreFlags = true;
+					continue;
+				}
+
 				if (argument.StartsWith("--")) {
 					if (!argMap.TryGetValue(argument[2..], out var argIndex)) {
 						argIndex = [];
