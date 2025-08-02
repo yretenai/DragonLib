@@ -5,8 +5,8 @@
 namespace DragonLib.IO.DataReader;
 
 public interface IMemoryHandler : IDisposable {
-	public static IMemoryHandler Handler { get; set; } = default!;
-	public bool ReadBytes(nint address, Span<byte> buffer, out int bytesRead);
-	public IEnumerable<(nint ModuleStart, int ModuleSize, string ModuleName)> EnumerateModules();
-	public Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>> MapSections();
+	static IMemoryHandler Handler { get; set; } = default!;
+	bool ReadBytes(nint address, Span<byte> buffer, out int bytesRead);
+	IEnumerable<(nint ModuleStart, int ModuleSize, string ModuleName)> EnumerateModules();
+	Dictionary<string, List<(nint ModuleStart, int ModuleSize, SectionFlags Flags)>> MapSections();
 }

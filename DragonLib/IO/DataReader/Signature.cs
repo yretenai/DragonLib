@@ -30,10 +30,12 @@ public static class Signature {
 			for (var i = 0; i < signature.Length; ++i) {
 				var b = signature[i];
 				unchecked {
-					if (b != buffer[ptr + i]) {
-						found = false;
-						break;
+					if (b == buffer[ptr + i]) {
+						continue;
 					}
+
+					found = false;
+					break;
 				}
 			}
 
@@ -95,10 +97,12 @@ public static class Signature {
 			for (var i = 0; i < signature.Length; ++i) {
 				var b = signature[i];
 				unchecked {
-					if (b != buffer[ptr + i]) {
-						found = false;
-						break;
+					if (b == buffer[ptr + i]) {
+						continue;
 					}
+
+					found = false;
+					break;
 				}
 			}
 

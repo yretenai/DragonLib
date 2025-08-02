@@ -139,13 +139,13 @@ public sealed partial class MemoryApiHandler : IMemoryHandler {
 	}
 
 	[StructLayout(LayoutKind.Explicit, Size = 48)]
-	// ReSharper disable once NotAccessedPositionalProperty.Local
 	private readonly record struct MemoryBasicInformation64(
 		[field: FieldOffset(0x0)]
 		nint BaseAddress,
 		[field: FieldOffset(0x18)]
 		nint RegionSize,
 		[field: FieldOffset(0x20)]
+		// ReSharper disable once NotAccessedPositionalProperty.Local
 		AllocationType State,
 		[field: FieldOffset(0x24)]
 		ProtectionType Protect);

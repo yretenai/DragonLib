@@ -64,6 +64,7 @@ public class FileEnumerator : IEnumerable<string> {
 			return true;
 		}
 
+		// ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 		foreach (var expression in Expressions) {
 			// thank you microsoft for not making this internal.
 			if (FileSystemName.MatchesSimpleExpression(expression.AsSpan(), path, IgnoreCase)) {

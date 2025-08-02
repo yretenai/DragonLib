@@ -44,7 +44,7 @@ public static class CommandLineFlagsParser {
 	}
 
 	public static void PrintHelp(Dictionary<PropertyInfo, (FlagAttribute Flag, Type FlagType)> flags, object instance, CommandLineOptions options, bool helpInvoked) {
-		flags = flags.Where(x => x.Value.Flag.Hidden == false).ToDictionary(x => x.Key, y => y.Value);
+		flags = flags.Where(x => !x.Value.Flag.Hidden).ToDictionary(x => x.Key, y => y.Value);
 		var entry = Assembly.GetEntryAssembly()?.GetName();
 		var usageSlim = "Usage: ";
 		if (entry is not null) {
@@ -720,13 +720,15 @@ public static class CommandLineFlagsParser {
 			return true;
 		}
 
-		if (flag.EnumPrefix is {
+		if (flag.EnumPrefix is not {
 			Length: > 0,
 		}) {
-			foreach (var prefix in flag.EnumPrefix) {
-				if (Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
-					return true;
-				}
+			return false;
+		}
+
+		foreach (var prefix in flag.EnumPrefix) {
+			if (Enum.TryParse(type, prefix + sterilizedValue, false, out value)) {
+				return true;
 			}
 		}
 

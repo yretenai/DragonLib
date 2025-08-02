@@ -35,6 +35,7 @@ public sealed class MinidumpHandler : IMemoryHandler {
 
 		foreach (var stream in streamSpan) {
 			Stream.Position = stream.Location.RVA;
+			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
 			switch (stream.Type) {
 				case MinidumpStreamType.ModuleList when Modules is not null: throw new InvalidOperationException("Duplicate Modules Stream");
 				case MinidumpStreamType.MemoryInfoList when MemoryInfo is not null: throw new InvalidOperationException("Duplicate MemoryInfo Stream");

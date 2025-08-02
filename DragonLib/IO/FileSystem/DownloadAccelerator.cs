@@ -72,6 +72,7 @@ public sealed class DownloadAccelerator : IDisposable {
 				ranges[i] = (start, length);
 				break;
 			}
+
 			ranges[i] = (start, end);
 		}
 

@@ -160,11 +160,7 @@ public class RentedMemoryStream : Stream {
 	public override int ReadByte() {
 		EnsureNotClosed();
 
-		if (Position >= Buffer.Length) {
-			throw new IndexOutOfRangeException();
-		}
-
-		return Buffer.Array[Position++];
+		return Position >= Buffer.Length ? throw new IndexOutOfRangeException() : Buffer.Array[Position++];
 	}
 
 	public override void WriteByte(byte value) {

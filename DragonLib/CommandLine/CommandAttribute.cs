@@ -5,11 +5,11 @@
 namespace DragonLib.CommandLine;
 
 public interface ICommandAttribute {
-	public Type FlagsType { get; }
-	public string Name { get; }
-	public string Description { get; }
-	public string Group { get; }
-	public bool Hide { get; }
+	Type FlagsType { get; }
+	string Name { get; }
+	string Description { get; }
+	string Group { get; }
+	bool Hide { get; }
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
