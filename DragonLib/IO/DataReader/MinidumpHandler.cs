@@ -237,8 +237,11 @@ public sealed class MinidumpHandler : IMemoryHandler {
 			}
 
 			var shift = address - memoryRange.StartOfMemoryRange;
-			Stream.Position = memoryRange.Memory.RVA + shift;
-			Stream.ReadExactly(buffer[..readFromPage]);
+			lock (Lock) {
+				Stream.Position = memoryRange.Memory.RVA + shift;
+				Stream.ReadExactly(buffer[..readFromPage]);
+			}
+
 			read += readFromPage;
 			buffer = buffer[readFromPage..];
 			if (buffer.IsEmpty) {
@@ -313,5 +316,19 @@ public sealed class MinidumpHandler : IMemoryHandler {
 		}
 
 		return default;
+	}
+
+	public nint GetAddress(long offset) {
+		offset -= BaseRVA;
+		foreach (var memoryRange in MemoryRanges64) {
+			if (offset <= memoryRange.Size) {
+				return (nint) (memoryRange.StartOfMemoryRange + offset);
+			}
+
+			// not contained
+			offset -= memoryRange.Size;
+		}
+
+		return 0;
 	}
 }
