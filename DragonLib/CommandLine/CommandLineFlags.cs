@@ -15,7 +15,7 @@ public record CommandLineFlags {
 	public bool Help { get; set; }
 
 	[Flag("v", Help = "Print the program version and exit", Aliases = ["version"])]
-	public bool Version { get; set; }
+	public virtual bool Version { get; set; }
 
 	public record Singleton<T> : CommandLineFlags where T : CommandLineFlags {
 		[field: AllowNull] [field: MaybeNull]
