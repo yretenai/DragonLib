@@ -28,7 +28,10 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public string[]? ValidValues { get; init; } = [];
 
 	[JsonIgnore]
-	public string[]? Aliases { get; init; } = [];
+	public string[] Aliases { get; init; } = [];
+
+	[JsonIgnore]
+	public string[] OldAliases { get; init; } = [];
 
 	public string[]? EnumPrefix { get; init; }
 	public char ReplaceDashes { get; init; }
@@ -38,7 +41,8 @@ public sealed class FlagAttribute(string flag) : Attribute {
 	public char EnvSeparator { get; init; } = (char) 0;
 	public char FileListPrefix { get; init; } = (char) 0;
 	public object? Extra { get; init; }
-	public string[] Flags => Aliases?.Concat([Flag]).Distinct().Reverse().ToArray() ?? [Flag];
+	public string[] Flags => Aliases.Concat([Flag]).Concat(OldAliases).Distinct().Reverse().ToArray();
+	public string[] PublicFlags => Aliases.Concat([Flag]).Distinct().Reverse().ToArray();
 
 	[JsonIgnore]
 	public override object TypeId => Flag;

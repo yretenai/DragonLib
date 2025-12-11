@@ -79,7 +79,7 @@ public static class CommandLineFlagsParser {
 			var hasValue = type.FullName != "System.Boolean";
 			var flagStr = flag.Flag;
 			if (flag.Positional == -1) {
-				flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
+				flagStr = string.Join(", ", flag.PublicFlags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
 			}
 
 			sizes[0] = Math.Max(sizes[0], flagStr.Length);
@@ -89,8 +89,8 @@ public static class CommandLineFlagsParser {
 			}
 
 			if (flag.Positional == -1) {
-				var flagOne = flag.Flags.FirstOrDefault(x => x.Length == 1);
-				var flagTwo = flag.Flags.FirstOrDefault(x => x.Length > 1);
+				var flagOne = flag.PublicFlags.FirstOrDefault(x => x.Length == 1);
+				var flagTwo = flag.PublicFlags.FirstOrDefault(x => x.Length > 1);
 				if (type.FullName == "System.Boolean") {
 					if (flag.IsRequired) {
 						if (flagOne is not null) {
@@ -238,7 +238,7 @@ public static class CommandLineFlagsParser {
 
 				var flagStr = flag.Flag;
 				if (flag.Positional == -1) {
-					flagStr = string.Join(", ", flag.Flags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
+					flagStr = string.Join(", ", flag.PublicFlags.Select(sw => $"-{(sw.Length > 1 ? "-" : string.Empty)}{sw}{(hasValue ? " value" : string.Empty)}"));
 				}
 
 				Console.WriteLine("{0} {1} {2}{3} {4}", flagStr.PadRight(sizes[0]), tn, te, flag.Help?.Trim() ?? string.Empty, required.Trim());
