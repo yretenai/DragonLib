@@ -8,7 +8,41 @@ using System.Runtime.InteropServices;
 
 namespace DragonLib.IO.Binary;
 
-public sealed class RentedArray<T> : IDisposable where T : struct {
+public sealed class UnownedRentedArray<T> : IRentedArray<T>, IDisposable where T : struct {
+	public UnownedRentedArray(IRentedArray<T> inner, int offset, int length) {
+		Inner = inner;
+		Offset = offset;
+		Length = length;
+	}
+
+
+	public IRentedArray<T> Inner { get; }
+	public int Offset { get; }
+	public int Length { get; private set; }
+	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Inner.Memory.Slice(Offset, Length);
+	public Span<T> Span => Length == 0 ? Span<T>.Empty : Inner.Span.Slice(Offset, Length);
+
+	public T this[int index] {
+		get => Span[index];
+		set => Span[index] = value;
+	}
+
+	public void Dispose() {
+		if (Length == 0) {
+			return;
+		}
+
+		Length = 0;
+	}
+}
+
+public interface IRentedArray<T> where T : struct {
+	Memory<T> Memory { get; }
+	Span<T> Span { get; }
+}
+
+
+public sealed class RentedArray<T> : IRentedArray<T>, IDisposable where T : struct {
 	public RentedArray(T[] array, int length) {
 		Array = array;
 		Length = length;
