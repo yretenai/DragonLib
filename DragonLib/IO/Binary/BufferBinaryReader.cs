@@ -273,7 +273,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string ReadPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
+	public virtual string ReadPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TElement> {
 		var length = Read<TSize>();
 		if (length == TSize.Zero) {
 			return string.Empty;
@@ -299,7 +299,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type of a single char</typeparam>
 	/// <returns></returns>
-	public virtual string PeekPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TSize> {
+	public virtual string PeekPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TElement> {
 		var pos = Position;
 		var value = ReadPString<TSize, TElement>(encoding, trim);
 		Position = pos;

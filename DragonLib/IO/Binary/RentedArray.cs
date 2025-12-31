@@ -8,13 +8,23 @@ using System.Runtime.InteropServices;
 
 namespace DragonLib.IO.Binary;
 
-public sealed class UnownedRentedArray<T> : IRentedArray<T>, IDisposable where T : struct {
+public interface IRentedArray<T> : IDisposable where T : struct {
+	Memory<T> Memory { get; }
+	Span<T> Span { get; }
+}
+
+public sealed class NullArray<T> : IRentedArray<T> where T : struct {
+	public void Dispose() { }
+	public Memory<T> Memory => Memory<T>.Empty;
+	public Span<T> Span => Span<T>.Empty;
+}
+
+public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
 	public UnownedRentedArray(IRentedArray<T> inner, int offset, int length) {
 		Inner = inner;
 		Offset = offset;
 		Length = length;
 	}
-
 
 	public IRentedArray<T> Inner { get; }
 	public int Offset { get; }
@@ -36,13 +46,45 @@ public sealed class UnownedRentedArray<T> : IRentedArray<T>, IDisposable where T
 	}
 }
 
-public interface IRentedArray<T> where T : struct {
-	Memory<T> Memory { get; }
-	Span<T> Span { get; }
+public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct {
+	private class MemoryCastManager(Memory<byte> from) : MemoryManager<T> {
+		private Memory<byte> From { get; } = from;
+
+		public override Span<T> GetSpan() => MemoryMarshal.Cast<byte, T>(From.Span);
+		protected override void Dispose(bool disposing) { }
+		public override MemoryHandle Pin(int elementIndex = 0) => throw new NotSupportedException();
+		public override void Unpin() => throw new NotSupportedException();
+	}
+
+	public UnownedCovariantArray(IRentedArray<byte> inner, int byteOffset, int length) {
+		Inner = inner;
+		Offset = byteOffset;
+		Length = length * Unsafe.SizeOf<T>();
+		Manager = new MemoryCastManager(Inner.Memory.Slice(Offset, Length));
+	}
+
+	private MemoryCastManager Manager { get; }
+	public IRentedArray<byte> Inner { get; }
+	public int Offset { get; }
+	public int Length { get; private set; }
+	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Manager.Memory;
+	public Span<T> Span => Length == 0 ? Span<T>.Empty : MemoryMarshal.Cast<byte, T>(Inner.Span.Slice(Offset, Length));
+
+	public T this[int index] {
+		get => Span[index];
+		set => Span[index] = value;
+	}
+
+	public void Dispose() {
+		if (Length == 0) {
+			return;
+		}
+
+		Length = 0;
+	}
 }
 
-
-public sealed class RentedArray<T> : IRentedArray<T>, IDisposable where T : struct {
+public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
 	public RentedArray(T[] array, int length) {
 		Array = array;
 		Length = length;
