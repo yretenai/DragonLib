@@ -23,6 +23,14 @@ public class ArrayPoolBinaryReader : ArrayBinaryReader {
 
 	public bool LeaveOpen { get; }
 
+	public override IRentedArray<T> ReadShared<T>(int length) where T : struct {
+		if (Rented == null) {
+			return new RentedArray<T>(0);
+		}
+
+		return new UnownedCovariantArray<T>(Rented, Position, length);
+	}
+
 	protected override void Dispose(bool disposing) {
 		if (LeaveOpen) {
 			return;

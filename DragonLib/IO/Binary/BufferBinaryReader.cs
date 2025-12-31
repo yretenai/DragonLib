@@ -101,6 +101,45 @@ public abstract class BufferBinaryReader : IDisposable {
 	}
 
 	/// <summary>
+	///     Read the specified amount of bytes into an array, while keeping the underlying buffer if possible
+	/// </summary>
+	/// <param name="length">Number of bytes to read</param>
+	/// <returns></returns>
+	public virtual IRentedArray<byte> ReadSharedBytes(int length) {
+		return ReadShared<byte>(length);
+	}
+
+	/// <summary>
+	///     Reads an array of type <typeparamref name="T" /> with a read count, while keeping the underlying buffer if possible
+	/// </summary>
+	/// <typeparam name="T">Type to read</typeparam>
+	/// <typeparam name="TSize">Type of the size specifier</typeparam>
+	/// <returns></returns>
+	public virtual IRentedArray<T> ReadShared<T, TSize>() where T : struct where TSize : struct, INumber<TSize> {
+		var length = Read<TSize>();
+		if (length == TSize.Zero) {
+			return new RentedArray<T>();
+		}
+
+		if (length < TSize.Zero) {
+			throw new InvalidOperationException();
+		}
+
+		var intLength = int.CreateChecked(length);
+		return ReadShared<T>(intLength);
+	}
+
+	/// <summary>
+	///     Reads an array of type <typeparamref name="T" /> with a specified count, while keeping the underlying buffer if possible
+	/// </summary>
+	/// <param name="length">Number of elements to read</param>
+	/// <typeparam name="T">Type to read</typeparam>
+	/// <returns></returns>
+	public virtual IRentedArray<T> ReadShared<T>(int length) where T : struct {
+		return Read<T>(length);
+	}
+
+	/// <summary>
 	///     Reads an array of type <typeparamref name="T" /> with a specified count into a List
 	/// </summary>
 	/// <param name="length">Number of elements to read</param>

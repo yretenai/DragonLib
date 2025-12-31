@@ -9,14 +9,9 @@ using System.Runtime.InteropServices;
 namespace DragonLib.IO.Binary;
 
 public interface IRentedArray<T> : IDisposable where T : struct {
+	int Length { get; }
 	Memory<T> Memory { get; }
 	Span<T> Span { get; }
-}
-
-public sealed class NullArray<T> : IRentedArray<T> where T : struct {
-	public void Dispose() { }
-	public Memory<T> Memory => Memory<T>.Empty;
-	public Span<T> Span => Span<T>.Empty;
 }
 
 public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
@@ -59,16 +54,17 @@ public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct 
 	public UnownedCovariantArray(IRentedArray<byte> inner, int byteOffset, int length) {
 		Inner = inner;
 		Offset = byteOffset;
-		Length = length * Unsafe.SizeOf<T>();
-		Manager = new MemoryCastManager(Inner.Memory.Slice(Offset, Length));
+		Length = length;
+		Manager = new MemoryCastManager(Inner.Memory.Slice(Offset, ByteLength));
 	}
 
 	private MemoryCastManager Manager { get; }
 	public IRentedArray<byte> Inner { get; }
 	public int Offset { get; }
 	public int Length { get; private set; }
+	public int ByteLength => Length * Unsafe.SizeOf<T>();
 	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Manager.Memory;
-	public Span<T> Span => Length == 0 ? Span<T>.Empty : MemoryMarshal.Cast<byte, T>(Inner.Span.Slice(Offset, Length));
+	public Span<T> Span => Length == 0 ? Span<T>.Empty : MemoryMarshal.Cast<byte, T>(Inner.Span.Slice(Offset, ByteLength));
 
 	public T this[int index] {
 		get => Span[index];
