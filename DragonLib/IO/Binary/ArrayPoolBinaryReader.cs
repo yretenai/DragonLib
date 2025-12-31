@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 using System.Buffers;
+using System.Runtime.CompilerServices;
 
 namespace DragonLib.IO.Binary;
 
@@ -28,7 +29,11 @@ public class ArrayPoolBinaryReader : ArrayBinaryReader {
 			return new RentedArray<T>(0);
 		}
 
-		return new UnownedCovariantArray<T>(Rented, Position, length);
+		var arr = new UnownedCovariantArray<T>(Rented, Position, length);
+
+		Position += Unsafe.SizeOf<T>() * length;
+
+		return arr;
 	}
 
 	protected override void Dispose(bool disposing) {
