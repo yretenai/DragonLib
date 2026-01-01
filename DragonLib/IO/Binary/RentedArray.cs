@@ -12,6 +12,7 @@ public interface IRentedArray<T> : IDisposable where T : struct {
 	int Length { get; }
 	Memory<T> Memory { get; }
 	Span<T> Span { get; }
+	T this[int Index] { get; set; }
 }
 
 public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
@@ -28,8 +29,8 @@ public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
 	public Span<T> Span => Length == 0 ? Span<T>.Empty : Inner.Span.Slice(Offset, Length);
 
 	public T this[int index] {
-		get => Span[index];
-		set => Span[index] = value;
+		get => Inner[Offset + index];
+		set => Inner[Offset + index] = value;
 	}
 
 	public void Dispose() {
