@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace DragonLib.IO.Binary;
 
-public interface IRentedArray<T> : IDisposable where T : struct {
+public interface IRentedArray<T> : IEnumerable<T>, IDisposable where T : struct {
 	int Length { get; }
 	Memory<T> Memory { get; }
 	Span<T> Span { get; }
@@ -40,6 +40,14 @@ public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
 
 		Length = 0;
 	}
+
+	public IEnumerator<T> GetEnumerator() {
+		for (var i = 0; i < Length; ++i) {
+			yield return this[i];
+		}
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct {
@@ -79,6 +87,15 @@ public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct 
 
 		Length = 0;
 	}
+
+	public IEnumerator<T> GetEnumerator() {
+		var slice = Memory;
+		for (var i = 0; i < Length; ++i) {
+			yield return slice.Span[i];
+		}
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
@@ -129,4 +146,12 @@ public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
 			}
 		}
 	}
+
+	public IEnumerator<T> GetEnumerator() {
+		for (var i = 0; i < Length; ++i) {
+			yield return this[i];
+		}
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
