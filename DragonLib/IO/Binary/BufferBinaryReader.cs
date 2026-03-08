@@ -105,9 +105,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// </summary>
 	/// <param name="length">Number of bytes to read</param>
 	/// <returns></returns>
-	public virtual IRentedArray<byte> ReadSharedBytes(int length) {
-		return ReadShared<byte>(length);
-	}
+	public virtual IRentedArray<byte> ReadSharedBytes(int length) => ReadShared<byte>(length);
 
 	/// <summary>
 	///     Reads an array of type <typeparamref name="T" /> with a read count, while keeping the underlying buffer if possible
@@ -130,14 +128,13 @@ public abstract class BufferBinaryReader : IDisposable {
 	}
 
 	/// <summary>
-	///     Reads an array of type <typeparamref name="T" /> with a specified count, while keeping the underlying buffer if possible
+	///     Reads an array of type <typeparamref name="T" /> with a specified count, while keeping the underlying buffer if
+	///     possible
 	/// </summary>
 	/// <param name="length">Number of elements to read</param>
 	/// <typeparam name="T">Type to read</typeparam>
 	/// <returns></returns>
-	public virtual IRentedArray<T> ReadShared<T>(int length) where T : struct {
-		return Read<T>(length);
-	}
+	public virtual IRentedArray<T> ReadShared<T>(int length) where T : struct => Read<T>(length);
 
 	/// <summary>
 	///     Reads an array of type <typeparamref name="T" /> with a specified count into a List
@@ -196,7 +193,8 @@ public abstract class BufferBinaryReader : IDisposable {
 	}
 
 	/// <summary>
-	///     Reads an array of type <typeparamref name="TElement" /> with a <typeparamref name="TSize" /> size element without advancing the buffer
+	///     Reads an array of type <typeparamref name="TElement" /> with a <typeparamref name="TSize" /> size element without
+	///     advancing the buffer
 	/// </summary>
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
 	/// <typeparam name="TElement">Type to read</typeparam>
@@ -331,7 +329,8 @@ public abstract class BufferBinaryReader : IDisposable {
 	}
 
 	/// <summary>
-	///     Reads a Pascal-String (length-prefixed string) with char type <typeparamref name="TElement" /> without advancing the buffer
+	///     Reads a Pascal-String (length-prefixed string) with char type <typeparamref name="TElement" /> without advancing
+	///     the buffer
 	/// </summary>
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="trim">Number of elements to remove from the end of the string</param>

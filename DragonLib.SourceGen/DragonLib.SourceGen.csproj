@@ -7,11 +7,12 @@ SPDX-License-Identifier: EUPL-1.2
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<NoWarn>RS1041</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

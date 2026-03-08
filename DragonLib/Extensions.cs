@@ -35,7 +35,7 @@ public static class Extensions {
 		return new Span<T>(clone);
 	}
 
-	public static Span<T> Clone<T>(this Span<T> span) => Clone((ReadOnlySpan<T>) span);
+	public static Span<T> Clone<T>(this Span<T> span) => ((ReadOnlySpan<T>) span).Clone();
 
 	public static string SanitizeFilename(this string path, char replaceChar = '_') {
 		var illegal = Path.GetInvalidFileNameChars();
@@ -111,11 +111,11 @@ public static class Extensions {
 		return encoding.GetString(data[..length].AsBytes());
 	}
 
-	public static string? ReadString<T>(this Span<T> data, Encoding encoding, out int length, T terminator = default, int limit = -1) where T : struct, IEquatable<T> => ReadString((ReadOnlySpan<T>) data, encoding, out length, terminator, limit);
+	public static string? ReadString<T>(this Span<T> data, Encoding encoding, out int length, T terminator = default, int limit = -1) where T : struct, IEquatable<T> => ((ReadOnlySpan<T>) data).ReadString(encoding, out length, terminator, limit);
 
-	public static string? ReadString<T>(this ReadOnlySpan<T> data, Encoding encoding, int limit = -1) where T : struct, IEquatable<T> => ReadString(data, encoding, out _, default, limit);
+	public static string? ReadString<T>(this ReadOnlySpan<T> data, Encoding encoding, int limit = -1) where T : struct, IEquatable<T> => data.ReadString(encoding, out _, default, limit);
 
-	public static string? ReadString<T>(this Span<T> data, Encoding encoding, int limit = -1) where T : struct, IEquatable<T> => ReadString((ReadOnlySpan<T>) data, encoding, out _, default, limit);
+	public static string? ReadString<T>(this Span<T> data, Encoding encoding, int limit = -1) where T : struct, IEquatable<T> => ((ReadOnlySpan<T>) data).ReadString(encoding, out _, default, limit);
 
 	public static int Align(this int value, int n) => unchecked(value + (n - 1)) & ~(n - 1);
 
@@ -309,13 +309,13 @@ public static class Extensions {
 			value = 0 - bytes;
 		}
 
-		var amount = GetHumanReadableBytes((ulong) value);
+		var amount = ((ulong) value).GetHumanReadableBytes();
 		return bytes < 0 ? "-" + amount : amount;
 	}
 
-	public static string GetHumanReadableBytes(this int bytes) => GetHumanReadableBytes((long) bytes);
+	public static string GetHumanReadableBytes(this int bytes) => ((long) bytes).GetHumanReadableBytes();
 
-	public static string GetHumanReadableBytes(this uint bytes) => GetHumanReadableBytes((ulong) bytes);
+	public static string GetHumanReadableBytes(this uint bytes) => ((ulong) bytes).GetHumanReadableBytes();
 
 	public static T[] SplitFlags<T>(this T flags) where T : Enum {
 		var v = Convert.ToUInt64(flags);

@@ -51,15 +51,6 @@ public sealed class UnownedRentedArray<T> : IRentedArray<T> where T : struct {
 }
 
 public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct {
-	private class MemoryCastManager(Memory<byte> from) : MemoryManager<T> {
-		private Memory<byte> From { get; } = from;
-
-		public override Span<T> GetSpan() => MemoryMarshal.Cast<byte, T>(From.Span);
-		protected override void Dispose(bool disposing) { }
-		public override MemoryHandle Pin(int elementIndex = 0) => throw new NotSupportedException();
-		public override void Unpin() => throw new NotSupportedException();
-	}
-
 	public UnownedCovariantArray(IRentedArray<byte> inner, int byteOffset, int length) {
 		Inner = inner;
 		Offset = byteOffset;
@@ -70,8 +61,8 @@ public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct 
 	private MemoryCastManager Manager { get; }
 	public IRentedArray<byte> Inner { get; }
 	public int Offset { get; }
-	public int Length { get; private set; }
 	public int ByteLength => Length * Unsafe.SizeOf<T>();
+	public int Length { get; private set; }
 	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Manager.Memory;
 	public Span<T> Span => Length == 0 ? Span<T>.Empty : MemoryMarshal.Cast<byte, T>(Inner.Span.Slice(Offset, ByteLength));
 
@@ -96,6 +87,15 @@ public sealed class UnownedCovariantArray<T> : IRentedArray<T> where T : struct 
 	}
 
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+	private class MemoryCastManager(Memory<byte> from) : MemoryManager<T> {
+		private Memory<byte> From { get; } = from;
+
+		public override Span<T> GetSpan() => MemoryMarshal.Cast<byte, T>(From.Span);
+		protected override void Dispose(bool disposing) { }
+		public override MemoryHandle Pin(int elementIndex = 0) => throw new NotSupportedException();
+		public override void Unpin() => throw new NotSupportedException();
+	}
 }
 
 public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
@@ -112,8 +112,8 @@ public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
 	}
 
 	public T[] Array { get; private set; }
-	public int Length { get; private set; }
 	public ArraySegment<T> Segment => Length == 0 ? ArraySegment<T>.Empty : new ArraySegment<T>(Array, 0, Length);
+	public int Length { get; private set; }
 	public Memory<T> Memory => Length == 0 ? Memory<T>.Empty : Array.AsMemory(0, Length);
 	public Span<T> Span => Length == 0 ? Span<T>.Empty : Array.AsSpan(0, Length);
 
@@ -132,6 +132,14 @@ public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
 		Length = 0;
 	}
 
+	public IEnumerator<T> GetEnumerator() {
+		for (var i = 0; i < Length; ++i) {
+			yield return this[i];
+		}
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
 	public static RentedArray<T> FromFile(string path) => FromStream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), false);
 
 	private static RentedArray<T> FromStream(Stream stream, bool leaveOpen) {
@@ -146,12 +154,4 @@ public sealed class RentedArray<T> : IRentedArray<T> where T : struct {
 			}
 		}
 	}
-
-	public IEnumerator<T> GetEnumerator() {
-		for (var i = 0; i < Length; ++i) {
-			yield return this[i];
-		}
-	}
-
-	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
