@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 using System.Reflection;
+using DragonLib.SourceGen.BitStructGenerator;
 
 namespace DragonLib.IO.Binary;
 
@@ -21,13 +22,13 @@ public static class BitPacked {
 			var offset = 0;
 			foreach (var property in properties) {
 				var info = property.GetCustomAttribute<BitFieldAttribute>();
-				if (info is null || info.Length == 0) {
+				if (info is null || info.Bits == 0) {
 					continue;
 				}
 
-				var mask = info.Length == 1 ? 1UL : (1UL << info.Length) - 1;
+				var mask = info.Bits == 1 ? 1UL : (1UL << info.Bits) - 1;
 				cached.Add((property, offset, mask));
-				offset += info.Length;
+				offset += info.Bits;
 			}
 
 			CachedBits[typeof(T)] = cached;
