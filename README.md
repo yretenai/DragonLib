@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2025 Legiayayana
+SPDX-FileCopyrightText: 2024-2026 Neptuwunium
 
 SPDX-License-Identifier: EUPL-1.2
 -->
