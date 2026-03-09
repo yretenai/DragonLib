@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace DragonLib;
 
+// todo: split this up
 public static class Extensions {
 	public const long OneKiB = 1024;
 	public const long OneMiB = OneKiB * 1024;
