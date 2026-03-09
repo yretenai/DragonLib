@@ -27,16 +27,18 @@ public class MagicGenerator : IIncrementalGenerator {
 			sb.AppendLine($"public partial class {symbol.Name} {{");
 
 			foreach (var property in symbol.GetMembers().OfType<IPropertySymbol>()) {
-				var magicAttribute = property.GetAttributes().FirstOrDefault(x => x.AttributeClass?.Name == "MagicAttribute" && x.ConstructorArguments is [{ Value: string }]);
+				var magicAttribute = property.GetAttributes().FirstOrDefault(x => x.AttributeClass?.Name == "MagicAttribute" && x.ConstructorArguments is [{ Value: string }, { Value: bool }]);
 				if (magicAttribute == default) {
 					continue;
 				}
 
 				var magic = (string) magicAttribute.ConstructorArguments[0].Value!;
+				var isLittleEndian = (bool) magicAttribute.ConstructorArguments[1].Value!;
+
 				// todo: validate value fits in type
 				var value = 0ul;
 				for (var i = 0; i < magic.Length; i++) {
-					value |= (ulong) (byte) magic[i] << (i * 8);
+					value |= (ulong) (byte) magic[isLittleEndian ? magic.Length - i - 1 : i] << (i * 8);
 				}
 
 				sb.AppendLine($"\tpublic partial {property.Type.ToDisplayString()} {property.Name} => 0x{value:x}u;");

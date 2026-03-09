@@ -10,8 +10,9 @@ namespace DragonLib.SourceGen.MagicGenerator;
 public sealed class GenerateMagicAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class MagicAttribute(string magic) : Attribute {
+public sealed class MagicAttribute(string magic, bool littleEndian = true) : Attribute {
 	public string Magic { get; } = magic;
+	public bool LittleEndian { get; } = littleEndian;
 }
 
 /*
@@ -21,7 +22,7 @@ public sealed partial class FileMagic {
 	[Magic("IDX ")]
 	public partial uint Index { get; }
 
-	[Magic("DATA")]
+	[Magic("DATA", false)]
 	public partial uint Data { get; }
 }
 
