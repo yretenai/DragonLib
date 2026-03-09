@@ -5,6 +5,7 @@
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -15,7 +16,7 @@ public class MagicGenerator : IIncrementalGenerator {
 	public void Initialize(IncrementalGeneratorInitializationContext context) {
 		var source = context.SyntaxProvider.ForAttributeWithMetadataName(
 			"DragonLib.SourceGen.MagicGenerator.GenerateMagicAttribute",
-			static (node, _) => node is ClassDeclarationSyntax,
+			static (node, _) => node is ClassDeclarationSyntax cds && cds.Modifiers.Any(SyntaxKind.StaticKeyword),
 			static (ctx, _) => (INamedTypeSymbol) ctx.TargetSymbol);
 
 		context.RegisterSourceOutput(source, static (spc, symbol) => {
@@ -24,9 +25,13 @@ public class MagicGenerator : IIncrementalGenerator {
 			sb.AppendLine();
 			sb.AppendLine($"namespace {symbol.ContainingNamespace.ToDisplayString()};");
 			sb.AppendLine();
-			sb.AppendLine($"public partial class {symbol.Name} {{");
+			sb.AppendLine($"public static partial class {symbol.Name} {{");
 
 			foreach (var property in symbol.GetMembers().OfType<IPropertySymbol>()) {
+				if (!property.IsStatic) {
+					continue;
+				}
+
 				var magicAttribute = property.GetAttributes().FirstOrDefault(x => x.AttributeClass?.Name == "MagicAttribute" && x.ConstructorArguments is [{ Value: string }, { Value: bool }]);
 				if (magicAttribute == default) {
 					continue;
@@ -41,7 +46,7 @@ public class MagicGenerator : IIncrementalGenerator {
 					value |= (ulong) (byte) magic[isLittleEndian ? magic.Length - i - 1 : i] << (i * 8);
 				}
 
-				sb.AppendLine($"\tpublic partial {property.Type.ToDisplayString()} {property.Name} => 0x{value:x}u;");
+				sb.AppendLine($"\tpublic static partial {property.Type.ToDisplayString()} {property.Name} => 0x{value:x}u;");
 			}
 
 			sb.AppendLine("}");
