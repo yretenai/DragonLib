@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -248,7 +249,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="bufferSize">Size of the read buffer, must be at least as much as the string size</param>
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
-	/// <typeparam name="T">Type of a single char</typeparam>
+	/// <typeparam name="T">Type of single char</typeparam>
 	/// <returns></returns>
 	public virtual string ReadCString<T>(Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
 		if (bufferSize < 0) {
@@ -267,13 +268,14 @@ public abstract class BufferBinaryReader : IDisposable {
 			return string.Empty;
 		}
 
-		// ReSharper disable once ArrangeRedundantParentheses
-		var buffer = (stackalloc T[bufferSize]);
-		var start = Position;
-		Read(buffer);
-		var length = buffer.IndexOf(T.Zero);
 		var one = Unsafe.SizeOf<T>();
+		T[]? rented = null;
+		var buffer = one * bufferSize > 4096 ? rented = ArrayPool<T>.Shared.Rent(bufferSize) : stackalloc T[bufferSize];
+		var start = Position;
+		var length = 0;
 		try {
+			Read(buffer);
+			length = buffer.IndexOf(T.Zero);
 			switch (length) {
 				case 0: return string.Empty;
 				case < 0: length = buffer.Length; break;
@@ -284,6 +286,10 @@ public abstract class BufferBinaryReader : IDisposable {
 			if (!fixedSize) {
 				Position = start + length + one;
 			}
+
+			if (rented != null) {
+				ArrayPool<T>.Shared.Return(rented);
+			}
 		}
 	}
 
@@ -293,7 +299,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="bufferSize">Size of the read buffer, must be at least as much as the string size</param>
 	/// <param name="fixedSize">When false, rewind to the first byte after the null byte</param>
-	/// <typeparam name="T">Type of a single char</typeparam>
+	/// <typeparam name="T">Type of single char</typeparam>
 	/// <returns></returns>
 	public virtual string PeekCString<T>(Encoding? encoding = default, int bufferSize = 1024, bool fixedSize = false) where T : unmanaged, INumber<T> {
 		var pos = Position;
@@ -308,7 +314,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="trim">Number of elements to remove from the end of the string</param>
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
-	/// <typeparam name="TElement">Type of a single char</typeparam>
+	/// <typeparam name="TElement">Type of single char</typeparam>
 	/// <returns></returns>
 	public virtual string ReadPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TElement> {
 		var length = Read<TSize>();
@@ -323,9 +329,17 @@ public abstract class BufferBinaryReader : IDisposable {
 		}
 
 		// ReSharper disable once ArrangeRedundantParentheses
-		var buffer = (stackalloc TElement[intLength]);
-		Read(buffer);
-		return GuessEncoding(encoding, Unsafe.SizeOf<TElement>()).GetString(MemoryMarshal.AsBytes(buffer[..(intLength - trim)]));
+		var one = Unsafe.SizeOf<TElement>();
+		TElement[]? rented = null;
+		var buffer = one * intLength > 4096 ? rented = ArrayPool<TElement>.Shared.Rent(intLength) : stackalloc TElement[intLength];
+		try {
+			Read(buffer);
+			return GuessEncoding(encoding, Unsafe.SizeOf<TElement>()).GetString(MemoryMarshal.AsBytes(buffer[..(intLength - trim)]));
+		} finally {
+			if (rented != null) {
+				ArrayPool<TElement>.Shared.Return(rented);
+			}
+		}
 	}
 
 	/// <summary>
@@ -335,7 +349,7 @@ public abstract class BufferBinaryReader : IDisposable {
 	/// <param name="encoding">Encoding to decode as</param>
 	/// <param name="trim">Number of elements to remove from the end of the string</param>
 	/// <typeparam name="TSize">Type of the size specifier</typeparam>
-	/// <typeparam name="TElement">Type of a single char</typeparam>
+	/// <typeparam name="TElement">Type of single char</typeparam>
 	/// <returns></returns>
 	public virtual string PeekPString<TSize, TElement>(Encoding? encoding = default, int trim = 0) where TSize : struct, INumber<TSize> where TElement : unmanaged, INumber<TElement> {
 		var pos = Position;
