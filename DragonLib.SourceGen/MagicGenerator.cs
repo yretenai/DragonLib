@@ -32,7 +32,7 @@ public class MagicGenerator : IIncrementalGenerator {
 					continue;
 				}
 
-				var magicAttribute = property.GetAttributes().FirstOrDefault(x => x.AttributeClass?.Name == "MagicAttribute" && x.ConstructorArguments is [{ Value: string }, { Value: bool }]);
+				var magicAttribute = property.GetAttributes().FirstOrDefault(x => x is { AttributeClass.Name: "MagicAttribute", ConstructorArguments: [{ Value: string }, { Value: bool }] });
 				if (magicAttribute == default) {
 					continue;
 				}

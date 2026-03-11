@@ -19,7 +19,7 @@ public class BitStructGenerator : IIncrementalGenerator {
 			static (ctx, _) => (INamedTypeSymbol) ctx.TargetSymbol);
 
 		context.RegisterSourceOutput(source, static (spc, symbol) => {
-			var typeAttribute = symbol.GetAttributes().First(x => x.AttributeClass is { Name: "BitStructAttribute" } && x.ConstructorArguments is [{ Value: int }]);
+			var typeAttribute = symbol.GetAttributes().First(x => x is { AttributeClass.Name: "BitStructAttribute", ConstructorArguments: [{ Value: int }] });
 			var size = (int) typeAttribute.ConstructorArguments[0].Value!;
 
 			var sb = new StringBuilder();
