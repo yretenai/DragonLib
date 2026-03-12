@@ -10,7 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
-		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>
 
 </Project>
