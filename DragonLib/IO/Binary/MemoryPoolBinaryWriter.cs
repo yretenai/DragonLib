@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 using System.Buffers;
+using DragonLib.Extensions;
 
 namespace DragonLib.IO.Binary;
 

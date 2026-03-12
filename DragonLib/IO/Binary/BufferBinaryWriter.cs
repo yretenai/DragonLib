@@ -5,6 +5,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DragonLib.Extensions;
 
 namespace DragonLib.IO.Binary;
 

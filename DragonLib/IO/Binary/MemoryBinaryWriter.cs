@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+using DragonLib.Extensions;
+
 namespace DragonLib.IO.Binary;
 
 public class MemoryBinaryWriter : BufferBinaryWriter {

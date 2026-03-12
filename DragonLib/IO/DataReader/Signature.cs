@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+using DragonLib.Extensions;
+
 namespace DragonLib.IO.DataReader;
 
 public readonly record struct SignatureByte(byte Value, bool IsWildcard) {
