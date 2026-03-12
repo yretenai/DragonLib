@@ -15,6 +15,9 @@ public static class TimeSpanExtensions {
 		public static TimeSpan OneCentury => TimeSpan.OneDecade * 10;
 		public static TimeSpan OneKiloyear => TimeSpan.OneCentury * 10;
 
+		public string RelativeTime => time.GetHumanReadableTime();
+		public string ShortRelativeTime => time.GetHumanReadableTime(true);
+
 		public string GetHumanReadableTime(bool shortForm = false) {
 			long amount;
 			string metric;
