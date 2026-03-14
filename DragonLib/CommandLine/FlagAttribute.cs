@@ -61,8 +61,8 @@ public sealed class FlagAttribute(string flag) : Attribute {
 		base.Equals(other) && Flag == other.Flag && Help == other.Help &&
 		Visitor == other.Visitor && Hidden == other.Hidden && VisitorAssembly == other.VisitorAssembly &&
 		IsRequired == other.IsRequired && Positional == other.Positional &&
-		ValidValues?.Equals(other.ValidValues) == true &&
-		Aliases?.Equals(other.Aliases) == true && EnumPrefix?.Equals(other.EnumPrefix) == true &&
+		ValidValues?.SequenceEqual(other.ValidValues) == true &&
+		Aliases.SequenceEqual(other.Aliases) && EnumPrefix?.SequenceEqual(other.EnumPrefix) == true &&
 		ReplaceDashes.Equals(other.ReplaceDashes);
 
 	public override string ToString() => $"-{(Flag.Length > 1 ? "-" : string.Empty)}{Flag}: {Help}";
