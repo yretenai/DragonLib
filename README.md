@@ -9,3 +9,5 @@ SPDX-License-Identifier: EUPL-1.2
 Common library for my projects.
 
 Note: This library is not designed to be used by others, and is not guaranteed to be stable.
+
+## Moved to https://github.com/neptuwunium/Neptune/tree/develop/Pluto
